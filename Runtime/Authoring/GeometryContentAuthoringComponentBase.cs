@@ -42,6 +42,8 @@ namespace Code.CubeMarching.Authoring
                         break;
                     case ShapeType.Noise:
                         return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                    case ShapeType.Plane:
+                        return ((CShapePlane*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

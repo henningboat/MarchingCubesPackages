@@ -45,4 +45,30 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             };
         }
     }
+    
+    public class PlaneShapeNode : ShapeNode<CShapeNoise>
+    {
+        public override string Title
+        {
+            get => "Plane";
+            set { }
+        }
+
+        protected override void OnDefineNode()
+        {
+            base.OnDefineNode();
+        }
+
+        protected override ShapeType GetShapeType()
+        {
+            return ShapeType.Plane;
+        }
+
+        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        {
+            return new()
+            {
+            };
+        }
+    }
 }

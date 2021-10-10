@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Code.CubeMarching.Authoring;
 using Code.CubeMarching.Rendering;
 using Code.SIMDMath;
