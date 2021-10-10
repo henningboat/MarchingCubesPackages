@@ -1,0 +1,302 @@
+﻿#include "Includes/MarchTables.compute"
+#include "Includes/TerrainData.hlsl"
+float4 _Time;
+#pragma kernel ResetSubChunkTriangleCount
+#pragma kernel GetTrianglePositions
+#pragma kernel CalculateTriangulationThreadGroupSizeKernel
+#pragma kernel Triangulation
+#pragma kernel ClearVertexData
+#pragma kernel BuildIndexBuffer
+
+StructuredBuffer<TerrainData4> _GlobalTerrainBuffer;
+StructuredBuffer<int> _GlobalTerrainIndexMap;
+StructuredBuffer<float4> _NormalBuffer;
+
+StructuredBuffer<int4> _TerrainChunkBasePosition;
+
+#include "Includes/GlobalDistanceField.hlsl"
+
+groupshared float3 _GeneratedNormals;
+
+
+struct VertexData {
+    float4 vertex;
+    float3 normal;
+};
+
+struct TriangulationInstruction
+{
+    int3 positionWS;
+    int cubeIndex;
+    int vertexBufferPosition;
+    int3 padding;
+};
+
+AppendStructuredBuffer<TriangulationInstruction> _ValidTrianglePositions;
+StructuredBuffer<TriangulationInstruction> _ValidTrianglePositionResults;
+RWStructuredBuffer<VertexData> triangles;
+RWStructuredBuffer<int> _TriangleCountPerSubChunk;
+StructuredBuffer<int> _TriangleCountPerSubChunkResult;
+
+uint triangleWriteIndex=0;
+int3 _ClusterPositionWS;
+
+//todo make int3?
+float isoLevel;
+
+groupshared int groupTriangleCount=0;
+
+
+
+float3 interpolateVerts(float4 v1, float4 v2, out float t) {
+    t = (isoLevel - v1.w) / (v2.w - v1.w);
+    return v1.xyz + t * (v2.xyz-v1.xyz);
+}
+
+float3 interpolateNormals(float3 v1, float3 v2, float t) {
+    return v1.xyz + t * (v2.xyz-v1.xyz);
+}
+
+
+float4 interpolateColors(float4 v1, float4 v2, float t) {
+    return v1 + t * (v2-v1);
+}
+
+
+int GetIndexOfVert(float3 positionOS, int3 basePositionOfChunk)
+{
+    const int3 positionIndex = floor(positionOS);
+    const int index = positionIndex.x+positionIndex.y*8+positionIndex.z*64;
+    return index;
+}
+
+float3 CalculateNormalForPosition(int3 localPosition)
+{
+    float3 combinedNormal=0.00001;
+    for (int x=-1;x<2;x++)
+        for (int y=-1;y<2;y++)
+            for (int z=-1;z<2;z++)
+            {
+                if(!(x==0&&y==0&&z==0))
+                {
+                    //const float surfaceDistance = _grid[GridPositionToIndex(int3(localPosition.x+x, localPosition.y+y, localPosition.z+z))].w;
+                    const float surfaceDistance = GetPointPosition(int3(localPosition.x+x, localPosition.y+y, localPosition.z+z)).w;
+           
+                    combinedNormal += float3(x,y,z)*surfaceDistance;
+                }
+            }
+
+    return normalize(combinedNormal);
+}
+
+int indexForTriangle;
+
+int GetSubChunkIndexFromPosition(int3 positionWS)
+{
+    const int3 positionInCluster = positionWS % 64;
+    const int chunkIndexInCluster = indexFromCoordAndGridSize(positionInCluster/8,8);
+    const int subChunkIndex = indexFromCoordAndGridSize((positionInCluster % 8)/4,2);
+
+    const int subChunkIndexInCluster = chunkIndexInCluster * 8 + subChunkIndex;
+    return subChunkIndexInCluster;
+}
+
+
+
+[numthreads(1,1,1)]
+void ResetSubChunkTriangleCount (uint3 id : SV_DispatchThreadID)
+{
+    const uint chunkIndex = id.x;
+    //the +2 is probably unnecessary
+    const int3 terrainChunkBasePosition = _TerrainChunkBasePosition[chunkIndex].xyz + 2;
+    const int subChunkIndexInCluster = GetSubChunkIndexFromPosition(terrainChunkBasePosition);
+
+    _TriangleCountPerSubChunk[subChunkIndexInCluster] = 0;
+}
+
+
+
+[numthreads(4,4,4)]
+void GetTrianglePositions (uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex, uint3 groupThreadID:SV_GroupThreadID)
+{
+    const uint chunkIndex = id.x/4;
+    const int3 terrainChunkBasePosition = _TerrainChunkBasePosition[chunkIndex].xyz;
+
+    int3 positionWS = groupThreadID + terrainChunkBasePosition;
+    
+    float4 cubeCorners[8] = {
+        GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
+
+    // Calculate unique index for each cube configuration.
+    // There are 256 possible values
+    // A value of 0 means cube is entirely inside surface; 255 entirely outside.
+    // The value is used to look up the edge table, which indicates which edges of the cube are cut by the isosurface.
+    int cubeIndex = 0;
+    if (cubeCorners[0].w > isoLevel) cubeIndex |= 1;
+    if (cubeCorners[1].w > isoLevel) cubeIndex |= 2;
+    if (cubeCorners[2].w > isoLevel) cubeIndex |= 4;
+    if (cubeCorners[3].w > isoLevel) cubeIndex |= 8;
+    if (cubeCorners[4].w > isoLevel) cubeIndex |= 16;
+    if (cubeCorners[5].w > isoLevel) cubeIndex |= 32;
+    if (cubeCorners[6].w > isoLevel) cubeIndex |= 64;
+    if (cubeCorners[7].w > isoLevel) cubeIndex |= 128;
+
+    const int subChunkIndexInCluster = GetSubChunkIndexFromPosition(positionWS);
+    
+    if(cubeIndex!=0 && cubeIndex!=255)
+    {
+        const int triangleCount = trianglesPerCubeIndex[cubeIndex];
+
+        InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, indexForTriangle);
+    
+        const int maxTrianglesPerSubChunk =  4 * 4 * 4 * 5;
+
+        TriangulationInstruction result = (TriangulationInstruction)0;
+        result.positionWS=positionWS;
+        result.cubeIndex=cubeIndex;
+        result.padding=subChunkIndexInCluster;
+
+        result.vertexBufferPosition =  3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + indexForTriangle;
+        
+        _ValidTrianglePositions.Append(result);
+    }
+}
+
+RWStructuredBuffer<int> _ArgsBuffer;
+[numthreads(1,1,1)]
+void CalculateTriangulationThreadGroupSizeKernel()
+{
+    _ArgsBuffer[1] =  ceil(_ArgsBuffer[0]/512.0f);
+}
+
+[numthreads(1,512,1)]
+void ClearVertexData (uint3 id : SV_DispatchThreadID)
+{
+    int index = id.x*512+id.y;
+    triangles[index]=(VertexData)0;
+}
+
+[numthreads(1,512,1)]
+void Triangulation (uint3 id : SV_DispatchThreadID)
+{
+    int index = id.x*512+id.y;
+    if(index>=_ArgsBuffer[0])
+        return;
+
+    TriangulationInstruction valid_triangle_position_result = _ValidTrianglePositionResults[index];
+    int3 positionWS = valid_triangle_position_result.positionWS;
+    int cubeIndex = valid_triangle_position_result.cubeIndex;
+
+    
+    float4 cubeCorners[8] = {
+        GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+       GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+       GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
+    
+    
+    
+    float3 cubeNormals[8] = {
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    }; 
+    
+    // Create triangles for current cube configuration
+    //todo make it work with multiple triangles again
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i +=3)
+    {
+        // Get indices of corner points A and B for each of the three edges
+        // of the cube that need to be joined to form the triangle.
+        int a0 = cornerIndexAFromEdge[triangulation[cubeIndex][i]];
+        int b0 = cornerIndexBFromEdge[triangulation[cubeIndex][i]];
+    
+        int a1 = cornerIndexAFromEdge[triangulation[cubeIndex][i+1]];
+        int b1 = cornerIndexBFromEdge[triangulation[cubeIndex][i+1]];
+    
+        int a2 = cornerIndexAFromEdge[triangulation[cubeIndex][i+2]];
+        int b2 = cornerIndexBFromEdge[triangulation[cubeIndex][i+2]];
+    
+        VertexData vertexA;
+        VertexData vertexB;
+        VertexData vertexC;
+        
+        float tA;
+        float tB;
+        float tC;
+         
+        vertexA.vertex = float4(interpolateVerts(cubeCorners[a0], cubeCorners[b0],tA),1);
+        vertexB.vertex = float4(interpolateVerts(cubeCorners[a1], cubeCorners[b1],tB),1);
+        vertexC.vertex = float4(interpolateVerts(cubeCorners[a2], cubeCorners[b2],tC),1);
+
+        vertexA.vertex.xyz -= _ClusterPositionWS;
+        vertexB.vertex.xyz -= _ClusterPositionWS;
+        vertexC.vertex.xyz -= _ClusterPositionWS;
+        
+        vertexA.normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0],tA);
+        vertexB.normal = interpolateNormals(cubeNormals[a1], cubeNormals[b1],tB);
+        vertexC.normal = interpolateNormals(cubeNormals[a2], cubeNormals[b2],tC);
+    
+        int baseIndex = valid_triangle_position_result.vertexBufferPosition + i;
+        triangles[baseIndex+0]=vertexC;
+        triangles[baseIndex+1]=vertexB;
+        triangles[baseIndex+2]=vertexA;
+    }
+}
+
+RWStructuredBuffer<uint> _ClusterMeshIndexBuffer;
+RWStructuredBuffer<uint> _IndexBufferCounter;
+
+int _TriangulationSubChunkCount;
+int _IndexBufferSize;
+
+[numthreads(1,1,1)]
+void BuildIndexBuffer (uint3 id : SV_DispatchThreadID)
+{
+    int3 subClusterPosition = _TerrainChunkBasePosition[id.x].xyz + 2;
+   int subChunkIndexInCluster = GetSubChunkIndexFromPosition(subClusterPosition);
+
+    int vertexCountOfSubChunk = _TriangleCountPerSubChunkResult[subChunkIndexInCluster];
+     int indexBufferOffset=0;
+     InterlockedAdd(_IndexBufferCounter[0],vertexCountOfSubChunk, indexBufferOffset);
+
+    int maxVertsPerCluster = 4*4*4*5*3;
+
+    int zeroIndexBufferOffset;
+    InterlockedAdd(_IndexBufferCounter[1],maxVertsPerCluster - vertexCountOfSubChunk, zeroIndexBufferOffset);
+    
+    int vertexOffset=maxVertsPerCluster*subChunkIndexInCluster;
+
+    AllMemoryBarrier();
+    
+    for(int i = 0;i<maxVertsPerCluster;i++)
+    {
+        //_ClusterMeshIndexBuffer[vertexOffset+i]=vertexOffset+i;
+        if(i<vertexCountOfSubChunk)
+        {
+            _ClusterMeshIndexBuffer[indexBufferOffset+i] = vertexOffset+i;
+        }
+        else
+        {
+            _ClusterMeshIndexBuffer[(_IndexBufferSize-zeroIndexBufferOffset) - (i-vertexCountOfSubChunk)]=0;
+        }
+    }
+}

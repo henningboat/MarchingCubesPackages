@@ -1,0 +1,32 @@
+{
+  "name": "com.henningboat.marchingcubes",
+  "displayName": "Henningboat - MarchingCubes",
+  "version": "0.1.0",
+  "unity": "2021.2",
+  "description": "Experimental DOTS Package for the generation of procedural geometry using distance fileds",
+  "keywords": [
+    "unity",
+    "unity3d",
+    "upm",
+    "henningboat",
+    "utility"
+  ],
+  "homepage": "https://github.com/henningboat/autonamegameobjects.git",
+  "bugs": {
+    "url": "https://github.com/henningboat/autonamegameobjects/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/henningboat/autonamegameobjects.git"
+  },
+  "license": "MIT",
+  "author": "Henningboat ()",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "com.unity.entities": "0.17.0-preview.41",
+    "com.unity.graphtools.foundation": "0.11.2-preview",
+    "com.unity.rendering.hybrid": "0.11.0-preview.44"
+  }
+}
