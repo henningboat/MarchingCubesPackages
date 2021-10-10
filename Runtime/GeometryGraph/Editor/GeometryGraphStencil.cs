@@ -147,17 +147,15 @@ namespace Code.CubeMarching.GeometryGraph.Editor
         {
             if (portModel.DataTypeHandle == TypeHandle.ExecutionFlow)
             {
-                capacity = PortCapacity.Single;
-                return true;
+                if ((portModel.Direction & PortDirection.Input) != 0)
+                {
+                    capacity = PortCapacity.Single;
+                    return true;
+                }
             }
 
             capacity = default;
             return false;
-        }
-
-        public override IGraphProcessor CreateGraphProcessor()
-        {
-            return base.CreateGraphProcessor();
         }
     }
 }
