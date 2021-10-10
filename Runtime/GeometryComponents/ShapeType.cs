@@ -6,6 +6,7 @@
         BoundingBox,
         Torus,
         Noise,
-        Plane
+        Plane,
+        Box
     }
 }
