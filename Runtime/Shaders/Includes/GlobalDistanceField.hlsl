@@ -58,20 +58,23 @@ float4 GetPointPosition(uint3 position)
     return float4(position.x, position.y, position.z, surfaceDistance);
 }
 
-float4 GetColorAtPosition(int3 position)
+int GetCubeMaterialData(uint3 position)
 {
-    const int positionInIndexMap = GetPointPositionInIndexMap(position);
-    const int terrainChunkCapacity = 512;
-    const int baseIndexOfTerrainChunk = _GlobalTerrainIndexMap[positionInIndexMap] * terrainChunkCapacity;
+    const uint positionInIndexMap = GetPointPositionInIndexMap(position);
+    const uint terrainChunkCapacity = 512;
+    int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
+    // chunkIndex=2+8;
+    const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
 
-    const int3 positionWithinTerrainChunk = ((position + 8) % 8);
-    const int indexWithinTerrainChunk = indexFromCoord(positionWithinTerrainChunk.x, positionWithinTerrainChunk.y, positionWithinTerrainChunk.z);
+    const uint3 positionWithinTerrainChunk = position % 8;
 
-    const int indexInTerrainBuffer = baseIndexOfTerrainChunk + indexWithinTerrainChunk;
+    const int subChunkIndex = indexFromCoordAndGridSize(positionWithinTerrainChunk/4,2);
 
-    float4 color = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].terrainMaterial.data[indexInTerrainBuffer % 4] == 0 ? float4(1, 0, 0, 1) : float4(0, 1, 1, 1);
+    const uint indexWithinSubChunk = indexFromCoordAndGridSize(position % 4,4);
+    const uint indexInTerrainBuffer = baseIndexOfTerrainChunk + subChunkIndex * 64 + indexWithinSubChunk;
+    
 
-    return color;
+    return _GlobalTerrainBuffer[indexInTerrainBuffer / 4].terrainMaterial.data[indexInTerrainBuffer % 4];
 }
 
 float GetSurfaceDistanceInterpolated(float3 positionWS)

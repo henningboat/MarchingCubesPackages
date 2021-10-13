@@ -125,20 +125,6 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
                 }
             }
             
-            if (geometryInstruction.GeometryInstructionType == GeometryInstructionType.PositionModification)
-            {
-                throw new NotImplementedException();
-                // for (var i = 0; i < _postionsWS.Length; i++)
-                // {
-                //     var position = _postionStack[_postionsWS.Length * combinerInstruction.CombinerDepth + i];
-                //
-                //     _postionStack[_postionsWS.Length * combinerInstruction.CombinerDepth + i] = combinerInstruction.GetTerrainTransformation().TransformPosition(position, _valueBuffer);
-                // }
-                //
-                // _lastCombinerDepth = combinerInstruction.CombinerDepth;
-                // return;
-            }
-            
             var stackBaseOffset = _postionsWS.Length * geometryInstruction.CombinerDepth;
             
             if (geometryInstruction.GeometryInstructionType == GeometryInstructionType.DistanceModification)
@@ -152,10 +138,12 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
                     _terrainDataBuffer[stackBaseOffset + i] = surfaceDistance;
                 }
                 
+                _lastCombinerDepth = geometryInstruction.CombinerDepth;
+                
                 return;
             }
 
-            if (_hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] == false)
+            if (_hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] == false && geometryInstruction.WritesToDistanceField)
             {
                 geometryInstruction.Combiner.Operation = CombinerOperation.Replace;
 
@@ -176,7 +164,7 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
 
                         float4x4 transformation = geometryInstruction.TransformationValue.Resolve(_valueBuffer);
 
-                        PackedFloat3 positionOS=default;
+                        PackedFloat3 positionOS = default;
 
 
                         var positionWSValue = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
@@ -190,22 +178,30 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
                             positionOS.y.PackedValues[j] = positionOSSlice.y;
                             positionOS.z.PackedValues[j] = positionOSSlice.z;
                         }
-                        
-                        //var positionOS = shape.Translation.TransformPosition(_postionStack[_postionsWS.Length * combinerInstruction.CombinerDepth + i],_valueBuffer);
+
+                        TerrainMaterial materialData = geometryInstruction.MaterialData.Resolve(_valueBuffer);
+                        PackedTerrainMaterial packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS, _valueBuffer);
-                        terrainData = new PackedTerrainData(surfaceDistance, default);
+                        terrainData = new PackedTerrainData(surfaceDistance, packedMaterialData);
                         break;
                     case GeometryInstructionType.Combiner:
-                        terrainData = _terrainDataBuffer[(geometryInstruction.CombinerDepth+1) * _postionsWS.Length + i];
+                        terrainData = _terrainDataBuffer[(geometryInstruction.CombinerDepth + 1) * _postionsWS.Length + i];
+                        break;
+                    case GeometryInstructionType.PositionModification:
+                        var position = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
+                        _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction.GetTerrainTransformation().TransformPosition(position, _valueBuffer);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
-                var existingData = _terrainDataBuffer[stackBaseOffset + i];
-                var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(geometryInstruction.Combiner, terrainData, existingData, _valueBuffer);
-                _terrainDataBuffer[stackBaseOffset + i] = combinedResult;
+                if (geometryInstruction.WritesToDistanceField)
+                {
+                    var existingData = _terrainDataBuffer[stackBaseOffset + i];
+                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(geometryInstruction.Combiner, terrainData, existingData, _valueBuffer);
+                    _terrainDataBuffer[stackBaseOffset + i] = combinedResult;
+                }
             }
 
             _lastCombinerDepth = geometryInstruction.CombinerDepth;

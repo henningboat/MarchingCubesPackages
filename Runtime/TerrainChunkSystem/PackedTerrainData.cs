@@ -79,35 +79,17 @@ namespace Code.CubeMarching.TerrainChunkSystem
     [StructLayout(LayoutKind.Sequential, Size = 4)]
     public struct TerrainMaterial
     {
+        public byte R;
+        public byte G;
+        public byte B;
         public byte MaterialID;
-        public TerrainMaterialFlags Flags;
-        public byte Padding0;
-        public byte Padding1;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsStatic()
-        {
-            return (Flags & TerrainMaterialFlags.Static) > 0;
-        }
-
-        public static TerrainMaterial GetSpecialMaterial()
-        {
-            return new() {MaterialID = 1};
-        }
 
         public static TerrainMaterial GetDefaultMaterial()
         {
-            return default;
+            return new() {R = byte.MaxValue, G = Byte.MaxValue, B = Byte.MaxValue, MaterialID = Byte.MaxValue};
         }
     }
-
-    [Flags]
-    public enum TerrainMaterialFlags : byte
-    {
-        Static = 1 << 0,
-        DisplayExternalBordes = 1 << 1
-    }
-
+    
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedTerrainMaterial
     {

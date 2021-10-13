@@ -41,10 +41,13 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             
             var distortions = TypeCache.GetTypesDerivedFrom(typeof(DistanceModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             var distortionItems = new SearcherItem("Distortion", "", distortions.ToList());
+            
+            var positionModifications = TypeCache.GetTypesDerivedFrom(typeof(PositionModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
+            var positionModificationItems = new SearcherItem("Distortion", "", positionModifications.ToList());
 
             var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            
             mathNodes.Add( MakeSearcherItem((typeof(GraphResult), "Result")));
+            mathNodes.Add( MakeSearcherItem((typeof(ColorNode), "Color")));
             
             var mathNodeItems = new SearcherItem("MathNodes", "", mathNodes.ToList());
 
@@ -59,7 +62,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var constantsItem = new SearcherItem("Values", "", others);
 
 
-            var items = new List<SearcherItem> {combinerItems, shapeItems, mathNodeItems, constantsItem, transformationItems, distortionItems};
+            var items = new List<SearcherItem> {combinerItems, shapeItems, mathNodeItems, constantsItem, transformationItems, distortionItems, positionModificationItems};
 
             var searcherDatabase = new SearcherDatabase(items);
             m_Databases.Add(searcherDatabase);

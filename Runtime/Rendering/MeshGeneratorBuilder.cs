@@ -20,19 +20,15 @@ namespace Code.CubeMarching.Rendering
         private static readonly VertexAttributeDescriptor[] ClusterMeshTerrainDescriptors =
         {
             new(VertexAttribute.Position, VertexAttributeFormat.Float32, 4),
-            new(VertexAttribute.Normal,VertexAttributeFormat.Float32,3)
+            new(VertexAttribute.Normal,VertexAttributeFormat.Float32,3),
+            new(VertexAttribute.Color,VertexAttributeFormat.UNorm8,4),
         };
 
         private struct VertexData
         {
             public readonly float4 vertex;
             public readonly float3 normal;
-
-            public VertexData(float3 vertex, float3 normal)
-            {
-                this.vertex = new float4(vertex, 1);
-                this.normal = normal;
-            }
+            public readonly int materialData;
         }
 
         public static CClusterMesh GenerateClusterMesh()

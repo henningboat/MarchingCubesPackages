@@ -230,17 +230,17 @@ namespace Code.CubeMarching.GeometryComponents
 
 
     [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit)]
     public struct CTerrainTransformationRepetition : ITerrainTransformation
     {
-        [SerializeField] public Float3Value Period;
-        [SerializeField] public Float3Value Offset;
+        [FieldOffset(0)] public Float3Value Period;
 
-        public TerrainTransformationType TerrainTransformationType { get; }
+        public TerrainTransformationType TerrainTransformationType => TerrainTransformationType.Repetition;
 
         public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer)
         {
-            return positionWS % new PackedFloat3(Period.Resolve(valueBuffer));
+            var period = Period.Resolve(valueBuffer);
+            return positionWS % period;
         }
     }
 }

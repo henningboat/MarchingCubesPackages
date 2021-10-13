@@ -22,6 +22,7 @@ groupshared float3 _GeneratedNormals;
 struct VertexData {
     float4 vertex;
     float3 normal;
+    int materialData;
 };
 
 struct TriangulationInstruction
@@ -207,7 +208,16 @@ void Triangulation (uint3 id : SV_DispatchThreadID)
        GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
     };
     
-    
+    int cubeVertexColors[8] = {
+        GetCubeMaterialData((int3(positionWS.x, positionWS.y, positionWS.z))),
+       GetCubeMaterialData((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+       GetCubeMaterialData((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+       GetCubeMaterialData((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+       GetCubeMaterialData((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+       GetCubeMaterialData((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+       GetCubeMaterialData((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+       GetCubeMaterialData((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
     
     float3 cubeNormals[8] = {
         CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
@@ -254,6 +264,11 @@ void Triangulation (uint3 id : SV_DispatchThreadID)
         vertexA.normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0],tA);
         vertexB.normal = interpolateNormals(cubeNormals[a1], cubeNormals[b1],tB);
         vertexC.normal = interpolateNormals(cubeNormals[a2], cubeNormals[b2],tC);
+
+        //todo actually select the right one
+        vertexA.materialData=cubeVertexColors[0];
+        vertexB.materialData=cubeVertexColors[0];
+        vertexC.materialData=cubeVertexColors[0];
     
         int baseIndex = valid_triangle_position_result.vertexBufferPosition + i;
         triangles[baseIndex+0]=vertexC;

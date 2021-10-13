@@ -7,18 +7,19 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Unity.Collections;
 using UnityEditor.GraphToolsFoundation.Overdrive;
+using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
     public static class PortModelExtensions
     {
-        public static void ResolveGeometryInput(this IPortModel port, GeometryGraphResolverContext context, GeometryGraphProperty transformation)
+        public static void ResolveGeometryInput(this IPortModel port, GeometryGraphResolverContext context, GeometryStackData stack)
         {
             var connectedPort = port.GetConnectedPorts().FirstOrDefault(model => model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow  && model.NodeModel != null);
             if (connectedPort != null && connectedPort.NodeModel is IGeometryNode geometryNode)
             {
-                geometryNode.Resolve(context, transformation);
+                geometryNode.Resolve(context, stack);
             }
         }
 
@@ -58,8 +59,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                     return mathNode.ResolvePropertyInput(context, geometryPropertyType);
 
                 case IVariableNodeModel varNode:
+                    var objectValue = varNode.VariableDeclarationModel.InitializationModel.ObjectValue;
+                   
+
                     return context.GetOrCreateProperty(varNode.VariableDeclarationModel.Guid,
-                        new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, varNode.VariableDeclarationModel.InitializationModel.ObjectValue, context, geometryPropertyType,
+                        new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, objectValue, context, geometryPropertyType,
                             varNode.VariableDeclarationModel.GetVariableName(), "Variable Node " + varNode.Title));
 
                 case IConstantNodeModel constNode:
@@ -79,8 +83,15 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                 //
                 // break;
                 default:
+                    var embeddedValue = self.EmbeddedValue.ObjectValue;
+                    if (embeddedValue is Color)
+                    {
+                        var color = (Color) self.EmbeddedValue.ObjectValue;
+                        embeddedValue = new Vector3(color.r, color.g, color.b);
+                    }
+                    
                     return context.GetOrCreateProperty(self.Guid,
-                        new GeometryGraphConstantProperty(self.EmbeddedValue.ObjectValue, context, geometryPropertyType, $"Embedded Value Node{self.UniqueName} port {self.UniqueName}"));
+                        new GeometryGraphConstantProperty(embeddedValue, context, geometryPropertyType, $"Embedded Value Node{self.UniqueName} port {self.UniqueName}"));
             }
         }
     }

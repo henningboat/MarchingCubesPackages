@@ -8,6 +8,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode;
 using Code.CubeMarching.TerrainChunkEntitySystem;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -36,14 +37,22 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
         public CombinerInstruction CurrentCombiner => _combinerStack.Peek();
         public GeometryGraphProperty OriginTransformation;
-
+        public GeometryGraphProperty DefaultColor;
+        public GeometryStackData OriginalGeometryStackData;
+        public GeometryGraphProperty DefaultColorFloat3;
 
         public GeometryGraphResolverContext()
         {
             ZeroFloatProperty = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(0.0f, this, GeometryPropertyType.Float, "Zero Float Constant"));
             OriginTransformation = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(Matrix4x4.Translate(Vector3.one*-32), this, GeometryPropertyType.Float4X4, "Origin Matrix"));
+            DefaultColorFloat3 = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(new Vector3(1,1,1), this, GeometryPropertyType.Float3, "Default Material Float3"));
+            DefaultColor = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphMathOperatorProperty(this,GeometryPropertyType.Color32,MathOperatorType.Float3ToColor32,DefaultColorFloat3,ZeroFloatProperty, "Default Material Color"));
+
+            OriginalGeometryStackData = new GeometryStackData() {Color = DefaultColor, Transformation = OriginTransformation};
+            
             _combinerStack.Push(new CombinerInstruction(CombinerOperation.Min, ZeroFloatProperty, 0));
         }
+
 
         public void BeginWriteCombiner(CombinerInstruction combiner)
         {
@@ -56,9 +65,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             _instructions.Add(combinerToFinish);
         }
 
-        public void WriteShape(ShapeType shapeType, GeometryGraphProperty transformation, List<GeometryGraphProperty> getProperties)
+        public void WriteShape(ShapeType shapeType, GeometryStackData stackData, List<GeometryGraphProperty> getProperties)
         {
-            _instructions.Add(new ShapeInstruction(shapeType, transformation, getProperties, CurrentCombinerDepth, CurrentCombiner));
+            _instructions.Add(new ShapeInstruction(shapeType, stackData.Transformation, stackData.Color, getProperties, CurrentCombinerDepth, CurrentCombiner));
         }
 
         public GeometryGraphExposedVariableNode GetExposedVariableProperty(SerializableGUID guid)
@@ -107,7 +116,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
                         {
                             _propertyValueBuffer.Add(constantFloat4X4Value[i]);
                         }
-
+                        break;
+                    case GeometryPropertyType.Color32:
+                        //colors are always calculated by math instructions, so we don't
+                        //need to write any default values
+                        _propertyValueBuffer.Add(-1);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -131,6 +144,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         }
 
         public void WriteDistanceModifier(DistanceModifierInstruction getDistanceModifierInstruction)
+        {
+            _instructions.Add(getDistanceModifierInstruction);
+        }
+        public void WritePositionModificationModifier(PositionModificationInstruction getDistanceModifierInstruction)
         {
             _instructions.Add(getDistanceModifierInstruction);
         }

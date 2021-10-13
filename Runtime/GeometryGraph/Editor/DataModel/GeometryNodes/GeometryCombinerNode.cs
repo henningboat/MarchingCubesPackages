@@ -15,6 +15,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
             GeometryOut = this.AddExecutionOutputPort(null, nameof(GeometryOut));
         }
 
-        public abstract void Resolve(GeometryGraphResolverContext context, GeometryGraphProperty parent);
+        public abstract void Resolve(GeometryGraphResolverContext context, GeometryStackData parent);
     }
 }

@@ -14,6 +14,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Rendering;
+using TerrainData = Code.CubeMarching.TerrainChunkSystem.TerrainData;
 
 namespace Code.CubeMarching.TerrainChunkEntitySystem
 {
@@ -121,7 +122,7 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
 
             //spawn data holder            
             var entity = EntityManager.CreateEntity(typeof(TerrainChunkDataBuffer), typeof(TotalClusterCounts), typeof(TerrainChunkIndexMap));
-            var totalClustersCount = new TotalClusterCounts() {Value = new int3(2, 2, 2)};
+            var totalClustersCount = new TotalClusterCounts() {Value = new int3(1, 1, 1)};
             EntityManager.SetComponentData(entity, totalClustersCount);
             var terrainChunkIndexMaps = this.GetSingletonBuffer<TerrainChunkIndexMap>();
             terrainChunkIndexMaps.ResizeUninitialized(totalClustersCount.Value.Volume() * 512);
@@ -273,6 +274,10 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
         
         public CGeometryCombiner Combiner;
 
+        public bool HasMaterial;
+        public MaterialDataValue MaterialData;
+        public bool WritesToDistanceField => GeometryInstructionType != GeometryInstructionType.PositionModification;
+
         #endregion
 
         public void AddValueBufferOffset(int valueBufferOffset)
@@ -283,7 +288,7 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
 
         public CGenericTerrainTransformation GetTerrainTransformation()
         {
-            return new() {TerrainTransformationType = (TerrainTransformationType) GeometryInstructionSubType,};
+            return new() {Data = PropertyIndexes,TerrainTransformationType = (TerrainTransformationType) GeometryInstructionSubType};
         }
 
         public CGenericGeometryShape GetShapeInstruction()

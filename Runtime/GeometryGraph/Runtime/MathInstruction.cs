@@ -7,6 +7,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {
@@ -38,9 +39,28 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
                         float4x4 float4X4Result = CalculateFloat4X4(instancePropertyBuffer);
                         instancePropertyBuffer.Write(float4X4Result, ResultIndex);
                         break;
+                    case GeometryPropertyType.Color32:
+                        float color32AsFloat = CalculateColor32(instancePropertyBuffer);
+                        instancePropertyBuffer.Write(color32AsFloat, ResultIndex);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
+        }
+
+        private float CalculateColor32(DynamicBuffer<float> instancePropertyBuffer)
+        {
+            unsafe
+            {
+                float3 colorValue = instancePropertyBuffer.Read<float3>(InputAIndex);
+                colorValue *= 255;
+                byte r = (byte) colorValue.x;
+                byte g = (byte) colorValue.y;
+                byte b = (byte) colorValue.z;
+
+                Color32 result = new Color32(r, g, b, 0);
+                return UnsafeUtility.ReadArrayElement<float>(UnsafeUtility.AddressOf(ref result), 0);
             }
         }
 

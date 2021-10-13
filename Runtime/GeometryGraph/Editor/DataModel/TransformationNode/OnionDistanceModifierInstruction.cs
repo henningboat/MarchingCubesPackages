@@ -7,8 +7,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 {
     public class OnionDistanceModifierInstruction : DistanceModifierInstruction
     {
-        public OnionDistanceModifierInstruction(GeometryGraphProperty thickness, GeometryGraphResolverContext context, GeometryGraphProperty transformation) :
-            base(context.CurrentCombinerDepth, context.CurrentCombiner, transformation, thickness)
+        public OnionDistanceModifierInstruction(GeometryGraphProperty thickness, GeometryGraphResolverContext context, GeometryStackData stackData) :
+            base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation, thickness)
         {
         }
 

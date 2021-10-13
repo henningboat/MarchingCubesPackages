@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Code.CubeMarching.Authoring;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.Rendering;
+using Code.CubeMarching.TerrainChunkSystem;
 using Code.SIMDMath;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -11,6 +12,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using static Code.SIMDMath.SimdMath;
+using TerrainData = Code.CubeMarching.TerrainChunkSystem.TerrainData;
 
 
 namespace Code.CubeMarching.GeometryComponents
@@ -86,6 +88,16 @@ namespace Code.CubeMarching.GeometryComponents
         public float3 Resolve(NativeArray<float> valueBuffer)
         {
             return new(valueBuffer[Index], valueBuffer[Index + 1], valueBuffer[Index + 2]);
+        }
+    }
+    
+    public struct MaterialDataValue
+    {
+        public int Index;
+
+        public TerrainMaterial Resolve(NativeArray<float> valueBuffer)
+        {
+            return valueBuffer.Reinterpret<TerrainMaterial>()[Index];
         }
     }
     

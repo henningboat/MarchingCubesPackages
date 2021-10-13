@@ -98,34 +98,5 @@ namespace Code.CubeMarching.TerrainChunkSystem
 
             return new PackedTerrainData(blendedSurfaceDistance, combinedMaterial);
         }
-
-
-        /// <summary>
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static TerrainChunkData FilterStatic(this TerrainChunkData data)
-        {
-            for (var i = 0; i < TerrainChunkData.PackedCapacity; i++)
-            {
-                var packedTerrainData = data[i];
-                data[i] = packedTerrainData.FilterStatic();
-            }
-
-            return data;
-        }
-
-        public static PackedTerrainData FilterStatic(this PackedTerrainData data)
-        {
-            for (var i = 0; i < PackedTerrainData.UnpackedCapacity; i++)
-            {
-                if (!data[i].TerrainMaterial.IsStatic())
-                {
-                    data[i] = TerrainData.DefaultOutside;
-                }
-            }
-
-            return data;
-        }
     }
 }

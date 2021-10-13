@@ -8,6 +8,7 @@
         Division,
         Min,
         Max,
-        Translate
+        Translate,
+        Float3ToColor32
     }
 }
