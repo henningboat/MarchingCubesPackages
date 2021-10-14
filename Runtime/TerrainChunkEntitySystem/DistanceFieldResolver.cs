@@ -13,8 +13,8 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(DynamicBuffer<TerrainChunkDataBuffer> terrainChunkBuffer, ref DistanceFieldChunkData distanceField, CTerrainEntityChunkPosition chunkPosition,
-            DynamicBuffer<GeometryInstruction> instructionsBuffer, Entity clusterEntity, int backgroundDataIndex, bool ignoreBackgroundData, CClusterParameters clusterParameters,
+        public static void CalculateDistanceFieldForChunk(NativeArray<TerrainChunkDataBuffer> terrainChunkBuffer, ref DistanceFieldChunkData distanceField, CTerrainEntityChunkPosition chunkPosition,
+            DynamicBuffer<GeometryInstruction> instructionsBuffer, int backgroundDataIndex, bool ignoreBackgroundData, CClusterParameters clusterParameters,
             NativeArray<float> valueBuffer)
         {
             TerrainChunkData terrainChunk = default;
@@ -29,7 +29,7 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
                 for (var i = 0; i < 2; i++)
                 {
                     var offsetInChunk = new PackedFloat3(new float4(2, 6, 2, 6), new float4(2, 2, 6, 6), new float4(i) * 4 + 2);
-                    positionsToCheck[i] = new float3(positionGS.x, positionGS.y, positionGS.z) * SSpawnTerrainChunks.TerrainChunkLength + offsetInChunk;
+                    positionsToCheck[i] = new float3(positionGS.x, positionGS.y, positionGS.z) * Constants.ChunkLength + offsetInChunk;
                 }
 
                 var iterator = new TerrainInstructionIterator(positionsToCheck, instructionsBuffer, chunkPosition.indexInCluster, existingData, valueBuffer);
@@ -185,7 +185,7 @@ namespace Code.CubeMarching.TerrainChunkEntitySystem
             y += subChunkIndex / 2 % 2 * 4;
             z += subChunkIndex / 4 * 4;
 
-            return new PackedFloat3(x, y, z) + positionGS * SSpawnTerrainChunks.TerrainChunkLength;
+            return new PackedFloat3(x, y, z) + positionGS * Constants.ChunkLength;
         }
     }
 }
