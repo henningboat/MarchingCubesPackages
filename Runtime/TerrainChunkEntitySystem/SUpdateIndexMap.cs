@@ -1,11 +1,4 @@
-﻿using Code.CubeMarching.Authoring;
-using Code.CubeMarching.TerrainChunkSystem;
-using Code.CubeMarching.Utils;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
-
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+﻿namespace TerrainChunkEntitySystem
 {
     // [UpdateAfter(typeof(SBuildStaticGeometry))]
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]

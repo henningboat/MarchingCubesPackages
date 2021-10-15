@@ -1,13 +1,13 @@
 ﻿using System;
-using Code.CubeMarching.GeometryComponents;
-using Code.CubeMarching.TerrainChunkSystem;
 using Code.SIMDMath;
+using GeometryComponents;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     /// <summary>
     ///     Calculates the TerrainData for a NativeArray world space positions

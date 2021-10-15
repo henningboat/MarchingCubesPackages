@@ -1,11 +1,11 @@
 ﻿using System;
-using Code.CubeMarching.GeometryComponents;
 using Code.SIMDMath;
+using GeometryComponents;
 using Unity.Collections;
 using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
-namespace Code.CubeMarching.TerrainChunkSystem
+namespace TerrainChunkSystem
 {
     public static class TerrainChunkOperations
     {

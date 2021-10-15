@@ -2,7 +2,7 @@
 using Unity.Entities;
 using UnityEngine;
 
-namespace Code.CubeMarching.Rendering
+namespace Rendering
 {
     [Serializable]
     public struct CClusterMesh : ISharedComponentData, IEquatable<CClusterMesh>

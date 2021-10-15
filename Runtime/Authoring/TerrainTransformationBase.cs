@@ -1,9 +1,9 @@
-﻿using Code.CubeMarching.GeometryComponents;
+﻿using GeometryComponents;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Code.CubeMarching.Authoring
+namespace Authoring
 {
     public abstract class TerrainTransformationBase<T> : MonoBehaviour, ITerrainModifierEntitySource, IConvertGameObjectToEntity where T : struct, ITerrainTransformation
     {

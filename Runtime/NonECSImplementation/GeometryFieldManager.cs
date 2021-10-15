@@ -11,14 +11,18 @@ namespace NonECSImplementation
         
         private void Awake()
         {
-            _geometryFieldData = new GeometryFieldData();
-            _updateMeshesSystem = new UpdateMeshesSystem();
-            _geometryFieldData.Initialize(1);
-            _updateMeshesSystem.Initialize(_geometryFieldData);
         }
 
         public void Update()
         {
+            if (_geometryFieldData == null)
+            {
+                Debug.Log("initializing");
+                _geometryFieldData = new GeometryFieldData();
+                _updateMeshesSystem = new UpdateMeshesSystem();
+                _geometryFieldData.Initialize(1);
+                _updateMeshesSystem.Initialize(_geometryFieldData);
+            }
             _geometryFieldData.AddRandomVoxel();
             _updateMeshesSystem.Update();
         }

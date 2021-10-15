@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching.TerrainChunkSystem
+namespace TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct TerrainData

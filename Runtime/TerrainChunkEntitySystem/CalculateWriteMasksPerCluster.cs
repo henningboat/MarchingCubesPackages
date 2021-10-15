@@ -1,10 +1,7 @@
-﻿using Code.CubeMarching.GeometryGraph;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.Utils;
-using Unity.Entities;
+﻿using Rendering;
+using Utils;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     public struct CalculateWriteMasksPerCluster
     {

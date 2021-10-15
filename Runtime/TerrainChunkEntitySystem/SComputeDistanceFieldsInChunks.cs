@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     //todo re-implement this functionality
     public struct CTerrainShapeCoverageMask : IBufferElementData

@@ -1,4 +1,4 @@
-﻿namespace Code.CubeMarching.GeometryComponents
+﻿namespace GeometryComponents
 {
     public enum ShapeType : byte
     {

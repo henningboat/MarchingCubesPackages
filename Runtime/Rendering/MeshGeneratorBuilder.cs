@@ -2,9 +2,8 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Random = UnityEngine.Random;
 
-namespace Code.CubeMarching.Rendering
+namespace Rendering
 {
     public static class MeshGeneratorBuilder
     {

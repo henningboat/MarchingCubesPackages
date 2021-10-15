@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Code.CubeMarching.Rendering;
+using Rendering;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Code.CubeMarching.Utils
+namespace Utils
 {
     //todo use native arrays
 

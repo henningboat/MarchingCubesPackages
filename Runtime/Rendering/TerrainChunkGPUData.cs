@@ -1,10 +1,10 @@
 ﻿using System;
-using Code.CubeMarching.TerrainChunkSystem;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Code.CubeMarching.Rendering
+namespace Rendering
 {
     internal class TerrainChunkGPUData
     {

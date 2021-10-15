@@ -1,15 +1,12 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.Rendering;
+﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
+using Rendering;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeTorus : IComponentData, ITerrainModifierShape

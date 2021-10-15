@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     public struct CGeometryGraphPropertyValue : IBufferElementData
     {

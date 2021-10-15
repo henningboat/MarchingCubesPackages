@@ -25,7 +25,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "com.unity.entities": "0.17.0-preview.41",
+    "com.unity.burst": "1.6.0",
     "com.unity.graphtools.foundation": "0.11.2-preview",
     "com.unity.rendering.hybrid": "0.11.0-preview.44"
   }

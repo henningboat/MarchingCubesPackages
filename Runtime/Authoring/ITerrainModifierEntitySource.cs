@@ -1,4 +1,4 @@
-﻿namespace Code.CubeMarching.Authoring
+﻿namespace Authoring
 {
     public interface ITerrainModifierEntitySource
     {

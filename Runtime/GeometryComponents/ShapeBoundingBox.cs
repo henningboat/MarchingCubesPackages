@@ -1,16 +1,13 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.Rendering;
+﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
+using Rendering;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using static Code.SIMDMath.SimdMath;
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeBoundingBox : IComponentData, ITerrainModifierShape

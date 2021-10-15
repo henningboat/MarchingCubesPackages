@@ -1,22 +1,11 @@
-using System;
 using System.Runtime.CompilerServices;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.GeometryComponents;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.TerrainChunkSystem;
-using Code.CubeMarching.Utils;
-using Unity.Collections;
+using Authoring;
+using GeometryComponents;
+using Rendering;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
-using Unity.Transforms;
-using UnityEngine;
-using UnityEngine.Rendering;
-using TerrainData = Code.CubeMarching.TerrainChunkSystem.TerrainData;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]
     // public class SSpawnTerrainChunks : SystemBase

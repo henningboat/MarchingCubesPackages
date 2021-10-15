@@ -1,12 +1,12 @@
 using System.Runtime.InteropServices;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.TerrainChunkSystem;
+using Rendering;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching.Triangulation
+namespace Triangulation
 {
     public static unsafe class TriangulationUtils
     {

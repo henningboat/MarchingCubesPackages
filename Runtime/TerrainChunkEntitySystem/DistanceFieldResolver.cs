@@ -1,15 +1,15 @@
 using System;
 using System.Runtime.CompilerServices;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.TerrainChunkSystem;
-using Code.CubeMarching.Utils;
+using Authoring;
 using Code.SIMDMath;
+using Rendering;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Utils;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     public static class DistanceFieldResolver
     {

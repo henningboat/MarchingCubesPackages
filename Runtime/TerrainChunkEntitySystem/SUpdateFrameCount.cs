@@ -1,6 +1,4 @@
-﻿using Unity.Entities;
-
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+﻿namespace TerrainChunkEntitySystem
 {
     // [UpdateAfter(typeof(SSpawnTerrainChunks))]
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]

@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.TerrainChunkSystem;
 using Code.SIMDMath;
-using JetBrains.Annotations;
+using Rendering;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using static Code.SIMDMath.SimdMath;
-using TerrainData = Code.CubeMarching.TerrainChunkSystem.TerrainData;
 
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]

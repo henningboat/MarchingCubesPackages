@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Code.CubeMarching.Utils
+namespace Utils
 {
     public static class BitmaskUtil
     {

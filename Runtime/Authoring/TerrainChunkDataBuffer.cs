@@ -1,9 +1,9 @@
 ﻿using System;
-using Code.CubeMarching.TerrainChunkSystem;
+using TerrainChunkSystem;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching.Authoring
+namespace Authoring
 {
     [Serializable]
     public struct TerrainChunkDataBuffer : IBufferElementData

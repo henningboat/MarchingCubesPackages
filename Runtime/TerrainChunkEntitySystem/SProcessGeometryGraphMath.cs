@@ -1,10 +1,6 @@
-﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Unity.Entities;
+﻿using Unity.Entities;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]
     // public class SProcessGeometryGraphMath : SystemBase

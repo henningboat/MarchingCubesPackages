@@ -1,7 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Jobs;
 
-namespace Code.CubeMarching.Utils
+namespace Utils
 {
     public struct NativeValue<T> where T : struct
     {

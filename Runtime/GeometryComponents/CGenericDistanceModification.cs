@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.TerrainChunkEntitySystem;
 using Code.SIMDMath;
+using TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using static Code.SIMDMath.SimdMath;
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericDistanceModification: IDistanceModification

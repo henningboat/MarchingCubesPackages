@@ -1,13 +1,6 @@
-﻿using Code.CubeMarching.Authoring;
-using Code.CubeMarching.GeometryGraph;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.Rendering;
-using Code.CubeMarching.Utils;
-using Unity.Entities;
-using Unity.Mathematics;
-using UnityEngine;
+﻿using Unity.Entities;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]
     // [UpdateAfter(typeof(SCombineGeometrySubGraphs))]

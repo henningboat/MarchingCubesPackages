@@ -1,8 +1,4 @@
-﻿using Code.CubeMarching.GeometryGraph.Runtime;
-using Unity.Entities;
-using UnityEngine;
-
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+﻿namespace TerrainChunkEntitySystem
 {
     // [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Default)]
     // [UpdateAfter(typeof(SProcessGeometryGraphMath))]

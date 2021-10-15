@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Code.CubeMarching.GeometryComponents;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.Rendering;
 using Code.SIMDMath;
+using GeometryComponents;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 
-namespace Code.CubeMarching.Authoring
+namespace Authoring
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericGeometryShape : IComponentData

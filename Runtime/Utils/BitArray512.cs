@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching.Utils
+namespace Utils
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct BitArray512

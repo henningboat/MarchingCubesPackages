@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Code.CubeMarching.GeometryGraph.Runtime;
-using Code.CubeMarching.TerrainChunkEntitySystem;
 using Code.SIMDMath;
+using TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
-using static Code.SIMDMath.SimdMath;
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     //todo reimplement
     // [StructLayout(LayoutKind.Sequential)]

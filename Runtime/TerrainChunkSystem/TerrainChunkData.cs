@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Code.CubeMarching.TerrainChunkSystem
+namespace TerrainChunkSystem
 {
     /// <summary>
     ///     Contains 512 float values, accessible via indexer

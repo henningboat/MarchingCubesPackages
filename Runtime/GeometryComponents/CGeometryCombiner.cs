@@ -1,8 +1,8 @@
-﻿using Code.CubeMarching.TerrainChunkEntitySystem;
+﻿using TerrainChunkEntitySystem;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching.GeometryComponents
+namespace GeometryComponents
 {
     public struct CGeometryCombiner : IComponentData
     {

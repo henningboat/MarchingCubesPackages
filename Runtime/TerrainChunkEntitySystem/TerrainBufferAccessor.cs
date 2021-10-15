@@ -1,11 +1,11 @@
-﻿using Code.CubeMarching.Authoring;
-using Code.CubeMarching.TerrainChunkSystem;
+﻿using Authoring;
+using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace Code.CubeMarching.TerrainChunkEntitySystem
+namespace TerrainChunkEntitySystem
 {
     public struct TerrainBufferAccessor
     {

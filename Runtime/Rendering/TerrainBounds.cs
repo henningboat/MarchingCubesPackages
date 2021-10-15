@@ -1,6 +1,6 @@
 ﻿using Unity.Mathematics;
 
-namespace Code.CubeMarching.Rendering
+namespace Rendering
 {
     public struct TerrainBounds
     {

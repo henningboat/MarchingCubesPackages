@@ -1,19 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using Code.CubeMarching.Authoring;
-using Code.CubeMarching.TerrainChunkEntitySystem;
-using Code.CubeMarching.Utils;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
-using UnityEngine.TerrainUtils;
-using Random = Unity.Mathematics.Random;
-using Code.CubeMarching.TerrainChunkEntitySystem;
-using Code.CubeMarching.TerrainChunkSystem;
+using Utils;
 
-namespace Code.CubeMarching.Rendering
+namespace Rendering
 {
     public struct CTriangulationInstruction : IBufferElementData
     {
@@ -28,17 +17,15 @@ namespace Code.CubeMarching.Rendering
     }
 
 
-    public struct CSubChunkWithTrianglesIndex : IBufferElementData
+    public struct CSubChunkWithTrianglesIndex
     {
-        public readonly bool HasData;
-        public readonly int3 ChunkPositionGS;
-        public readonly int SubChunkIndex;
+        public int3 ChunkPositionGS;
+        public int SubChunkIndex;
 
         public CSubChunkWithTrianglesIndex(int3 chunkPositionGs, int subChunkIndex, bool hasData)
         {
             ChunkPositionGS = chunkPositionGs;
             SubChunkIndex = subChunkIndex;
-            HasData = hasData;
         }
     }
 
@@ -216,5 +203,8 @@ namespace Code.CubeMarching.Rendering
         public BitArray512 WriteMask;
         public int vertexCount;
         public int lastVertexBufferChangeTimestamp;
+        public int triangulationInstructionCount;
+        public int3 PositionGS;
+        public int ClusterIndex;
     }
 }

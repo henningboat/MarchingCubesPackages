@@ -1,9 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
-using UnityEditor;
-using UnityEngine;
 
-namespace Code.CubeMarching.Triangulation
+namespace Triangulation
 {
     public class TriangulationTables
     {

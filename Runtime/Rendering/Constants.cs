@@ -1,4 +1,4 @@
-﻿namespace Code.CubeMarching.Rendering
+﻿namespace Rendering
 {
     public static class Constants
     {
