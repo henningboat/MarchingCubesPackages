@@ -66,6 +66,7 @@ namespace GeometryComponents
         int GetDimensions();
     }
 
+    [Serializable]
     public struct FloatValue
     {
         public int Index;
@@ -76,6 +77,7 @@ namespace GeometryComponents
         }
     }
 
+    [Serializable]
     public struct Float3Value
     {
         public int Index;
@@ -86,6 +88,7 @@ namespace GeometryComponents
         }
     }
     
+    [Serializable]
     public struct MaterialDataValue
     {
         public int Index;
@@ -96,6 +99,7 @@ namespace GeometryComponents
         }
     }
     
+    [Serializable]
     public struct Float4X4Value
     {
         public int Index;

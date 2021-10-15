@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using Authoring;
 using GeometryComponents;
@@ -249,7 +250,8 @@ namespace TerrainChunkEntitySystem
         #endregion
     }
 
-    public struct GeometryInstruction:IBufferElementData
+    [Serializable]
+    public struct GeometryInstruction
     {
         #region Public Fields
 

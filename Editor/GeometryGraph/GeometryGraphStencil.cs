@@ -88,6 +88,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             return this;
         }
 
+        public override IGraphProcessor CreateGraphProcessor()
+        {
+            return new GeometryGraphProcessor();
+        }
+
         List<SearcherDatabaseBase> ISearcherDatabaseProvider.GetGraphElementsSearcherDatabases(IGraphModel graphModel)
         {
             return m_Databases;

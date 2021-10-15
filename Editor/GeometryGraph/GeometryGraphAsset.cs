@@ -47,24 +47,5 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
             return false;
         }
-
-        public GeometryGraphResolverContext ResolveGraph()
-        {
-            var context = new GeometryGraphResolverContext();
-
-            var resultNode = GraphModel.NodeModels.FirstOrDefault(model => model is GraphResult) as GraphResult;
-
-            var rootNode = resultNode.DataIn.GetConnectedPorts().FirstOrDefault().NodeModel as IGeometryNode;
-
-            context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min,context.ZeroFloatProperty,context.CurrentCombinerDepth));
-
-            rootNode.Resolve(context, context.OriginalGeometryStackData);
-
-            context.FinishWritingCombiner();
-            
-            context.BuildBuffers();
-
-            return context;
-        }
     }
 }

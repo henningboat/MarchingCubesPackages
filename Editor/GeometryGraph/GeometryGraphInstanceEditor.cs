@@ -15,12 +15,13 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
         private void OnEnable()
         {
-            _geometryGraphProperty = serializedObject.FindProperty("_geometryGraph");
+            _geometryGraphProperty = serializedObject.FindProperty("_geometryGraphRuntimeData");
         }
 
         public override void OnInspectorGUI()
         {
-            var graph = _geometryGraphProperty.objectReferenceValue as GeometryGraphAsset;
+            var graph = _geometryGraphProperty.objectReferenceValue as GeometryGraphRuntimeData;
+            var graphAsset = AssetDatabase.LoadAssetAtPath<GeometryGraphAsset>(AssetDatabase.GetAssetPath(graph));
 
             EditorGUILayout.PropertyField(_geometryGraphProperty);
             if (graph == null)
@@ -36,7 +37,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var geometryGraphInstance = (GeometryGraphInstance) target;
             var currentOverwrites = geometryGraphInstance.GetOverwrites();
 
-            foreach (var variableDeclarationModel in graph.GraphModel.VariableDeclarations)
+            foreach (var variableDeclarationModel in graphAsset.GraphModel.VariableDeclarations)
             {
                 EditorGUILayout.BeginHorizontal();
 

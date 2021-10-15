@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
+[Serializable]
 public struct MathInstruction
 {
     public MathOperatorType MathOperationType;

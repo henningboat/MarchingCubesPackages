@@ -1,17 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class GeometryGraphInstance : MonoBehaviour
 {
-    //[SerializeField] private GeometryGraphAsset _geometryGraph;
+    [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
     [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
 
-    //public GeometryGraphAsset Graph => _geometryGraph;
+    public GeometryGraphRuntimeData GraphData => _geometryGraphRuntimeData;
     public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
 
 
@@ -20,8 +19,18 @@ public class GeometryGraphInstance : MonoBehaviour
         return Overwrites;
     }
 
-    public void SetOverwrites(List<GeometryGraphPropertyOverwrite> newOverwrites)
+    public void SetOverwrites(List<GeometryGraphPropertyOverwrite> newOverwrites) 
     {
         _overwrites = newOverwrites;
+    }
+
+    private void OnEnable()
+    {
+        _geometryGraphRuntimeData.AllocateNativeArrays();
+    }
+
+    private void OnDestroy()
+    {
+        
     }
 }
