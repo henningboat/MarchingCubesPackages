@@ -1,12 +1,12 @@
 ﻿using System;
 using TerrainChunkEntitySystem;
-using Unity.Entities;
+
 using Unity.Mathematics;
 
 namespace GeometryComponents
 {
     [Serializable]
-    public struct CGeometryCombiner : IComponentData
+    public struct CGeometryCombiner
     {
         #region Public Fields
 

@@ -4,9 +4,8 @@ using Code.SIMDMath;
 using Rendering;
 using TerrainChunkSystem;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Mathematics;
-using Unity.Transforms;
 using static Code.SIMDMath.SimdMath;
 
 
@@ -14,7 +13,7 @@ namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]
-    public struct CShapeSphere : IComponentData, ITerrainModifierShape
+    public struct CShapeSphere : ITerrainModifierShape
     {
         public bool Equals(CShapeSphere other)
         {
@@ -43,27 +42,7 @@ namespace GeometryComponents
             return length(positionOS) - radiusValue;
         }
 
-        public TerrainBounds CalculateBounds(Translation translation, NativeArray<float> valueBuffer)
-        {
-            var radiusValue = radius.Resolve(valueBuffer);
-            var center = translation.Value;
-            return new TerrainBounds
-            {
-                min = center - radiusValue, max = center + radiusValue
-            };
-        }
-
-        public uint CalculateHash()
-        {
-            return math.asuint(radius.Index);
-        }
-
         public ShapeType Type => ShapeType.Sphere;
-    }
-
-    public interface IValueReference
-    {
-        int GetDimensions();
     }
 
     [Serializable]

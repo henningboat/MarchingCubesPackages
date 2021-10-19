@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NonECSImplementation;
+using Unity.Mathematics;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -23,8 +24,15 @@ public class GeometryGraphInstance : MonoBehaviour
 
                 _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
             }
+            UpdateOverwritesInValueBuffer();
             return _graphData;
         }
+    }
+
+    private void UpdateOverwritesInValueBuffer()
+    {
+        //apply main transformation
+        _graphData.ValueBuffer.Write(transform.worldToLocalMatrix,_geometryGraphRuntimeData.MainTransformation.Index);
     }
 
     public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;

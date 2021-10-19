@@ -14,15 +14,17 @@ namespace NonECSImplementation
         [NativeDisableParallelForRestriction] public NativeArray<CTriangulationInstruction> TriangulationInstructions;
         [NativeDisableParallelForRestriction] public NativeArray<CSubChunkWithTrianglesIndex> SubChunksWithTrianglesData;
         [NativeDisableParallelForRestriction] public NativeArray<CVertexCountPerSubCluster> VertexCountPerSubChunk;
+        [NativeDisableParallelForRestriction] public GeometryFieldData GeometryField;
 
-        public NativeArray<CClusterParameters> ClusterParameters;
-            
         public void Execute(int clusterIndex)
         {
+            var cluster = GeometryField.GetCluster(clusterIndex);
             int offsetInSubChunkBuffer = clusterIndex * Constants.subChunksPerCluster;
 
-            var clusterParameters = ClusterParameters[clusterIndex];
+            var clusterParameters = cluster.Parameters;
             clusterParameters.needsIndexBufferUpdate = false;
+
+            int subChunksWithTrianglesCount=0;
 
             // NativeSlice<int> vertexCountData = default;
             //     var hasVertexCountReadback = false;
@@ -50,11 +52,9 @@ namespace NonECSImplementation
 
             for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
             {
+                var chunkParameters = cluster.GetChunk(chunkIndex).Parameters;
                 var positionOfChunkWS = TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex, new int3(Constants.chunkLengthPerCluster))*Constants.chunkLength;
 
-                //toto read actual inner data masks ones those exist
-                byte innerDataMask = Byte.MaxValue;
-                //
                 // var currentHash = dynamicData.DistanceFieldChunkData.CurrentGeometryInstructionsHash;
 
                 for (var i = 0; i < 8; i++)
@@ -70,7 +70,7 @@ namespace NonECSImplementation
                     //     }
                     // }
 
-                    if (innerDataMask.GetBit(i))
+                    if (chunkParameters.InnerDataMask.GetBit(i))
                     {
                         var subChunkOffset = TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, 2) * 4;
                         
@@ -81,21 +81,27 @@ namespace NonECSImplementation
                         {
                             triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
                             vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = Rendering.Constants.maxVertsPerCluster};
-                            SubChunksWithTrianglesData[subChunkIndex] = new CSubChunkWithTrianglesIndex()
+                            SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex()
                             {
                                 SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
                             };
+                            subChunksWithTrianglesCount++;
                         }
 
                         totalVertexCount += vertexCountPerSubChunk[subChunkIndex].vertexCount;
+                    }
+                    else
+                    {
+                        
                     }
                 }
             }
 
             clusterParameters.vertexCount = totalVertexCount;
             clusterParameters.triangulationInstructionCount = triangulationInstructions.Count;
+            clusterParameters.subChunksWithTrianglesCount = subChunksWithTrianglesCount;
 
-            ClusterParameters[clusterIndex] = clusterParameters;
+            cluster.Parameters = clusterParameters;
         }
     }
 }

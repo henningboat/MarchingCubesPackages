@@ -3,7 +3,7 @@ using Code.SIMDMath;
 using GeometryComponents;
 using TerrainChunkSystem;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 using float4x4 = Unity.Mathematics.float4x4;
@@ -26,7 +26,6 @@ namespace TerrainChunkEntitySystem
         private readonly NativeArray<GeometryInstruction>.ReadOnly _combinerInstructions;
         private readonly NativeArray<PackedFloat3>.ReadOnly _postionsWS;
         private readonly int _combinerStackSize;
-        private readonly int _indexInsideChunk;
         private NativeArray<PackedFloat3> _postionStack;
         private NativeArray<bool> _hasWrittenToCurrentCombiner;
         private int _lastCombinerDepth;
@@ -37,7 +36,7 @@ namespace TerrainChunkEntitySystem
 
         #region Constructors
 
-        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<GeometryInstruction> combinerInstructions, int indexInsideChunk, 
+        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<GeometryInstruction> combinerInstructions, 
             NativeArray<float> valueBuffer)
         {
             _valueBuffer = valueBuffer;
@@ -57,7 +56,6 @@ namespace TerrainChunkEntitySystem
             _terrainDataBuffer = new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);
 
-            _indexInsideChunk = indexInsideChunk;
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
             _lastCombinerDepth = -1;
         }
@@ -157,8 +155,6 @@ namespace TerrainChunkEntitySystem
                         var shape = geometryInstruction.GetShapeInstruction();
 
                         float4x4 transformation = geometryInstruction.TransformationValue.Resolve(_valueBuffer);
-
-                        transformation = float4x4.identity;
 
                         PackedFloat3 positionOS = default;
 

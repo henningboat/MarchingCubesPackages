@@ -4,7 +4,7 @@ using System.Linq;
 using NonECSImplementation;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -165,7 +165,7 @@ namespace Rendering
 
         public const int ChunkLength = 8;
 
-
+ 
         public void Dispose()
         {
             _argsBuffer.Dispose();

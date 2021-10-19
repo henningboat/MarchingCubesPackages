@@ -2,14 +2,12 @@
 using Code.SIMDMath;
 using Rendering;
 using Unity.Collections;
-using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 
 namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeTorus : IComponentData, ITerrainModifierShape
+    public struct CShapeTorus : ITerrainModifierShape
     {
         [FieldOffset(0)] public FloatValue radius;
         [FieldOffset(4)] public FloatValue thickness;
@@ -22,26 +20,11 @@ namespace GeometryComponents
             return SimdMath.length(q) - thickness;
         }
 
-        public TerrainBounds CalculateBounds(Translation translation, NativeArray<float> valueBuffer)
-        {
-            var center = translation.Value;
-            var extends = radius.Resolve(valueBuffer) + thickness.Resolve(valueBuffer);
-            return new TerrainBounds
-            {
-                min = center - extends, max = center + extends
-            };
-        }
-
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
         {
             return sdTorus(positionOS, radius.Resolve(valueBuffer), thickness.Resolve(valueBuffer));
         }
-
-        public uint CalculateHash()
-        {
-            return math.hash(new float2(radius.Index, thickness.Index));
-        }
-
+        
         public ShapeType Type => ShapeType.Torus;
     }
 }

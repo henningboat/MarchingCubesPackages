@@ -1,11 +1,11 @@
 ﻿using System;
-using Unity.Entities;
+
 using UnityEngine;
 
 namespace Rendering
 {
     [Serializable]
-    public struct CClusterMesh : ISharedComponentData, IEquatable<CClusterMesh>
+    public struct CClusterMesh : IEquatable<CClusterMesh>
     {
         public Mesh mesh;
 

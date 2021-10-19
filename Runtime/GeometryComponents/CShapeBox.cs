@@ -3,14 +3,13 @@ using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Rendering;
 using Unity.Collections;
-using Unity.Entities;
-using Unity.Transforms;
+
 using static Code.SIMDMath.SimdMath;
 
 namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeBox : IComponentData, ITerrainModifierShape
+    public struct CShapeBox : ITerrainModifierShape
     {
         [FieldOffset(0)] public Float3Value Extends;
         
@@ -19,16 +18,6 @@ namespace GeometryComponents
             var extends = Extends.Resolve(valueBuffer);
             PackedFloat3 q = abs(positionWS) - extends;
             return length(max(q, 0.0f)) + min(max(q.x, max(q.y, q.z)), 0.0f);
-        }
-
-        public TerrainBounds CalculateBounds(Translation translation, NativeArray<float> valueBuffer)
-        {
-            return new() {min = int.MinValue, max = int.MaxValue};
-        }
-
-        public uint CalculateHash()
-        {
-            throw new NotImplementedException();
         }
 
         public ShapeType Type => ShapeType.Box;

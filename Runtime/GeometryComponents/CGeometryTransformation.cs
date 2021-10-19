@@ -5,7 +5,7 @@ using Code.SIMDMath;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Entities;
+
 using Unity.Mathematics;
 
 namespace GeometryComponents
@@ -67,7 +67,7 @@ namespace GeometryComponents
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CGenericTerrainTransformation : IComponentData
+    public struct CGenericTerrainTransformation
     {
         public int16 Data;
         public TerrainTransformationType TerrainTransformationType;
@@ -123,7 +123,7 @@ namespace GeometryComponents
         Repetition = 3
     }
 
-    public struct CGeometryTransformation : IComponentData, ITerrainTransformation
+    public struct CGeometryTransformation : ITerrainTransformation
     {
         public TerrainModifierTransformationType Type;
         public Float3Value objectOrigin;

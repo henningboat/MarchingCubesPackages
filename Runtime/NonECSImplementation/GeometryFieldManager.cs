@@ -1,6 +1,4 @@
-﻿using System;
-using TerrainChunkEntitySystem;
-using Unity.Jobs;
+﻿using Unity.Jobs;
 using UnityEngine;
 
 namespace NonECSImplementation

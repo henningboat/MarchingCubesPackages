@@ -2,8 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using Authoring;
 using GeometryComponents;
-using Rendering;
-using Unity.Entities;
 using Unity.Mathematics;
 
 namespace TerrainChunkEntitySystem
@@ -211,7 +209,7 @@ namespace TerrainChunkEntitySystem
         public bool HasMaterial => (_flags & GeometryInstructionFlags.HasMaterial) != 0;
         public MaterialDataValue MaterialData;
         public bool WritesToDistanceField => GeometryInstructionType != GeometryInstructionType.PositionModification;
-
+        
         #endregion
 
         public void AddValueBufferOffset(int valueBufferOffset)
@@ -248,16 +246,6 @@ namespace TerrainChunkEntitySystem
     public enum DistanceModificationType
     {
         Onion,
-    }
-    
-    public struct CTerrainModifierBounds : IComponentData
-    {
-        #region Public Fields
-
-        public TerrainBounds Bounds;
-        public int IndexInShapeMap;
-
-        #endregion
     }
 
     public static class Int3Extensions

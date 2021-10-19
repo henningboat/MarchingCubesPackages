@@ -1,11 +1,12 @@
-﻿using TerrainChunkEntitySystem;
+﻿using System;
+using TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
 namespace NonECSImplementation
 {
-    public struct GeometryGraphData : INativeDisposable
+    public struct GeometryGraphData : IDisposable
     {
         [NativeDisableParallelForRestriction] public NativeArray<float> ValueBuffer;
         [NativeDisableParallelForRestriction] public NativeArray<MathInstruction> MathInstructions;

@@ -2,14 +2,13 @@
 using Code.SIMDMath;
 using Rendering;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Mathematics;
-using Unity.Transforms;
 
 namespace GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeNoise : IComponentData, ITerrainModifierShape
+    public struct CShapeNoise : ITerrainModifierShape
     {
         [FieldOffset(0)] public FloatValue strength;
         [FieldOffset(4)] public FloatValue valueOffset;
@@ -22,16 +21,6 @@ namespace GeometryComponents
 
             var positionOS = scale.Resolve(valueBuffer) * (positionWS - offsetValue);
             return ((cnoise4(positionOS)) + valueOffset.Resolve(valueBuffer)) * strength.Resolve(valueBuffer);
-        }
-
-        public TerrainBounds CalculateBounds(Translation translation, NativeArray<float> valueBuffer)
-        {
-            return new() {min = int.MinValue, max = int.MaxValue};
-        }
-
-        public uint CalculateHash()
-        {
-            return math.hash(new float4(strength.Index, valueOffset.Index, offset.Index, scale.Index));
         }
 
         public ShapeType Type => ShapeType.Noise;

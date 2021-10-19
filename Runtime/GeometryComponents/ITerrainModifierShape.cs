@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using Rendering;
 using Unity.Collections;
-using Unity.Transforms;
 
 namespace GeometryComponents
 {
@@ -12,10 +11,5 @@ namespace GeometryComponents
 
         [UsedImplicitly]
         PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer);
-
-        [UsedImplicitly]
-        TerrainBounds CalculateBounds(Translation translation, NativeArray<float> valueBuffer);
-
-        uint CalculateHash();
     }
 }

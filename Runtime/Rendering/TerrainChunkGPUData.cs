@@ -25,7 +25,7 @@ namespace Rendering
             _terrainIndexMap = new ComputeBuffer(512 * 100, 4 * 3, ComputeBufferType.Default);
         }
 
-        public void UpdateWithSurfaceData(ComputeBuffer globalTerrainBuffer, ComputeBuffer globalTerrainIndexMap, NativeList<int3> chunkPositionsToRender, int3 terrainMapSize, int materialIDFilter)
+        public void UpdateWithSurfaceData(ComputeBuffer globalTerrainBuffer, ComputeBuffer globalTerrainIndexMap, NativeArray<int3> chunkPositionsToRender, int3 terrainMapSize, int materialIDFilter)
         {
             if (chunkPositionsToRender.Length == 0)
             {
@@ -46,7 +46,7 @@ namespace Rendering
                 _triangleBuffer = new ComputeBuffer(requiredTriangleCapacity, trianbgleByteSize, ComputeBufferType.Append);
             }
 
-            _terrainIndexMap.SetData(chunkPositionsToRender.AsArray());
+            _terrainIndexMap.SetData(chunkPositionsToRender);
 
             Shader.SetGlobalInt("numPointsPerAxis", ChunkLength);
             Shader.SetGlobalBuffer("_GlobalTerrainBuffer", globalTerrainBuffer);

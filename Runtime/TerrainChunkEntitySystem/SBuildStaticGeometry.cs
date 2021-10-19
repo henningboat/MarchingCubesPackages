@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+﻿
 
 namespace TerrainChunkEntitySystem
 {
@@ -56,13 +56,4 @@ namespace TerrainChunkEntitySystem
     //
     //     #endregion
     // }
-
-    public static class Extensions
-    {
-        public static DynamicBuffer<T> GetSingletonBuffer<T>(this SystemBase system) where T : struct, IBufferElementData
-        {
-            var singletonEntity = system.GetSingletonEntity<T>();
-            return system.GetBuffer<T>(singletonEntity);
-        }
-    }
 }

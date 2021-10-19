@@ -4,12 +4,12 @@ using Code.SIMDMath;
 using GeometryComponents;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Entities;
+
 
 namespace Authoring
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct CGenericGeometryShape : IComponentData
+    public struct CGenericGeometryShape
     {
         #region Public Fields
 

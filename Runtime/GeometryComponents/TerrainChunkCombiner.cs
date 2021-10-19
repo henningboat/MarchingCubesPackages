@@ -1,5 +1,5 @@
 ﻿using System;
-using Unity.Entities;
+
 
 namespace GeometryComponents
 {
@@ -33,15 +33,5 @@ namespace GeometryComponents
                     throw new ArgumentOutOfRangeException(nameof(combinerOperation), combinerOperation, null);
             }
         }
-    }
-
-    [InternalBufferCapacity(128)]
-    public struct CTerrainChunkCombinerChild : IBufferElementData
-    {
-        #region Public Fields
-
-        public Entity SourceEntity;
-
-        #endregion
     }
 }

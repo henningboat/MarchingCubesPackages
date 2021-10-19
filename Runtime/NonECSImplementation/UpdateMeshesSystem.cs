@@ -2,7 +2,7 @@
 using Authoring;
 using Rendering;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -44,7 +44,7 @@ namespace NonECSImplementation
         {
             JCalculateTriangulationIndicesJob job = new JCalculateTriangulationIndicesJob()
             {
-                ClusterParameters = _geometryFieldData.ClusterParameters,
+                GeometryField = _geometryFieldData,
                 TriangulationInstructions = _triangulationInstructions,
                 VertexCountPerSubChunk = _vertexCountPerSubChunk,
                 SubChunksWithTrianglesData = _subChunksWithTrianglesData,
@@ -81,13 +81,17 @@ namespace NonECSImplementation
                 
                 int subChunkIndex = clusterIndex * Constants.subChunksPerCluster;
                 var triangulationInstructions = _triangulationInstructions.Slice(subChunkIndex, clusterParameters.triangulationInstructionCount);
+                var subChunksWithTriangles =
+                    _subChunksWithTrianglesData.Slice(subChunkIndex, clusterParameters.subChunksWithTrianglesCount);
                 var gpuBuffers = _gpuDataPerCluster[clusterIndex];
                 
                 //todo!
                 int3 clusterPosition=0;
                 
-                gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer, triangulationInstructions,_subChunksWithTrianglesData, 0, 
+                gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer, triangulationInstructions,subChunksWithTriangles, 0, 
                     clusterPosition, clusterParameters);
+                
+                Debug.Log(subChunksWithTriangles.Length);
             }
         }
 

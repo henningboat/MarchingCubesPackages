@@ -17,7 +17,11 @@ namespace NonECSImplementation
             _chunkParametersSlice = chunkParametersSlice;
         }
 
-        public CClusterParameters Parameters => _clusterParameters[0];
+        public CClusterParameters Parameters
+        {
+            get => _clusterParameters[0];
+            set => _clusterParameters[0] = value;
+        }
 
         public GeometryChunk GetChunk(int chunkIndex)
         {

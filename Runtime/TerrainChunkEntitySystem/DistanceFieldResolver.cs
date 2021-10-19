@@ -6,7 +6,7 @@ using NonECSImplementation;
 using Rendering;
 using TerrainChunkSystem;
 using Unity.Collections;
-using Unity.Entities;
+
 using Unity.Mathematics;
 using Utils;
 using Constants = Rendering.Constants;
@@ -30,7 +30,7 @@ namespace TerrainChunkEntitySystem
                     positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + offsetInChunk;
                 }
 
-                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions, chunkParameters.IndexInCluster, geometryGraph.ValueBuffer);
+                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
 
                 iterator.CalculateTerrainData();
 
@@ -52,8 +52,7 @@ namespace TerrainChunkEntitySystem
             {
                 CreatePositionsArray(chunk, out var positions);
 
-                var iterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions,
-                    chunkParameters.IndexInCluster, geometryGraph.ValueBuffer);
+                var iterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
                 iterator.CalculateTerrainData();
 
                 CopyResultsBackToBuffer(chunk, iterator);
@@ -62,7 +61,7 @@ namespace TerrainChunkEntitySystem
             }
             else
             {
-                //todo
+                todo
                 // if (chunkParameters.ChunkInsideTerrain == 0)
                 // {
                 //     terrainChunk = TerrainChunkData.Outside;

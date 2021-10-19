@@ -2,7 +2,7 @@
 using System.Reflection;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Entities;
+
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ public struct MathInstruction
     public int ResultIndex;
     public GeometryPropertyType ResultType;
 
-    public void Execute(DynamicBuffer<float> instancePropertyBuffer)
+    public void Execute(NativeArray<float> instancePropertyBuffer)
     {
         unsafe
         {
@@ -45,7 +45,7 @@ public struct MathInstruction
         }
     }
 
-    private float CalculateColor32(DynamicBuffer<float> instancePropertyBuffer)
+    private float CalculateColor32(NativeArray<float> instancePropertyBuffer)
     {
         unsafe
         {
@@ -60,12 +60,12 @@ public struct MathInstruction
         }
     }
 
-    private float3 CalculateFloat3(DynamicBuffer<float> instancePropertyBuffer)
+    private float3 CalculateFloat3(NativeArray<float> instancePropertyBuffer)
     {
         throw new NotImplementedException();
     }
 
-    private float4x4 CalculateFloat4X4(DynamicBuffer<float> instancePropertyBuffer)
+    private float4x4 CalculateFloat4X4(NativeArray<float> instancePropertyBuffer)
     {
         switch (MathOperationType)
         {
@@ -83,7 +83,7 @@ public struct MathInstruction
         }
     }
 
-    private float CalculateFloat(DynamicBuffer<float> instancePropertyBuffer)
+    private float CalculateFloat(NativeArray<float> instancePropertyBuffer)
     {
         var inputA = instancePropertyBuffer.Read<float>(InputAIndex);
         var inputB = instancePropertyBuffer.Read<float>(InputBIndex);
@@ -115,16 +115,6 @@ public struct MathInstruction
 
 public static unsafe class DynamicBufferFloatExtensionMethods
 {
-    public static T Read<T>(this DynamicBuffer<float> buffer, int index) where T : struct
-    {
-        return UnsafeUtility.ReadArrayElementWithStride<T>(buffer.GetUnsafePtr(), 1, sizeof(float) * index);
-    }
-
-    public static void Write<T>(this DynamicBuffer<float> buffer, T value, int index) where T : struct
-    {
-        UnsafeUtility.WriteArrayElementWithStride(buffer.GetUnsafeReadOnlyPtr(), 1, sizeof(float) * index, value);
-    }
-        
     public static T Read<T>(this NativeArray<float> buffer, int index) where T : struct
     {
         return UnsafeUtility.ReadArrayElementWithStride<T>(buffer.GetUnsafeReadOnlyPtr(), 1, sizeof(float) * index);

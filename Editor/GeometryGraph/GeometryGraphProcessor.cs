@@ -26,7 +26,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
                 contentHash.Append(result.GeometryInstructionBuffer.ToArray());
 
                 var data = GetRuntimeData(graphModel);
-                data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer, result.GeometryInstructionBuffer, contentHash);
+                data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
+                    result.GeometryInstructionBuffer, contentHash,
+                    new Float4X4Value {Index = result.OriginTransformation.Index});
                 EditorUtility.SetDirty(data);
                 return new GraphProcessingResult() {Errors = { }};
             }

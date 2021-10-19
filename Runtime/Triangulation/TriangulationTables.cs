@@ -1,7 +1,4 @@
-﻿using Unity.Collections;
-using Unity.Entities;
-
-namespace Triangulation
+﻿namespace Triangulation
 {
     public class TriangulationTables
     {
@@ -585,48 +582,5 @@ namespace Triangulation
             7
         };
 
-        public static BlobAssetReference<TriangulationDataBlobAsset> GetBlobAsset()
-        {
-            BlobAssetReference<TriangulationDataBlobAsset> reference;
-            using (BlobBuilder builder = new BlobBuilder(Allocator.Temp))
-            {
-                ref TriangulationDataBlobAsset asset = ref builder.ConstructRoot<TriangulationDataBlobAsset>();
-            
-                var edgesArray = builder.Allocate(ref asset.edges, 256);
-                for (int i = 0; i < TriangulationTables.edges.Length; i++)
-                {
-                    edgesArray[i] = edges[i];
-                }
-            
-                var triangulationArray = builder.Allocate(ref asset.triangulation, 16 * 256);
-                for (int i = 0; i < TriangulationTables.triangulation.Length; i++)
-                {
-                    triangulationArray[i] = triangulation[i / 16, i % 16];
-                }
-
-            
-                var cornerIndexAFromEdgeArray = builder.Allocate(ref asset.cornerIndexAFromEdge, 12);
-                for (int i = 0; i < 12; i++)
-                {
-                    cornerIndexAFromEdgeArray[i] = cornerIndexAFromEdge[i];
-                }
-                var cornerIndexBFromEdgeArray = builder.Allocate(ref asset.cornerIndexBFromEdge, 12);   
-                for (int i = 0; i < 12; i++)
-                {
-                    cornerIndexBFromEdgeArray[i] = cornerIndexBFromEdge[i];
-                }
-                reference = builder.CreateBlobAssetReference<TriangulationDataBlobAsset>(Allocator.Persistent);
-            }
-
-            return reference;
-        }
-
-        public struct TriangulationDataBlobAsset
-        {
-            public BlobArray<int> edges;
-            public BlobArray<int> triangulation;
-            public BlobArray<int> cornerIndexAFromEdge;
-            public BlobArray<int> cornerIndexBFromEdge;
-        }
     }
 }
