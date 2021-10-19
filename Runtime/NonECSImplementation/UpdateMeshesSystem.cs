@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Authoring;
 using Rendering;
-using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -41,18 +40,17 @@ namespace NonECSImplementation
             }
         }
         
-        public void Update()
+        public void Update(JobHandle jobHandle)
         {
             JCalculateTriangulationIndicesJob job = new JCalculateTriangulationIndicesJob()
             {
                 ClusterParameters = _geometryFieldData.ClusterParameters,
-                ClusterPositions = _geometryFieldData.ClusterPositions,
                 TriangulationInstructions = _triangulationInstructions,
                 VertexCountPerSubChunk = _vertexCountPerSubChunk,
                 SubChunksWithTrianglesData = _subChunksWithTrianglesData,
             };
 
-            var handle = job.Schedule(_geometryFieldData.ClusterCount, 1);
+            var handle = job.Schedule(_geometryFieldData.ClusterCount, 1,jobHandle);
             handle.Complete();
             
             
@@ -62,7 +60,7 @@ namespace NonECSImplementation
 
 
             var terrainChunkDataBuffer = _geometryFieldData.GeometryBuffer;
-            _distanceFieldComputeBuffer = new ComputeBuffer(terrainChunkDataBuffer.Length * TerrainChunkData.PackedCapacity, 4 * 4 * 2);
+            _distanceFieldComputeBuffer = new ComputeBuffer(terrainChunkDataBuffer.Length * 128, 4 * 4 * 2);
             _distanceFieldComputeBuffer.SetData(terrainChunkDataBuffer);
             
             //todo placeholder
@@ -81,7 +79,7 @@ namespace NonECSImplementation
             {
                 var clusterParameters = _geometryFieldData.ClusterParameters[clusterIndex];
                 
-                int subChunkIndex = clusterIndex * GeometryFieldData.subChunksPerCluster;
+                int subChunkIndex = clusterIndex * Constants.subChunksPerCluster;
                 var triangulationInstructions = _triangulationInstructions.Slice(subChunkIndex, clusterParameters.triangulationInstructionCount);
                 var gpuBuffers = _gpuDataPerCluster[clusterIndex];
                 

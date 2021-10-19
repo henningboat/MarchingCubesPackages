@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+using float4x4 = Unity.Mathematics.float4x4;
 
 namespace TerrainChunkEntitySystem
 {
@@ -16,7 +17,7 @@ namespace TerrainChunkEntitySystem
     {
         #region Public Fields
 
-        public NativeArray<PackedTerrainData> _terrainDataBuffer;
+        public NativeArray<PackedDistanceFieldData> _terrainDataBuffer;
 
         #endregion
 
@@ -30,22 +31,17 @@ namespace TerrainChunkEntitySystem
         private NativeArray<bool> _hasWrittenToCurrentCombiner;
         private int _lastCombinerDepth;
 
-        /// <summary>
-        ///     The TerrainChunkData that was inside of this chunk in the previous frame
-        /// </summary>
-        private TerrainChunkData _originalTerrainData;
-
         private NativeArray<float> _valueBuffer;
 
         #endregion
 
         #region Constructors
 
-        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, DynamicBuffer<GeometryInstruction> combinerInstructions, int indexInsideChunk, TerrainChunkData existingData,
+        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<GeometryInstruction> combinerInstructions, int indexInsideChunk, 
             NativeArray<float> valueBuffer)
         {
             _valueBuffer = valueBuffer;
-            _combinerInstructions = combinerInstructions.AsNativeArray().AsReadOnly();
+            _combinerInstructions = combinerInstructions.AsReadOnly();
             //todo cache this between pre-pass and actual pass
             _combinerStackSize = 0;
             for (var i = 0; i < combinerInstructions.Length; i++)
@@ -58,14 +54,12 @@ namespace TerrainChunkEntitySystem
 
             _postionsWS = positions.AsReadOnly();
 
-            _terrainDataBuffer = new NativeArray<PackedTerrainData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
+            _terrainDataBuffer = new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);
 
             _indexInsideChunk = indexInsideChunk;
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
             _lastCombinerDepth = -1;
-
-            _originalTerrainData = existingData;
         }
 
         #endregion
@@ -84,7 +78,7 @@ namespace TerrainChunkEntitySystem
             {
                 for (var i = 0; i < _postionsWS.Length; i++)
                 {
-                    _terrainDataBuffer[i] = new PackedTerrainData(10, new PackedTerrainMaterial(TerrainMaterial.GetDefaultMaterial()));
+                    _terrainDataBuffer[i] = new PackedDistanceFieldData(10, new PackedTerrainMaterial(TerrainMaterial.GetDefaultMaterial()));
                 }
             }
         }
@@ -142,27 +136,29 @@ namespace TerrainChunkEntitySystem
                 
                 return;
             }
-
+            
             if (_hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] == false && geometryInstruction.WritesToDistanceField)
             {
                 geometryInstruction.Combiner.Operation = CombinerOperation.Replace;
-
+            
                 _hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] = true;
             }
 
 
             for (var i = 0; i < _postionsWS.Length; i++)
             {
-                PackedTerrainData terrainData = default;
+                PackedDistanceFieldData terrainData = default;
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyOriginal:
-                        terrainData = _originalTerrainData[i];
+                        throw new NotImplementedException();
                         break;
                     case GeometryInstructionType.Shape:
                         var shape = geometryInstruction.GetShapeInstruction();
 
                         float4x4 transformation = geometryInstruction.TransformationValue.Resolve(_valueBuffer);
+
+                        transformation = float4x4.identity;
 
                         PackedFloat3 positionOS = default;
 
@@ -183,7 +179,7 @@ namespace TerrainChunkEntitySystem
                         PackedTerrainMaterial packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS, _valueBuffer);
-                        terrainData = new PackedTerrainData(surfaceDistance, packedMaterialData);
+                        terrainData = new PackedDistanceFieldData(surfaceDistance, packedMaterialData);
                         break;
                     case GeometryInstructionType.Combiner:
                         terrainData = _terrainDataBuffer[(geometryInstruction.CombinerDepth + 1) * _postionsWS.Length + i];

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using GeometryComponents;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
@@ -17,12 +14,20 @@ namespace Code.CubeMarching.GeometryGraph.Editor
     {
         public GraphProcessingResult ProcessGraph(IGraphModel graphModel)
         {
+            EditorApplication.QueuePlayerLoopUpdate();
+            
             try
             {
                 var result = Resolve(graphModel);
 
+                var contentHash = new Hash128();
+                contentHash.Append(result.PropertyValueBuffer);
+                contentHash.Append(result.MathInstructionBuffer);
+                contentHash.Append(result.GeometryInstructionBuffer.ToArray());
+
                 var data = GetRuntimeData(graphModel);
-                data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer, result.GeometryInstructionBuffer);
+                data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer, result.GeometryInstructionBuffer, contentHash);
+                EditorUtility.SetDirty(data);
                 return new GraphProcessingResult() {Errors = { }};
             }
             catch (Exception e)

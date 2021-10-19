@@ -160,71 +160,6 @@ namespace TerrainChunkEntitySystem
     //     #endregion
     // }
 
-    public struct CFrameCount : IComponentData
-    {
-        public int Value;
-    }
-
-    public struct CClusterChildListElement : IBufferElementData
-    {
-        public Entity Entity;
-    }
-
-    public struct CClusterPosition : IComponentData
-    {
-        #region Public Fields
-
-        public int ClusterIndex;
-        public int3 PositionGS;
-
-        #endregion
-    }
-    
-    public struct CTerrainEntityChunkPosition : IComponentData
-    {
-        #region Public Fields
-
-        public int indexInCluster;
-        public int3 positionGS;
-
-        #endregion
-    }
-
-    public struct DistanceFieldChunkData
-    {
-        public byte ChunkInsideTerrain;
-        public byte InnerDataMask;
-        public int IndexInDistanceFieldBuffer;
-        public bool HasData => InnerDataMask != 0;
-        public int InstructionChangeFrameCount;
-
-        public uint CurrentGeometryInstructionsHash;
-        public bool InstructionsChangedSinceLastFrame;
-    }
-
-    public struct ClusterChild : IComponentData
-    {
-        public Entity ClusterEntity;
-    }
-
-    public struct CTerrainChunkStaticData : IComponentData
-    {
-        #region Public Fields
-
-        public DistanceFieldChunkData DistanceFieldChunkData;
-
-        #endregion
-    }
-
-    public struct CTerrainChunkDynamicData : IComponentData
-    {
-        #region Public Fields
-
-        public DistanceFieldChunkData DistanceFieldChunkData;
-
-        #endregion
-    }
-    
     public static class Utils
     {
         #region Static Stuff
@@ -250,6 +185,13 @@ namespace TerrainChunkEntitySystem
         #endregion
     }
 
+    [Flags]
+    public enum GeometryInstructionFlags
+    {
+        None = 0,
+        HasMaterial = 1 << 0,
+    }
+
     [Serializable]
     public struct GeometryInstruction
     {
@@ -265,7 +207,8 @@ namespace TerrainChunkEntitySystem
         
         public CGeometryCombiner Combiner;
 
-        public bool HasMaterial;
+        public GeometryInstructionFlags _flags;
+        public bool HasMaterial => (_flags & GeometryInstructionFlags.HasMaterial) != 0;
         public MaterialDataValue MaterialData;
         public bool WritesToDistanceField => GeometryInstructionType != GeometryInstructionType.PositionModification;
 

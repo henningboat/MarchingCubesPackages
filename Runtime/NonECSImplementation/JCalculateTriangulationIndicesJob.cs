@@ -1,6 +1,5 @@
 ﻿using System;
 using Rendering;
-using TerrainChunkEntitySystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -16,12 +15,11 @@ namespace NonECSImplementation
         [NativeDisableParallelForRestriction] public NativeArray<CSubChunkWithTrianglesIndex> SubChunksWithTrianglesData;
         [NativeDisableParallelForRestriction] public NativeArray<CVertexCountPerSubCluster> VertexCountPerSubChunk;
 
-        [ReadOnly] public NativeArray<CClusterPosition> ClusterPositions;
         public NativeArray<CClusterParameters> ClusterParameters;
             
         public void Execute(int clusterIndex)
         {
-            int offsetInSubChunkBuffer = clusterIndex * GeometryFieldData.subChunksPerCluster;
+            int offsetInSubChunkBuffer = clusterIndex * Constants.subChunksPerCluster;
 
             var clusterParameters = ClusterParameters[clusterIndex];
             clusterParameters.needsIndexBufferUpdate = false;
@@ -44,16 +42,15 @@ namespace NonECSImplementation
     
             var totalVertexCount = 0;
 
-             NativeSlice<CVertexCountPerSubCluster> vertexCountPerSubChunk = VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, GeometryFieldData.subChunksPerCluster);
+             NativeSlice<CVertexCountPerSubCluster> vertexCountPerSubChunk = VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
             // NativeSlice<CSubChunkWithTrianglesIndex> subChunksWithTriangles = SubChunksWithTrianglesData.Slice(offsetInSubChunkBuffer, GeometryFieldData.subChunksPerCluster);
             //
 
-            var triangulationInstructions = TriangulationInstructions.SliceList(offsetInSubChunkBuffer, GeometryFieldData.subChunksPerCluster);
+            var triangulationInstructions = TriangulationInstructions.SliceList(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
 
-            for (var chunkIndex = 0; chunkIndex < GeometryFieldData.chunksPerCluster; chunkIndex++)
+            for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
             {
-                var clusterPosition = ClusterPositions[clusterIndex];
-                var positionOfChunkWS = TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex, new int3(GeometryFieldData.chunkLength));
+                var positionOfChunkWS = TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex, new int3(Constants.chunkLengthPerCluster))*Constants.chunkLength;
 
                 //toto read actual inner data masks ones those exist
                 byte innerDataMask = Byte.MaxValue;
@@ -82,8 +79,12 @@ namespace NonECSImplementation
                         //todo re-add checking for this 
                         //   if (dynamicData.DistanceFieldChunkData.InstructionsChangedSinceLastFrame)
                         {
-                            triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, 0));
-                            vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = Constants.maxVertsPerCluster};
+                            triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
+                            vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = Rendering.Constants.maxVertsPerCluster};
+                            SubChunksWithTrianglesData[subChunkIndex] = new CSubChunkWithTrianglesIndex()
+                            {
+                                SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
+                            };
                         }
 
                         totalVertexCount += vertexCountPerSubChunk[subChunkIndex].vertexCount;

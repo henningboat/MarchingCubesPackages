@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NonECSImplementation;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
@@ -50,7 +51,7 @@ namespace Rendering
             result._mesh = MeshGeneratorBuilder.GenerateClusterMesh().mesh;
 
             result._clusterCounts = geometryFieldData.ClusterCounts;
-            result._chunkCounts = geometryFieldData.ClusterCounts*GeometryFieldData.chunkLengthPerCluster;
+            result._chunkCounts = geometryFieldData.ClusterCounts*NonECSImplementation.Constants.chunkLengthPerCluster;
             
             return result;
         }
@@ -159,7 +160,7 @@ namespace Rendering
 
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
 
-            Graphics.DrawMesh(_mesh, Matrix4x4.identity, null, 0);
+            Graphics.DrawMesh(_mesh, Matrix4x4.identity, DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
         }
 
         public const int ChunkLength = 8;

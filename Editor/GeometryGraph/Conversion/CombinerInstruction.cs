@@ -27,7 +27,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         public override GeometryInstruction GetInstruction()
         {
             var propertyIndexes = new int16();
-            propertyIndexes[0] = Depth + 1;
+            //todo
+            //propertyIndexes[0] = Depth + 1;
 
             return new GeometryInstruction()
             {

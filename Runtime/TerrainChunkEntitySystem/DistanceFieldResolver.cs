@@ -2,94 +2,90 @@ using System;
 using System.Runtime.CompilerServices;
 using Authoring;
 using Code.SIMDMath;
+using NonECSImplementation;
 using Rendering;
 using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Utils;
+using Constants = Rendering.Constants;
 
 namespace TerrainChunkEntitySystem
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(NativeArray<TerrainChunkDataBuffer> terrainChunkBuffer, ref DistanceFieldChunkData distanceField, CTerrainEntityChunkPosition chunkPosition,
-            DynamicBuffer<GeometryInstruction> instructionsBuffer, int backgroundDataIndex, bool ignoreBackgroundData, CClusterParameters clusterParameters,
-            NativeArray<float> valueBuffer)
+        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, GeometryFieldData geometryField, GeometryGraphData geometryGraph)
         {
-            TerrainChunkData terrainChunk = default;
-            var existingData = terrainChunkBuffer[backgroundDataIndex].Value;
-
-            if (clusterParameters.WriteMask[chunkPosition.indexInCluster])
+            var clusterParameters = cluster.Parameters;
+            var chunkParameters = chunk.Parameters;
+            
+            //todo
+            if (clusterParameters.WriteMask[chunkParameters.IndexInCluster]||true)
             {
-                //todo make the masks work again to reduce amount of computations
-                var positionGS = chunkPosition.positionGS;
-
                 var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
                 for (var i = 0; i < 2; i++)
                 {
                     var offsetInChunk = new PackedFloat3(new float4(2, 6, 2, 6), new float4(2, 2, 6, 6), new float4(i) * 4 + 2);
-                    positionsToCheck[i] = new float3(positionGS.x, positionGS.y, positionGS.z) * Constants.ChunkLength + offsetInChunk;
+                    positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + offsetInChunk;
                 }
 
-                var iterator = new TerrainInstructionIterator(positionsToCheck, instructionsBuffer, chunkPosition.indexInCluster, existingData, valueBuffer);
+                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions, chunkParameters.IndexInCluster, geometryGraph.ValueBuffer);
 
                 iterator.CalculateTerrainData();
 
                 GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
 
-                distanceField.InnerDataMask = mask;
-                distanceField.ChunkInsideTerrain = insideTerrainMask;
+                chunkParameters.InnerDataMask = mask;
+                chunkParameters.ChunkInsideTerrain = insideTerrainMask;
 
                 positionsToCheck.Dispose();
             }
             else
             {
-                distanceField.InnerDataMask = 0;
-                if (ignoreBackgroundData)
-                {
-                    return;
-                }
+                chunkParameters.InnerDataMask = 0;
+                return;
             }
 
 
-            if (distanceField.InnerDataMask != 0)
+            if (chunkParameters.InnerDataMask != 0)
             {
-                CreatePositionsArray(distanceField, chunkPosition, out var positions);
+                CreatePositionsArray(chunk, out var positions);
 
-                var iterator = new TerrainInstructionIterator(positions, instructionsBuffer, chunkPosition.indexInCluster, existingData, valueBuffer);
+                var iterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions,
+                    chunkParameters.IndexInCluster, geometryGraph.ValueBuffer);
                 iterator.CalculateTerrainData();
 
-                terrainChunk = CopyResultsBackToBuffer(distanceField, terrainChunk, iterator);
+                CopyResultsBackToBuffer(chunk, iterator);
 
-                positions.Dispose();
                 iterator.Dispose();
             }
             else
             {
-                if (distanceField.ChunkInsideTerrain == 0)
-                {
-                    terrainChunk = TerrainChunkData.Outside;
-                }
-                else
-                {
-                    terrainChunk = TerrainChunkData.Inside;
-                }
+                //todo
+                // if (chunkParameters.ChunkInsideTerrain == 0)
+                // {
+                //     terrainChunk = TerrainChunkData.Outside;
+                // }
+                // else
+                // {
+                //     terrainChunk = TerrainChunkData.Inside;
+                // }
             }
 
-            terrainChunkBuffer[distanceField.IndexInDistanceFieldBuffer] = new TerrainChunkDataBuffer {Value = terrainChunk};
+            chunk.Parameters = chunkParameters;
         }
 
-        private static TerrainChunkData CopyResultsBackToBuffer(DistanceFieldChunkData distanceField, TerrainChunkData terrainChunk, TerrainInstructionIterator iterator)
+        private static void CopyResultsBackToBuffer(GeometryChunk chunk, TerrainInstructionIterator iterator)
         {
             var readDataOffset = 0;
             for (var subChunkIndex = 0; subChunkIndex < 8; subChunkIndex++)
             {
-                if (distanceField.InnerDataMask.GetBit(subChunkIndex))
+                if (chunk.Parameters.InnerDataMask.GetBit(subChunkIndex))
                 {
                     for (var i = 0; i < 16; i++)
                     {
-                        terrainChunk[subChunkIndex * 16 + i] = iterator._terrainDataBuffer[readDataOffset + i];
+                        chunk[subChunkIndex * 16 + i] = iterator._terrainDataBuffer[readDataOffset + i];
                     }
 
                     readDataOffset += 16;
@@ -99,22 +95,20 @@ namespace TerrainChunkEntitySystem
                     for (var indexInSubChunk = 0; indexInSubChunk < 16; indexInSubChunk++)
                     {
                         //todo use a reasonable value instead of the hard coded 2
-                        if (distanceField.ChunkInsideTerrain.GetBit(subChunkIndex))
+                        if (chunk.Parameters.ChunkInsideTerrain.GetBit(subChunkIndex))
                         {
-                            terrainChunk[subChunkIndex * 16 + indexInSubChunk] = new PackedTerrainData(-2);
+                            chunk[subChunkIndex * 16 + indexInSubChunk] = new PackedDistanceFieldData(-2);
                         }
                         else
                         {
-                            terrainChunk[subChunkIndex * 16 + indexInSubChunk] = new PackedTerrainData(2);
+                            chunk[subChunkIndex * 16 + indexInSubChunk] = new PackedDistanceFieldData(2);
                         }
                     }
                 }
             }
-
-            return terrainChunk;
         }
 
-        private static void GetCoverageAndFillMaskFromSurfaceDistance(NativeArray<PackedTerrainData> result, out byte mask, out byte insideTerrainMask)
+        private static void GetCoverageAndFillMaskFromSurfaceDistance(NativeArray<PackedDistanceFieldData> result, out byte mask, out byte insideTerrainMask)
         {
             mask = 0;
             insideTerrainMask = 0;
@@ -139,9 +133,9 @@ namespace TerrainChunkEntitySystem
         }
 
         // Returns a temp array of the positions that actually need to be computed
-        private static void CreatePositionsArray(DistanceFieldChunkData distanceField, CTerrainEntityChunkPosition chunk, out NativeArray<PackedFloat3> positions)
+        private static void CreatePositionsArray(GeometryChunk chunk, out NativeArray<PackedFloat3> positions)
         {
-            var countBits = math.countbits((int) distanceField.InnerDataMask);
+            var countBits = math.countbits((int) chunk.Parameters.InnerDataMask);
 
             positions = new NativeArray<PackedFloat3>(16 * countBits, Allocator.Temp);
             new NativeArray<int>(16 * countBits, Allocator.Temp);
@@ -149,11 +143,12 @@ namespace TerrainChunkEntitySystem
             var writtenPositionCount = 0;
             for (var subChunkIndex = 0; subChunkIndex < 8; subChunkIndex++)
             {
-                if (distanceField.InnerDataMask.GetBit(subChunkIndex))
+                if (chunk.Parameters.InnerDataMask.GetBit(subChunkIndex))
                 {
                     for (var indexInSubChunk = 0; indexInSubChunk < 16; indexInSubChunk++)
                     {
-                        var positionWS = IndexToPositionWSPacked(subChunkIndex, indexInSubChunk, chunk.positionGS);
+                        var positionWS = IndexToPositionWSPacked(subChunkIndex, indexInSubChunk,
+                            chunk.Parameters.PositionWS);
                         positions[writtenPositionCount + indexInSubChunk] = positionWS;
                     }
 
@@ -163,7 +158,7 @@ namespace TerrainChunkEntitySystem
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static PackedFloat3 IndexToPositionWSPacked(int subChunkIndex, int indexInSubChunk, in float3 positionGS)
+        private static PackedFloat3 IndexToPositionWSPacked(int subChunkIndex, int indexInSubChunk, in float3 positionWS)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (subChunkIndex < 0 || subChunkIndex >= 8)
@@ -185,7 +180,7 @@ namespace TerrainChunkEntitySystem
             y += subChunkIndex / 2 % 2 * 4;
             z += subChunkIndex / 4 * 4;
 
-            return new PackedFloat3(x, y, z) + positionGS * Constants.ChunkLength;
+            return new PackedFloat3(x, y, z) + positionWS;
         }
     }
 }

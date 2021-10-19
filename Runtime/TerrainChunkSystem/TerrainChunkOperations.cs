@@ -9,9 +9,9 @@ namespace TerrainChunkSystem
 {
     public static class TerrainChunkOperations
     {
-        public static PackedTerrainData CombinePackedTerrainData(CGeometryCombiner combiner, PackedTerrainData valuesA, PackedTerrainData valuesB, NativeArray<float> propertyBuffer)
+        public static PackedDistanceFieldData CombinePackedTerrainData(CGeometryCombiner combiner, PackedDistanceFieldData valuesA, PackedDistanceFieldData valuesB, NativeArray<float> propertyBuffer)
         {
-            PackedTerrainData packedTerrainData;
+            PackedDistanceFieldData packedTerrainData;
             switch (combiner.Operation)
             {
                 case CombinerOperation.Min:
@@ -43,37 +43,37 @@ namespace TerrainChunkSystem
             return packedTerrainData;
         }
 
-        private static PackedTerrainData ReplaceTerrainColor(PackedTerrainData a, PackedTerrainData b)
+        private static PackedDistanceFieldData ReplaceTerrainColor(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
             var replaceTerrainMaterial = a.SurfaceDistance.PackedValues > 0;
-            return new PackedTerrainData {SurfaceDistance = b.SurfaceDistance, TerrainMaterial = PackedTerrainMaterial.Select(b.TerrainMaterial, a.TerrainMaterial, replaceTerrainMaterial)};
+            return new PackedDistanceFieldData {SurfaceDistance = b.SurfaceDistance, TerrainMaterial = PackedTerrainMaterial.Select(b.TerrainMaterial, a.TerrainMaterial, replaceTerrainMaterial)};
         }
 
-        public static PackedTerrainData CombineTerrainMin(PackedTerrainData a, PackedTerrainData b)
+        public static PackedDistanceFieldData CombineTerrainMin(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
             var bIsSmaller = a.SurfaceDistance.PackedValues > b.SurfaceDistance.PackedValues;
             var surfaceDistance = math.min(a.SurfaceDistance.PackedValues, b.SurfaceDistance.PackedValues);
             var combinedMaterial = PackedTerrainMaterial.Select(a.TerrainMaterial, b.TerrainMaterial, bIsSmaller);
 
-            return new PackedTerrainData(new PackedFloat(surfaceDistance), combinedMaterial);
+            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), combinedMaterial);
         }
 
-        public static PackedTerrainData CombineTerrainMax(PackedTerrainData a, PackedTerrainData b)
+        public static PackedDistanceFieldData CombineTerrainMax(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
             var bIsBigger = a.SurfaceDistance.PackedValues < b.SurfaceDistance.PackedValues;
             var surfaceDistance = math.select(a.SurfaceDistance.PackedValues, b.SurfaceDistance.PackedValues, bIsBigger);
             var combinedMaterial = PackedTerrainMaterial.Select(a.TerrainMaterial, b.TerrainMaterial, !bIsBigger);
 
-            return new PackedTerrainData(new PackedFloat(surfaceDistance), combinedMaterial);
+            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), combinedMaterial);
         }
 
-        public static PackedTerrainData CombineTerrainAdd(PackedTerrainData a, PackedTerrainData b)
+        public static PackedDistanceFieldData CombineTerrainAdd(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
             return new(a.SurfaceDistance + b.SurfaceDistance, a.TerrainMaterial);
         }
 
         //https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
-        public static PackedTerrainData CombineTerrainSmoothMin(PackedTerrainData terrainDataA, PackedTerrainData terrainDataB, PackedFloat blendFactor)
+        public static PackedDistanceFieldData CombineTerrainSmoothMin(PackedDistanceFieldData terrainDataA, PackedDistanceFieldData terrainDataB, PackedFloat blendFactor)
         {
             var a = terrainDataA.SurfaceDistance;
             var b = terrainDataB.SurfaceDistance;
@@ -83,10 +83,10 @@ namespace TerrainChunkSystem
             var bIsSmaller = terrainDataA.SurfaceDistance.PackedValues > terrainDataB.SurfaceDistance.PackedValues;
             var combinedMaterial = PackedTerrainMaterial.Select(terrainDataA.TerrainMaterial, terrainDataB.TerrainMaterial, bIsSmaller);
 
-            return new PackedTerrainData(blendedSurfaceDistance, combinedMaterial);
+            return new PackedDistanceFieldData(blendedSurfaceDistance, combinedMaterial);
         }
 
-        private static PackedTerrainData CombineTerrainSmoothSubtract(PackedTerrainData terrainDataA, PackedTerrainData terrainDataB, PackedFloat blendFactor)
+        private static PackedDistanceFieldData CombineTerrainSmoothSubtract(PackedDistanceFieldData terrainDataA, PackedDistanceFieldData terrainDataB, PackedFloat blendFactor)
         {
             var a = terrainDataA.SurfaceDistance;
             var b = terrainDataB.SurfaceDistance;
@@ -96,7 +96,7 @@ namespace TerrainChunkSystem
             var bIsSmaller = terrainDataA.SurfaceDistance.PackedValues > terrainDataB.SurfaceDistance.PackedValues;
             var combinedMaterial = PackedTerrainMaterial.Select(terrainDataA.TerrainMaterial, terrainDataB.TerrainMaterial, bIsSmaller);
 
-            return new PackedTerrainData(blendedSurfaceDistance, combinedMaterial);
+            return new PackedDistanceFieldData(blendedSurfaceDistance, combinedMaterial);
         }
     }
 }

@@ -7,24 +7,24 @@ using Unity.Mathematics;
 namespace TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct TerrainData
+    public struct DistanceFieldData
     {
         public float SurfaceDistance;
         public TerrainMaterial TerrainMaterial;
 
-        public static readonly TerrainData DefaultOutside = new()
+        public static readonly DistanceFieldData DefaultOutside = new()
         {
-            SurfaceDistance = TerrainChunkData.DefaultOutsideValue
+            SurfaceDistance = 10
         };
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct PackedTerrainData
+    public struct PackedDistanceFieldData
     {
         public PackedFloat SurfaceDistance;
         public PackedTerrainMaterial TerrainMaterial;
 
-        public PackedTerrainData(PackedFloat surfaceDistance, PackedTerrainMaterial packedTerrainMaterial = default) : this()
+        public PackedDistanceFieldData(PackedFloat surfaceDistance, PackedTerrainMaterial packedTerrainMaterial = default) : this()
         {
             SurfaceDistance = surfaceDistance;
             TerrainMaterial = packedTerrainMaterial;
@@ -32,7 +32,7 @@ namespace TerrainChunkSystem
 
         public const int UnpackedCapacity = 4;
 
-        public TerrainData this[int i]
+        public DistanceFieldData this[int i]
         {
             get
             {
@@ -48,7 +48,7 @@ namespace TerrainChunkSystem
                     }
 #endif
                     var pointer = UnsafeUtility.AddressOf(ref this);
-                    var arrayEntry = UnsafeUtility.ReadArrayElement<TerrainData>(pointer, i);
+                    var arrayEntry = UnsafeUtility.ReadArrayElement<DistanceFieldData>(pointer, i);
                     return arrayEntry;
                 }
             }

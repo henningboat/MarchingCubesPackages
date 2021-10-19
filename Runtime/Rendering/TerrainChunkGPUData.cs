@@ -1,5 +1,4 @@
 ﻿using System;
-using TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,7 +22,7 @@ namespace Rendering
             _trianglePositionCountBuffer = new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
             _trianglePositionCountBuffer.SetData(new[] {1, 1, 1, 1, 1});
             //todo make this properly resize
-            _terrainIndexMap = new ComputeBuffer(TerrainChunkData.UnPackedCapacity * 100, 4 * 3, ComputeBufferType.Default);
+            _terrainIndexMap = new ComputeBuffer(512 * 100, 4 * 3, ComputeBufferType.Default);
         }
 
         public void UpdateWithSurfaceData(ComputeBuffer globalTerrainBuffer, ComputeBuffer globalTerrainIndexMap, NativeList<int3> chunkPositionsToRender, int3 terrainMapSize, int materialIDFilter)
@@ -34,7 +33,7 @@ namespace Rendering
             }
 
             var trianbgleByteSize = (3 + 3 + 4) * 4;
-            var requiredTriangleCapacity = TerrainChunkData.UnPackedCapacity * chunkPositionsToRender.Length * 5;
+            var requiredTriangleCapacity = NonECSImplementation.Constants.chunkVolume * chunkPositionsToRender.Length * 5;
             if (_triangleBuffer == null || _triangleBuffer.count < requiredTriangleCapacity)
             {
                 if (_triangleBuffer != null)

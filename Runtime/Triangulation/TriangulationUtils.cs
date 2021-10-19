@@ -316,9 +316,9 @@ namespace Triangulation
         public unsafe struct TerrainCollisionDataAccessor
         {
             private int* DetailBufferMapping;
-            private PackedTerrainData* DetailBuffer;
+            private PackedDistanceFieldData* DetailBuffer;
 
-            public TerrainCollisionDataAccessor(int* detailBufferMapping, PackedTerrainData* detailBuffer)
+            public TerrainCollisionDataAccessor(int* detailBufferMapping, PackedDistanceFieldData* detailBuffer)
             {
                 DetailBufferMapping = detailBufferMapping;
                 DetailBuffer = detailBuffer;
@@ -337,7 +337,7 @@ namespace Triangulation
                 unsafe
                 {
                     int packedIndex = index / 4;
-                    PackedTerrainData packedData = DetailBuffer[packedIndex];
+                    PackedDistanceFieldData packedData = DetailBuffer[packedIndex];
                     return packedData.SurfaceDistance.PackedValues[index % 4];
                 }
             }

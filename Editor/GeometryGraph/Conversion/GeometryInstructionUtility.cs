@@ -12,10 +12,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         {
             var transformationValue = new Float4X4Value() {Index = transformation.Index};
             var propertyIndexes = new int16();
+           
             for (int i = 0; i < shapeProperties.Count; i++)
-            {
-                propertyIndexes[i] = shapeProperties[i].Index;
-            }
+             {
+                 propertyIndexes[i] = shapeProperties[i].Index;
+             }
 
             var material = new MaterialDataValue()
             {
@@ -30,7 +31,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
                 CombinerDepth = depth,
                 TransformationValue = transformationValue,
                 PropertyIndexes = propertyIndexes,
-                HasMaterial = color != null,
+                //HasMaterial = color != null,
                 MaterialData = material,
             };
         }
