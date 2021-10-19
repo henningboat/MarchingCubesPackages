@@ -70,6 +70,7 @@ namespace Rendering
 
             if (cSubChunkWithTrianglesIndices.Length == 0)
             {
+                return;
                 indexCount = 0;
             }
             else

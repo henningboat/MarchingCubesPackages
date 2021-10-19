@@ -2,22 +2,9 @@
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
 
 namespace TerrainChunkSystem
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct DistanceFieldData
-    {
-        public float SurfaceDistance;
-        public TerrainMaterial TerrainMaterial;
-
-        public static readonly DistanceFieldData DefaultOutside = new()
-        {
-            SurfaceDistance = 10
-        };
-    }
-
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedDistanceFieldData
     {
@@ -68,52 +55,6 @@ namespace TerrainChunkSystem
                     UnsafeUtility.WriteArrayElement(pointer, i, valueToWrite);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    ///     Always make sure to keep the content of this struct in sync with TerrainMaterial.hlsl
-    /// </summary>
-    [Serializable]
-    [StructLayout(LayoutKind.Sequential, Size = 4)]
-    public struct TerrainMaterial
-    {
-        public byte R;
-        public byte G;
-        public byte B;
-        public byte MaterialID;
-
-        public static TerrainMaterial GetDefaultMaterial()
-        {
-            return new() {R = byte.MaxValue, G = Byte.MaxValue, B = Byte.MaxValue, MaterialID = Byte.MaxValue};
-        }
-    }
-    
-    [StructLayout(LayoutKind.Sequential)]
-    public struct PackedTerrainMaterial
-    {
-        public TerrainMaterial a;
-        public TerrainMaterial b;
-        public TerrainMaterial c;
-        public TerrainMaterial d;
-
-        public PackedTerrainMaterial(TerrainMaterial material)
-        {
-            a = material;
-            b = material;
-            c = material;
-            d = material;
-        }
-
-        public static PackedTerrainMaterial Select(PackedTerrainMaterial packedMaterialA, PackedTerrainMaterial packedMaterialB, bool4 selection)
-        {
-            return new()
-            {
-                a = selection.x ? packedMaterialB.a : packedMaterialA.a,
-                b = selection.y ? packedMaterialB.b : packedMaterialA.b,
-                c = selection.z ? packedMaterialB.c : packedMaterialA.c,
-                d = selection.w ? packedMaterialB.d : packedMaterialA.d
-            };
         }
     }
 }

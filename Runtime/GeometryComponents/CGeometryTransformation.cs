@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-
 using Unity.Mathematics;
 
 namespace GeometryComponents
@@ -59,69 +56,6 @@ namespace GeometryComponents
     //     public TerrainTransformationType TerrainTransformationType => TerrainTransformationType.Wave;
     // }
 
-
-    public interface ITerrainTransformation
-    {
-        public TerrainTransformationType TerrainTransformationType { get; }
-        public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer);
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CGenericTerrainTransformation
-    {
-        public int16 Data;
-        public TerrainTransformationType TerrainTransformationType;
-
-        public PackedFloat3 TransformPosition(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
-        {
-            unsafe
-            {
-                var ptr = UnsafeUtility.AddressOf(ref Data);
-                switch (TerrainTransformationType)
-                {
-                    //todo reimplement
-                    // case TerrainTransformationType.Mirror:
-                    //     return ((CTerrainTransformationMirror*) ptr)->TransformPosition(positionOS);
-                    //     break;
-                    case TerrainTransformationType.Repetition:
-                        return ((CTerrainTransformationRepetition*) ptr)->TransformPosition(positionOS, valueBuffer);
-                    case TerrainTransformationType.Transform:
-                        return ((CGeometryTransformation*) ptr)->TransformPosition(positionOS, valueBuffer);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        // public uint CalculateHash()
-        // {
-        //     unsafe
-        //     {
-        //         var ptr = UnsafeUtility.AddressOf(ref Data);
-        //         switch (TerrainTransformationType)
-        //         {
-        //             //todo reimplement
-        //             // case TerrainTransformationType.Mirror:
-        //             //     return ((CTerrainTransformationMirror*) ptr)->CalculateHash();
-        //             case TerrainTransformationType.Transform:
-        //                 return ((CGeometryTransformation*) ptr)->CalculateHash();
-        //                 break;
-        //             default:
-        //                 throw new ArgumentOutOfRangeException();
-        //         }
-        //     }
-        // }
-    }
-
-
-    public enum TerrainTransformationType
-    {
-        Mirror = 0,
-        Wave = 1,
-        Transform = 2,
-        Repetition = 3
-    }
 
     public struct CGeometryTransformation : ITerrainTransformation
     {
@@ -214,30 +148,6 @@ namespace GeometryComponents
             hash.AddToHash((uint) objectOrigin.Index);
             hash.AddToHash((uint) Type);
             return hash;
-        }
-    }
-
-    public enum TerrainModifierTransformationType : byte
-    {
-        None,
-        TransformationOnly,
-        TransformationAndUniformScale,
-        TransformationRotationAndScale
-    }
-
-
-    [Serializable]
-    [StructLayout(LayoutKind.Explicit)]
-    public struct CTerrainTransformationRepetition : ITerrainTransformation
-    {
-        [FieldOffset(0)] public Float3Value Period;
-
-        public TerrainTransformationType TerrainTransformationType => TerrainTransformationType.Repetition;
-
-        public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer)
-        {
-            var period = Period.Resolve(valueBuffer);
-            return positionWS % period;
         }
     }
 }

@@ -4,7 +4,6 @@ using Code.SIMDMath;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using static Code.SIMDMath.SimdMath;
 
 namespace GeometryComponents
 {
@@ -29,20 +28,5 @@ namespace GeometryComponents
                 }
             }
         }
-    }
-
-    public struct OnionDistanceModification: IDistanceModification
-    {
-        public FloatValue Thickness;
-
-        public PackedFloat GetSurfaceDistance(PackedFloat currentDistance, NativeArray<float> valueBuffer)
-        {
-            return abs(currentDistance) - Thickness.Resolve(valueBuffer);
-        }
-    }
-
-    public interface IDistanceModification
-    {
-        PackedFloat GetSurfaceDistance(PackedFloat currentDistance, NativeArray<float> valueBuffer);
     }
 }

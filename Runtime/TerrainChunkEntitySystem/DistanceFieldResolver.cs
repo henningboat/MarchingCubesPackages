@@ -47,32 +47,26 @@ namespace TerrainChunkEntitySystem
                 return;
             }
 
+            chunk.Parameters = chunkParameters;
 
-            if (chunkParameters.InnerDataMask != 0)
+            TerrainInstructionIterator detailIterator=default;
+            var containsDetails = chunkParameters.InnerDataMask != 0;
+            if (containsDetails)
             {
                 CreatePositionsArray(chunk, out var positions);
 
-                var iterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
-                iterator.CalculateTerrainData();
-
-                CopyResultsBackToBuffer(chunk, iterator);
-
-                iterator.Dispose();
+                detailIterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
+                detailIterator.CalculateTerrainData();
             }
-            else
+            
+            
+            CopyResultsBackToBuffer(chunk, detailIterator);
+            
+            if (containsDetails)
             {
-                todo
-                // if (chunkParameters.ChunkInsideTerrain == 0)
-                // {
-                //     terrainChunk = TerrainChunkData.Outside;
-                // }
-                // else
-                // {
-                //     terrainChunk = TerrainChunkData.Inside;
-                // }
+                detailIterator.Dispose();
             }
 
-            chunk.Parameters = chunkParameters;
         }
 
         private static void CopyResultsBackToBuffer(GeometryChunk chunk, TerrainInstructionIterator iterator)
