@@ -1,5 +1,6 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using GeometrySystems.GeometryMath;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {

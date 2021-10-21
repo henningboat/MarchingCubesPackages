@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using DistanceFieldGeneration.Shapes;
 using GeometryComponents;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 

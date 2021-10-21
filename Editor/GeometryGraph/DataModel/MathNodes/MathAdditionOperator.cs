@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using GeometrySystems.GeometryMath;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes

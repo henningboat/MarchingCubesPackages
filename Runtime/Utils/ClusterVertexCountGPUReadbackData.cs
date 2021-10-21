@@ -12,7 +12,7 @@ namespace Utils
 
         public ClusterVertexCountGPUReadbackData(AsyncReadbackUtility.ReadbackData readbackData)
         {
-            vertexCounts = new NativeArray<int>(Constants.SubChunksInCluster, Allocator.TempJob);
+            vertexCounts = new NativeArray<int>(Constants.subChunksPerCluster, Allocator.TempJob);
             frameTimestamp = readbackData.frameTimestamp;    
             
             for (int i = 0; i < 4096; i++)

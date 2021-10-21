@@ -33,7 +33,7 @@ namespace Rendering
             }
 
             var trianbgleByteSize = (3 + 3 + 4) * 4;
-            var requiredTriangleCapacity = NonECSImplementation.Constants.chunkVolume * chunkPositionsToRender.Length * 5;
+            var requiredTriangleCapacity = global::Constants.chunkVolume * chunkPositionsToRender.Length * 5;
             if (_triangleBuffer == null || _triangleBuffer.count < requiredTriangleCapacity)
             {
                 if (_triangleBuffer != null)

@@ -7,6 +7,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode;
 using GeometryComponents;
+using GeometrySystems.GeometryMath;
 using TerrainChunkEntitySystem;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;

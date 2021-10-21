@@ -1,15 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
-using Authoring;
 using Code.SIMDMath;
+using GeometrySystems.GeometryFieldSetup;
 using NonECSImplementation;
-using Rendering;
 using TerrainChunkSystem;
 using Unity.Collections;
-
 using Unity.Mathematics;
 using Utils;
-using Constants = Rendering.Constants;
 
 namespace TerrainChunkEntitySystem
 {

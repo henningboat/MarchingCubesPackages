@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GeometrySystems.GeometryFieldSetup;
 using NonECSImplementation;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
@@ -45,13 +46,13 @@ namespace Rendering
             result._countPerSubChunkReadback = new NativeArray<int>(512 * 8, Allocator.Persistent);
             
             
-            var requiredTriangleCapacity = Constants.SubChunksInCluster * 4 * 4 * 4 * 5;
+            var requiredTriangleCapacity = Constants.subChunksPerCluster * 4 * 4 * 4 * 5;
             result._trianglePositionBuffer = new ComputeBuffer(requiredTriangleCapacity, 8 * 4, ComputeBufferType.Append);
 
             result._mesh = MeshGeneratorBuilder.GenerateClusterMesh().mesh;
 
             result._clusterCounts = geometryFieldData.ClusterCounts;
-            result._chunkCounts = geometryFieldData.ClusterCounts*NonECSImplementation.Constants.chunkLengthPerCluster;
+            result._chunkCounts = geometryFieldData.ClusterCounts*global::Constants.chunkLengthPerCluster;
             
             return result;
         }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GeometryComponents;
+using GeometrySystems.GeometryMath;
 using TerrainChunkEntitySystem;
 using Unity.Collections;
 
