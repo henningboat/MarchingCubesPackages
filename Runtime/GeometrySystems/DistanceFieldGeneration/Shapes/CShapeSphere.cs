@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents;
 using Unity.Collections;
 using static Code.SIMDMath.SimdMath;
 
 
-namespace DistanceFieldGeneration.Shapes
+namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]

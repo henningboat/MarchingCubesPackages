@@ -1,9 +1,9 @@
-﻿using GeometrySystems.DistanceFieldGeneration;
-using GeometrySystems.GeometryFieldSetup;
-using GeometrySystems.MeshGenerationSystem;
+﻿using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
 using UnityEngine;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems
 {
     [ExecuteInEditMode]
     public class GeometryFieldManager : MonoBehaviour

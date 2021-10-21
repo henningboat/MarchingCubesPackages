@@ -1,14 +1,12 @@
-﻿using System;
-using GeometrySystems.GeometryFieldSetup;
-using Rendering;
+﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Rendering;
+using henningboat.CubeMarching.Utils;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
-using Utils;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 {
     [BurstCompile]
     public struct JCalculateTriangulationIndicesJob : IJobParallelFor
@@ -59,6 +57,8 @@ namespace NonECSImplementation
 
                 // var currentHash = dynamicData.DistanceFieldChunkData.CurrentGeometryInstructionsHash;
 
+                if (!cluster.Parameters.WriteMask[chunkIndex]) continue;
+
                 for (var i = 0; i < 8; i++)
                 {
                     var subChunkIndex = chunkIndex * 8 + i;
@@ -75,26 +75,21 @@ namespace NonECSImplementation
                     if (chunkParameters.InnerDataMask.GetBit(i))
                     {
                         var subChunkOffset = TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, 2) * 4;
-                        
-//                        triangulationInstructions.Add( new CSubChunkWithTrianglesIndex(positionOfChunkWS + subChunkOffset, 0, true));
 
                         //todo re-add checking for this 
-                        //   if (dynamicData.DistanceFieldChunkData.InstructionsChangedSinceLastFrame)
+                        if (chunkParameters.InstructionsChangedSinceLastFrame)
                         {
                             triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
                             vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = Constants.maxVertsPerCluster};
-                            SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex()
-                            {
-                                SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
-                            };
-                            subChunksWithTrianglesCount++;
                         }
 
+                        SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex
+                        {
+                            SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
+                        };
+                        subChunksWithTrianglesCount++;
+                           
                         totalVertexCount += vertexCountPerSubChunk[subChunkIndex].vertexCount;
-                    }
-                    else
-                    {
-                        
                     }
                 }
             }

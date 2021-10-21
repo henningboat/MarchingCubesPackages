@@ -1,4 +1,4 @@
-﻿namespace Triangulation
+﻿namespace henningboat.CubeMarching.Triangulation
 {
     public class TriangulationTables
     {

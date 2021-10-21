@@ -1,4 +1,4 @@
-﻿using TerrainChunkEntitySystem;
+﻿using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {

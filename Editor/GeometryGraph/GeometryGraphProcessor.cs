@@ -2,7 +2,8 @@
 using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using GeometryComponents;
+using henningboat.CubeMarching;
+using henningboat.CubeMarching.GeometryComponents;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;

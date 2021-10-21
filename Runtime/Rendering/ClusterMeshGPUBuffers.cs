@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GeometrySystems.GeometryFieldSetup;
-using NonECSImplementation;
-using TerrainChunkEntitySystem;
+﻿using System.Linq;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
-
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Utils;
 
-namespace Rendering
+namespace henningboat.CubeMarching.Rendering
 {
     internal struct ClusterMeshGPUBuffers
     {
@@ -52,7 +46,7 @@ namespace Rendering
             result._mesh = MeshGeneratorBuilder.GenerateClusterMesh().mesh;
 
             result._clusterCounts = geometryFieldData.ClusterCounts;
-            result._chunkCounts = geometryFieldData.ClusterCounts*global::Constants.chunkLengthPerCluster;
+            result._chunkCounts = geometryFieldData.ClusterCounts*global::henningboat.CubeMarching.Constants.chunkLengthPerCluster;
             
             return result;
         }

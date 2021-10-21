@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Unity.Collections;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]

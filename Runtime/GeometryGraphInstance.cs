@@ -1,60 +1,62 @@
 using System.Collections.Generic;
-using NonECSImplementation;
-using Unity.Mathematics;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using UnityEngine;
 
-[ExecuteInEditMode]
-public class GeometryGraphInstance : MonoBehaviour
+namespace henningboat.CubeMarching
 {
-    [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
-    [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
-    private GeometryGraphData _graphData;
-
-    internal GeometryGraphData GraphData
+    [ExecuteInEditMode]
+    public class GeometryGraphInstance : MonoBehaviour
     {
-        get
+        [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
+        [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
+        private GeometryGraphData _graphData;
+
+        internal GeometryGraphData GraphData
         {
-            //todo initialize this in a better way
-            if (_graphData.ContentHash!=_geometryGraphRuntimeData.ContentHash)
+            get
             {
-                if (_graphData.GeometryInstructions.IsCreated)
+                if (_graphData.ContentHash != _geometryGraphRuntimeData.ContentHash)
                 {
-                    _graphData.Dispose();
+                    if (_graphData.GeometryInstructions.IsCreated)
+                    {
+                        _graphData.Dispose();
+                    }
+
+                    _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
                 }
 
-                _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
+                UpdateOverwritesInValueBuffer();
+                return _graphData;
             }
-            UpdateOverwritesInValueBuffer();
-            return _graphData;
         }
-    }
 
-    private void UpdateOverwritesInValueBuffer()
-    {
-        //apply main transformation
-        _graphData.ValueBuffer.Write(transform.worldToLocalMatrix,_geometryGraphRuntimeData.MainTransformation.Index);
-    }
+        private void UpdateOverwritesInValueBuffer()
+        {
+            //apply main transformation
+            _graphData.ValueBuffer.Write(transform.worldToLocalMatrix,_geometryGraphRuntimeData.MainTransformation.Index);
+        }
 
-    public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
+        public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
 
-    public List<GeometryGraphPropertyOverwrite> GetOverwrites()
-    {
-        return Overwrites;
-    }
+        public List<GeometryGraphPropertyOverwrite> GetOverwrites()
+        {
+            return Overwrites;
+        }
 
-    public void SetOverwrites(List<GeometryGraphPropertyOverwrite> newOverwrites)
-    {
-        _overwrites = newOverwrites;
-    }
+        public void SetOverwrites(List<GeometryGraphPropertyOverwrite> newOverwrites)
+        {
+            _overwrites = newOverwrites;
+        }
 
 
-    private void OnEnable()
-    {
-        _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
-    }
+        private void OnEnable()
+        {
+            _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
+        }
 
-    private void OnDisable()
-    {
-        _graphData.Dispose();
+        private void OnDisable()
+        {
+            _graphData.Dispose();
+        }
     }
 }

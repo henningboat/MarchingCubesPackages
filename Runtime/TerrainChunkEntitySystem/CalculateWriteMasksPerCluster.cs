@@ -1,7 +1,7 @@
-﻿using Rendering;
-using Utils;
+﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Utils;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public struct CalculateWriteMasksPerCluster
     {

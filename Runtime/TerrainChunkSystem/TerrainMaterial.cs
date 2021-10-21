@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace TerrainChunkSystem
+namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     /// <summary>
     ///     Always make sure to keep the content of this struct in sync with TerrainMaterial.hlsl

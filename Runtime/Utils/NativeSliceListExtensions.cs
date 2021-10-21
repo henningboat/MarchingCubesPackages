@@ -1,6 +1,6 @@
 ﻿using Unity.Collections;
 
-namespace Utils
+namespace henningboat.CubeMarching.Utils
 {
     public static class NativeSliceListExtensions
     {

@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Rendering
+namespace henningboat.CubeMarching.Rendering
 {
     public static class MeshGeneratorBuilder
     {

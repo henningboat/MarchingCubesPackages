@@ -1,8 +1,7 @@
 ﻿using System;
-
 using UnityEngine;
 
-namespace Rendering
+namespace henningboat.CubeMarching.Rendering
 {
     [Serializable]
     public struct CClusterMesh : IEquatable<CClusterMesh>

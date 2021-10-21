@@ -1,12 +1,11 @@
-using Rendering;
-using TerrainChunkEntitySystem;
-using TerrainChunkSystem;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace GeometrySystems.GeometryFieldSetup
+namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryFieldData
     {

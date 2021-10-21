@@ -1,6 +1,6 @@
 ﻿using Unity.Mathematics;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public static class Int3Extensions
     {

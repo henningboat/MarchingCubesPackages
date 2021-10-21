@@ -1,7 +1,8 @@
-﻿using GeometrySystems.GeometryFieldSetup;
+﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using Unity.Jobs;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
 {
     internal class UpdateDistanceFieldSystem
     {

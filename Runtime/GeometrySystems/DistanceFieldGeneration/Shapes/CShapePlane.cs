@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents;
 using Unity.Collections;
 
-namespace DistanceFieldGeneration.Shapes
+namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapePlane :  ITerrainModifierShape

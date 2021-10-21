@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace TerrainChunkSystem
+namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct DistanceFieldData

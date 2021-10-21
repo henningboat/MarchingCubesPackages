@@ -1,12 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using Rendering;
 using Unity.Collections;
-
-using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeBoundingBox: ITerrainModifierShape

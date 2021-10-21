@@ -1,7 +1,7 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
 
-namespace GeometrySystems.GeometryFieldSetup
+namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryChunkParameters
     {

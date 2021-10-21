@@ -1,9 +1,8 @@
 ﻿using System;
-using TerrainChunkEntitySystem;
-
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Mathematics;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [Serializable]
     public struct CGeometryCombiner

@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu]
-public class DynamicCubeMarchingSettingsHolder : ScriptableObject
+namespace henningboat.CubeMarching
 {
-    private static DynamicCubeMarchingSettingsHolder _instance;
-    public ComputeShader Compute;
-    public Material[] Materials;
-
-    public static DynamicCubeMarchingSettingsHolder Instance
+    [CreateAssetMenu]
+    public class DynamicCubeMarchingSettingsHolder : ScriptableObject
     {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = Resources.Load<DynamicCubeMarchingSettingsHolder>("DynamicCubeMarchingSettingsHolder");
-            }
+        private static DynamicCubeMarchingSettingsHolder _instance;
+        public ComputeShader Compute;
+        public Material[] Materials;
 
-            return _instance;
+        public static DynamicCubeMarchingSettingsHolder Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = Resources.Load<DynamicCubeMarchingSettingsHolder>("DynamicCubeMarchingSettingsHolder");
+                }
+
+                return _instance;
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using GeometryComponents;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 

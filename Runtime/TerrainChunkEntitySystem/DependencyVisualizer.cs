@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public class DependencyVisualizer : MonoBehaviour
     {

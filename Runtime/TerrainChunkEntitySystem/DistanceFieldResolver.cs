@@ -1,14 +1,14 @@
 using System;
 using System.Runtime.CompilerServices;
 using Code.SIMDMath;
-using GeometrySystems.GeometryFieldSetup;
-using NonECSImplementation;
-using TerrainChunkSystem;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.TerrainChunkSystem;
+using henningboat.CubeMarching.Utils;
 using Unity.Collections;
 using Unity.Mathematics;
-using Utils;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public static class DistanceFieldResolver
     {
@@ -18,7 +18,7 @@ namespace TerrainChunkEntitySystem
             var chunkParameters = chunk.Parameters;
             
             //todo
-            if (clusterParameters.WriteMask[chunkParameters.IndexInCluster]||true)
+            if (clusterParameters.WriteMask[chunkParameters.IndexInCluster]&& chunkParameters.InstructionsChangedSinceLastFrame)
             {
                 var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
                 for (var i = 0; i < 2; i++)
@@ -29,7 +29,7 @@ namespace TerrainChunkEntitySystem
 
                 var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
 
-                iterator.CalculateTerrainData();
+                iterator.CalculateAllTerrainData();
 
                 GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
 
@@ -53,7 +53,7 @@ namespace TerrainChunkEntitySystem
                 CreatePositionsArray(chunk, out var positions);
 
                 detailIterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
-                detailIterator.CalculateTerrainData();
+                detailIterator.CalculateAllTerrainData();
             }
             
             

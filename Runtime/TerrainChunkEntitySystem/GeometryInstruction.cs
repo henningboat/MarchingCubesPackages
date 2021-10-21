@@ -1,8 +1,8 @@
 ﻿using System;
-using Authoring;
-using GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     [Serializable]
     public struct GeometryInstruction

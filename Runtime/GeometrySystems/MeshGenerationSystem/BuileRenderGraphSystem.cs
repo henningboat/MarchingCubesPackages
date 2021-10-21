@@ -1,8 +1,8 @@
-﻿using GeometrySystems.GeometryFieldSetup;
-using NonECSImplementation;
+﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using Unity.Jobs;
 
-namespace GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 {
     internal class BuileRenderGraphSystem
     {

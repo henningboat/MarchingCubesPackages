@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using Authoring;
-using GeometrySystems.GeometryFieldSetup;
-using Rendering;
+﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Rendering;
 using Unity.Collections;
-
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 {
     internal struct UpdateMeshesSystem
     {
@@ -77,8 +74,6 @@ namespace NonECSImplementation
 
             _indexMapComputeBuffer = new ComputeBuffer(indexMap.Length, 4);
             _indexMapComputeBuffer.SetData(indexMap);
-
-            var clusterMeshRendererEntities = _gpuDataPerCluster;
 
             for (var clusterIndex = 0; clusterIndex < _gpuDataPerCluster.Length; clusterIndex++)
             {

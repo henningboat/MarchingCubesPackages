@@ -1,5 +1,6 @@
 ﻿using System;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using henningboat.CubeMarching;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {

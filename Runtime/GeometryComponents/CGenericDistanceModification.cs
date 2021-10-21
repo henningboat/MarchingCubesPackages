@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericDistanceModification: IDistanceModification

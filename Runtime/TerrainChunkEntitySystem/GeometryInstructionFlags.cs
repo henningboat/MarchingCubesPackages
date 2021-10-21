@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     [Flags]
     public enum GeometryInstructionFlags

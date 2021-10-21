@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace TerrainChunkSystem
+namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedDistanceFieldData

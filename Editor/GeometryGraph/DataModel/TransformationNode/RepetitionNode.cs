@@ -2,9 +2,10 @@
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
-using GeometryComponents;
+using henningboat.CubeMarching;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using JetBrains.Annotations;
-using TerrainChunkEntitySystem;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;

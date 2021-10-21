@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Utils
+namespace henningboat.CubeMarching.Utils
 {
     //todo use native arrays
 

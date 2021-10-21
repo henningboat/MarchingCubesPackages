@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Rendering
+namespace henningboat.CubeMarching.Rendering
 {
     internal class TerrainChunkGPUData
     {
@@ -33,7 +33,7 @@ namespace Rendering
             }
 
             var trianbgleByteSize = (3 + 3 + 4) * 4;
-            var requiredTriangleCapacity = global::Constants.chunkVolume * chunkPositionsToRender.Length * 5;
+            var requiredTriangleCapacity = global::henningboat.CubeMarching.Constants.chunkVolume * chunkPositionsToRender.Length * 5;
             if (_triangleBuffer == null || _triangleBuffer.count < requiredTriangleCapacity)
             {
                 if (_triangleBuffer != null)

@@ -4,7 +4,7 @@ using Code.SIMDMath;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericTerrainTransformation

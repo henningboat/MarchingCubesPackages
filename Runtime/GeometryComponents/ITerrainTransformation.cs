@@ -1,7 +1,7 @@
 ﻿using Code.SIMDMath;
 using Unity.Collections;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     public interface ITerrainTransformation
     {

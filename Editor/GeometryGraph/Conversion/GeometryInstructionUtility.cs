@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using GeometryComponents;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {

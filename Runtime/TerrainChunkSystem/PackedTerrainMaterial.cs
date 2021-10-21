@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace TerrainChunkSystem
+namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedTerrainMaterial

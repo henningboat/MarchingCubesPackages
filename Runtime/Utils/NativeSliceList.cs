@@ -1,7 +1,6 @@
-﻿using Rendering;
-using Unity.Collections;
+﻿using Unity.Collections;
 
-namespace Utils
+namespace henningboat.CubeMarching.Utils
 {
     public struct NativeSliceList<T> where T : struct
     {

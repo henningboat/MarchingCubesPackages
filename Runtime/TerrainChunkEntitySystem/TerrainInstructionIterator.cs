@@ -1,14 +1,13 @@
 ﻿using System;
 using Code.SIMDMath;
-using GeometryComponents;
-using TerrainChunkSystem;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
-
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 using float4x4 = Unity.Mathematics.float4x4;
 
-namespace TerrainChunkEntitySystem
+namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     /// <summary>
     ///     Calculates the TerrainData for a NativeArray world space positions
@@ -31,14 +30,17 @@ namespace TerrainChunkEntitySystem
         private int _lastCombinerDepth;
 
         private NativeArray<float> _valueBuffer;
+        public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
+        private bool _allowPerInstructionReadback;
 
         #endregion
 
         #region Constructors
 
         public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<GeometryInstruction> combinerInstructions, 
-            NativeArray<float> valueBuffer)
+            NativeArray<float> valueBuffer, bool allowPerInstructionReadback = false)
         {
+            _allowPerInstructionReadback = allowPerInstructionReadback;
             _valueBuffer = valueBuffer;
             _combinerInstructions = combinerInstructions.AsReadOnly();
             //todo cache this between pre-pass and actual pass
@@ -58,13 +60,22 @@ namespace TerrainChunkEntitySystem
 
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
             _lastCombinerDepth = -1;
+
+            if (allowPerInstructionReadback)
+            {
+                CurrentInstructionSurfaceDistanceReadback = new NativeArray<PackedFloat>(positions.Length, Allocator.Temp);
+            }
+            else
+            {
+                CurrentInstructionSurfaceDistanceReadback = default;
+            }
         }
 
         #endregion
 
         #region Public methods
 
-        public void CalculateTerrainData()
+        public void CalculateAllTerrainData()
         {
             for (var i = 0; i < _combinerInstructions.Length; i++)
             {
@@ -86,13 +97,18 @@ namespace TerrainChunkEntitySystem
             _terrainDataBuffer.Dispose();
             _postionStack.Dispose();
             _hasWrittenToCurrentCombiner.Dispose();
+            
+            if (CurrentInstructionSurfaceDistanceReadback.IsCreated)
+            {
+                CurrentInstructionSurfaceDistanceReadback.Dispose();
+            }
         }
 
         #endregion
 
         #region Private methods
 
-        private void ProcessTerrainData(int instructionIndex)
+        public void ProcessTerrainData(int instructionIndex)
         {
             GeometryInstruction geometryInstruction = _combinerInstructions[instructionIndex];
 
@@ -175,6 +191,12 @@ namespace TerrainChunkEntitySystem
                         PackedTerrainMaterial packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS, _valueBuffer);
+
+                        if (_allowPerInstructionReadback)
+                        {
+                            CurrentInstructionSurfaceDistanceReadback[i] = surfaceDistance;
+                        }
+
                         terrainData = new PackedDistanceFieldData(surfaceDistance, packedMaterialData);
                         break;
                     case GeometryInstructionType.Combiner:

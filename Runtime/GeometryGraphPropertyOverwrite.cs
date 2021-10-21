@@ -1,31 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-[Serializable]
-public class GeometryGraphPropertyOverwrite
+namespace henningboat.CubeMarching
 {
-    [SerializeField] private SerializableGUID _propertyGUID;
-    [SerializeField] private float[] _value;
-    [SerializeField] private MonoBehaviour _providerObject;
-
-    public GeometryGraphPropertyOverwrite(SerializableGUID guid)
+    [Serializable]
+    public class GeometryGraphPropertyOverwrite
     {
-        _propertyGUID = guid;
-    }
+        [SerializeField] private SerializableGUID _propertyGUID;
+        [SerializeField] private float[] _value;
+        [SerializeField] private MonoBehaviour _providerObject;
 
-    public SerializableGUID PropertyGUID => _propertyGUID;
-
-    public MonoBehaviour ProviderObject => _providerObject;
-
-    public float[] Value => _value;
-
-    public void SetValueCapacity(int length)
-    {
-        if (_value == null || _value.Length != length)
+        public GeometryGraphPropertyOverwrite(SerializableGUID guid)
         {
-            _value = new float[length];
+            _propertyGUID = guid;
+        }
+
+        public SerializableGUID PropertyGUID => _propertyGUID;
+
+        public MonoBehaviour ProviderObject => _providerObject;
+
+        public float[] Value => _value;
+
+        public void SetValueCapacity(int length)
+        {
+            if (_value == null || _value.Length != length)
+            {
+                _value = new float[length];
+            }
         }
     }
 }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using GeometryComponents;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;

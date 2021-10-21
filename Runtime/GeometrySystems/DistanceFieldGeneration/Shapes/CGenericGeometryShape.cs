@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using DistanceFieldGeneration.Shapes;
-using GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-
-namespace Authoring
+namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericGeometryShape

@@ -1,8 +1,8 @@
 ﻿using System;
-using TerrainChunkSystem;
+using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [Serializable]
     public struct MaterialDataValue

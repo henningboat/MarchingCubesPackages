@@ -1,4 +1,4 @@
-﻿namespace TerrainChunkEntitySystem
+﻿namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public enum DistanceModificationType
     {

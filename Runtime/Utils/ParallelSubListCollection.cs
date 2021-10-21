@@ -3,7 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace Utils
+namespace henningboat.CubeMarching.Utils
 {
     //todo rename to something reasonable
     //todo add safety checks

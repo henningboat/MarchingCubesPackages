@@ -1,8 +1,7 @@
-﻿using Rendering;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Jobs;
 
-namespace Utils
+namespace henningboat.CubeMarching.Utils
 {
     public struct ClusterVertexCountGPUReadbackData
     {

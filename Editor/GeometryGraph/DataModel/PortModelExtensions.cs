@@ -5,6 +5,7 @@ using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using henningboat.CubeMarching;
 using Unity.Collections;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;

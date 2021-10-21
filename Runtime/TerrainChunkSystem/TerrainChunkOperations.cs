@@ -1,11 +1,11 @@
 ﻿using System;
 using Code.SIMDMath;
-using GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents;
 using Unity.Collections;
 using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
-namespace TerrainChunkSystem
+namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     public static class TerrainChunkOperations
     {

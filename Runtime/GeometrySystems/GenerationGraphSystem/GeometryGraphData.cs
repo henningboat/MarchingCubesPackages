@@ -1,11 +1,11 @@
 ﻿using System;
-using GeometrySystems.GeometryMath;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.GeometrySystems.GeometryMath;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
 {
     public struct GeometryGraphData : IDisposable
     {

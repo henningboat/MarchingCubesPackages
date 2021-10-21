@@ -1,6 +1,6 @@
 ﻿using Unity.Mathematics;
 
-namespace Rendering
+namespace henningboat.CubeMarching.Rendering
 {
     public struct CSubChunkWithTrianglesIndex
     {

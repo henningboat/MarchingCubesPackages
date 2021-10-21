@@ -1,7 +1,10 @@
-﻿public enum GeometryPropertyType
+﻿namespace henningboat.CubeMarching
 {
-    Float,
-    Float3,
-    Float4X4,
-    Color32
+    public enum GeometryPropertyType
+    {
+        Float,
+        Float3,
+        Float4X4,
+        Color32
+    }
 }

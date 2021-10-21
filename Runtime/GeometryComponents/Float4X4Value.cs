@@ -2,7 +2,7 @@
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     [Serializable]
     public struct Float4X4Value

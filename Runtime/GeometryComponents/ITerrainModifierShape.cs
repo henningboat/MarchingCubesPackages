@@ -1,9 +1,8 @@
 ﻿using Code.SIMDMath;
 using JetBrains.Annotations;
-using Rendering;
 using Unity.Collections;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     public interface ITerrainModifierShape
     {

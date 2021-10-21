@@ -1,9 +1,10 @@
-﻿using GeometrySystems.GeometryFieldSetup;
-using TerrainChunkEntitySystem;
+﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Burst;
 using Unity.Jobs;
 
-namespace NonECSImplementation
+namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
 {
     [BurstCompile]
     internal struct JCalculateDistanceField : IJobParallelFor

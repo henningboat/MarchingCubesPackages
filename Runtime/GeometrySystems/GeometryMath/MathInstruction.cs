@@ -4,7 +4,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GeometrySystems.GeometryMath
+namespace henningboat.CubeMarching.GeometrySystems.GeometryMath
 {
     [Serializable]
     public struct MathInstruction

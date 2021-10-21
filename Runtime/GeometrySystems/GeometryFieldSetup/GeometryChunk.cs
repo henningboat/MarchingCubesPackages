@@ -1,7 +1,7 @@
-﻿using TerrainChunkSystem;
+﻿using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
 
-namespace GeometrySystems.GeometryFieldSetup
+namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryChunk
     {

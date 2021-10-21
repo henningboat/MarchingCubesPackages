@@ -1,7 +1,6 @@
 ﻿using System;
 
-
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     public static class CombinerOperationExtensions
     {

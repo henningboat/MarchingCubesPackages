@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using DistanceFieldGeneration.Shapes;
-using GeometryComponents;
+using henningboat.CubeMarching;
+using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 

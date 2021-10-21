@@ -1,7 +1,8 @@
 ﻿using System;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
-using GeometryComponents;
+using henningboat.CubeMarching;
+using henningboat.CubeMarching.GeometryComponents;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;

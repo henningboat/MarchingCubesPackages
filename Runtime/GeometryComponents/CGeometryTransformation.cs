@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using Code.SIMDMath;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace GeometryComponents
+namespace henningboat.CubeMarching.GeometryComponents
 {
     //todo reimplement
     // [StructLayout(LayoutKind.Sequential)]

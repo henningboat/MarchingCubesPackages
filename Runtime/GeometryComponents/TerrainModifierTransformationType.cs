@@ -1,4 +1,4 @@
-﻿namespace GeometryComponents
+﻿namespace henningboat.CubeMarching.GeometryComponents
 {
     public enum TerrainModifierTransformationType : byte
     {

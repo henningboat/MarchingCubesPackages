@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using TerrainChunkEntitySystem;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 {
