@@ -172,9 +172,9 @@ namespace Code.SIMDMath
 
         public static PackedFloat3 mod(PackedFloat3 a, PackedFloat3 periode)
         {
-            a.x.PackedValues %= periode.x.PackedValues;
-            a.y.PackedValues %= periode.y.PackedValues;
-            a.z.PackedValues %= periode.z.PackedValues;
+            a.x.PackedValues = math.modf(a.x.PackedValues/periode.x.PackedValues,out float4 _)*periode.x.PackedValues;
+            a.y.PackedValues = math.modf(a.y.PackedValues/periode.y.PackedValues,out float4 _)*periode.y.PackedValues;
+            a.z.PackedValues = math.modf(a.z.PackedValues/periode.z.PackedValues,out float4 _)*periode.z.PackedValues;
             return a;
         }
     }

@@ -64,7 +64,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
             var rootNode = resultNode.DataIn.GetConnectedPorts().FirstOrDefault().NodeModel as IGeometryNode;
 
-            context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty, context.CurrentCombinerDepth));
+            context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty, 0));
 
             rootNode.Resolve(context, context.OriginalGeometryStackData);
 

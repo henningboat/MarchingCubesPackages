@@ -5,7 +5,6 @@ using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
-using float4x4 = Unity.Mathematics.float4x4;
 
 namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
@@ -29,15 +28,16 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
         private NativeArray<bool> _hasWrittenToCurrentCombiner;
         private int _lastCombinerDepth;
 
-        private NativeArray<float> _valueBuffer;
+        private readonly NativeArray<float> _valueBuffer;
         public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
-        private bool _allowPerInstructionReadback;
+        private readonly bool _allowPerInstructionReadback;
 
         #endregion
 
         #region Constructors
 
-        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<GeometryInstruction> combinerInstructions, 
+        public TerrainInstructionIterator(NativeArray<PackedFloat3> positions,
+            NativeArray<GeometryInstruction> combinerInstructions,
             NativeArray<float> valueBuffer, bool allowPerInstructionReadback = false)
         {
             _allowPerInstructionReadback = allowPerInstructionReadback;
@@ -46,29 +46,25 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
             //todo cache this between pre-pass and actual pass
             _combinerStackSize = 0;
             for (var i = 0; i < combinerInstructions.Length; i++)
-            {
                 _combinerStackSize = max(_combinerInstructions[i].CombinerDepth, _combinerStackSize);
-            }
 
             //todo workaround. Remove this and see the exceptions
             _combinerStackSize++;
 
             _postionsWS = positions.AsReadOnly();
 
-            _terrainDataBuffer = new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
+            _terrainDataBuffer =
+                new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);
 
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
             _lastCombinerDepth = -1;
 
             if (allowPerInstructionReadback)
-            {
-                CurrentInstructionSurfaceDistanceReadback = new NativeArray<PackedFloat>(positions.Length, Allocator.Temp);
-            }
+                CurrentInstructionSurfaceDistanceReadback =
+                    new NativeArray<PackedFloat>(positions.Length, Allocator.Temp);
             else
-            {
                 CurrentInstructionSurfaceDistanceReadback = default;
-            }
         }
 
         #endregion
@@ -77,19 +73,13 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 
         public void CalculateAllTerrainData()
         {
-            for (var i = 0; i < _combinerInstructions.Length; i++)
-            {
-                ProcessTerrainData(i);
-            }
+            for (var i = 0; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
 
             //In case we did not write any data to the terrain, we fill it with a dummy value
             if (_hasWrittenToCurrentCombiner[0] == false)
-            {
                 for (var i = 0; i < _postionsWS.Length; i++)
-                {
-                    _terrainDataBuffer[i] = new PackedDistanceFieldData(10, new PackedTerrainMaterial(TerrainMaterial.GetDefaultMaterial()));
-                }
-            }
+                    _terrainDataBuffer[i] = new PackedDistanceFieldData(10,
+                        new PackedTerrainMaterial(TerrainMaterial.GetDefaultMaterial()));
         }
 
         public void Dispose()
@@ -97,11 +87,9 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
             _terrainDataBuffer.Dispose();
             _postionStack.Dispose();
             _hasWrittenToCurrentCombiner.Dispose();
-            
+
             if (CurrentInstructionSurfaceDistanceReadback.IsCreated)
-            {
                 CurrentInstructionSurfaceDistanceReadback.Dispose();
-            }
         }
 
         #endregion
@@ -110,51 +98,52 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 
         public void ProcessTerrainData(int instructionIndex)
         {
-            GeometryInstruction geometryInstruction = _combinerInstructions[instructionIndex];
+            var geometryInstruction = _combinerInstructions[instructionIndex];
 
 
             if (geometryInstruction.CombinerDepth > _lastCombinerDepth)
-            {
-                for (var combinerDepthToInitialize = max(0, _lastCombinerDepth + 1); combinerDepthToInitialize <= geometryInstruction.CombinerDepth; combinerDepthToInitialize++)
+                for (var combinerDepthToInitialize = max(0, _lastCombinerDepth + 1);
+                    combinerDepthToInitialize <= geometryInstruction.CombinerDepth;
+                    combinerDepthToInitialize++)
                 {
                     _hasWrittenToCurrentCombiner[combinerDepthToInitialize] = false;
 
                     var positionsLength = _postionsWS.Length;
 
                     if (combinerDepthToInitialize == 0)
-                    {
-                        NativeArray<PackedFloat3>.Copy(_postionsWS, 0, _postionStack, positionsLength * combinerDepthToInitialize, positionsLength);
-                    }
+                        NativeArray<PackedFloat3>.Copy(_postionsWS, 0, _postionStack,
+                            positionsLength * combinerDepthToInitialize, positionsLength);
                     else
-                    {
                         //copy all positions from the previous level in the stack to the new one
-                        NativeArray<PackedFloat3>.Copy(_postionStack, positionsLength * (combinerDepthToInitialize - 1), _postionStack, positionsLength * combinerDepthToInitialize, positionsLength);
-                    }
+                        NativeArray<PackedFloat3>.Copy(_postionStack, positionsLength * (combinerDepthToInitialize - 1),
+                            _postionStack, positionsLength * combinerDepthToInitialize, positionsLength);
                 }
-            }
-            
+
             var stackBaseOffset = _postionsWS.Length * geometryInstruction.CombinerDepth;
-            
+
             if (geometryInstruction.GeometryInstructionType == GeometryInstructionType.DistanceModification)
             {
                 var distanceModificationInstruction = geometryInstruction.GetDistanceModificationInstruction();
-                
+
                 for (var i = 0; i < _postionsWS.Length; i++)
                 {
                     var surfaceDistance = _terrainDataBuffer[stackBaseOffset + i];
-                    surfaceDistance.SurfaceDistance = distanceModificationInstruction.GetSurfaceDistance(surfaceDistance.SurfaceDistance, _valueBuffer);
+                    surfaceDistance.SurfaceDistance =
+                        distanceModificationInstruction.GetSurfaceDistance(surfaceDistance.SurfaceDistance,
+                            _valueBuffer);
                     _terrainDataBuffer[stackBaseOffset + i] = surfaceDistance;
                 }
-                
+
                 _lastCombinerDepth = geometryInstruction.CombinerDepth;
-                
+
                 return;
             }
-            
-            if (_hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] == false && geometryInstruction.WritesToDistanceField)
+
+            if (_hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] == false &&
+                geometryInstruction.WritesToDistanceField)
             {
                 geometryInstruction.Combiner.Operation = CombinerOperation.Replace;
-            
+
                 _hasWrittenToCurrentCombiner[geometryInstruction.CombinerDepth] = true;
             }
 
@@ -168,43 +157,32 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                         throw new NotImplementedException();
                         break;
                     case GeometryInstructionType.Shape:
+                    {
                         var shape = geometryInstruction.GetShapeInstruction();
 
-                        float4x4 transformation = geometryInstruction.TransformationValue.Resolve(_valueBuffer);
+                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i);
 
-                        PackedFloat3 positionOS = default;
-
-
-                        var positionWSValue = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
-
-                        //todo add SIMD version
-                        for (int j = 0; j < 4; j++)
-                        {
-                            float4 positionWSSlice = new float4(positionWSValue.x.PackedValues[j], positionWSValue.y.PackedValues[j], positionWSValue.z.PackedValues[j], 1);
-                            float4 positionOSSlice = mul(transformation, positionWSSlice);
-                            positionOS.x.PackedValues[j] = positionOSSlice.x;
-                            positionOS.y.PackedValues[j] = positionOSSlice.y;
-                            positionOS.z.PackedValues[j] = positionOSSlice.z;
-                        }
-
-                        TerrainMaterial materialData = geometryInstruction.MaterialData.Resolve(_valueBuffer);
-                        PackedTerrainMaterial packedMaterialData = new PackedTerrainMaterial(materialData);
+                        var materialData = geometryInstruction.MaterialData.Resolve(_valueBuffer);
+                        var packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS, _valueBuffer);
 
                         if (_allowPerInstructionReadback)
-                        {
                             CurrentInstructionSurfaceDistanceReadback[i] = surfaceDistance;
-                        }
 
                         terrainData = new PackedDistanceFieldData(surfaceDistance, packedMaterialData);
+                    }
                         break;
                     case GeometryInstructionType.Combiner:
-                        terrainData = _terrainDataBuffer[(geometryInstruction.CombinerDepth + 1) * _postionsWS.Length + i];
+                        terrainData =
+                            _terrainDataBuffer[(geometryInstruction.CombinerDepth + 1) * _postionsWS.Length + i];
                         break;
                     case GeometryInstructionType.PositionModification:
-                        var position = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
-                        _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction.GetTerrainTransformation().TransformPosition(position, _valueBuffer);
+                    {
+                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i);
+                        _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction
+                            .GetTerrainTransformation().TransformPosition(positionOS, _valueBuffer);
+                    }
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -213,12 +191,36 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                 if (geometryInstruction.WritesToDistanceField)
                 {
                     var existingData = _terrainDataBuffer[stackBaseOffset + i];
-                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(geometryInstruction.Combiner, terrainData, existingData, _valueBuffer);
+                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(geometryInstruction.Combiner,
+                        terrainData, existingData, _valueBuffer);
                     _terrainDataBuffer[stackBaseOffset + i] = combinedResult;
                 }
             }
 
             _lastCombinerDepth = geometryInstruction.CombinerDepth;
+        }
+
+        private PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i)
+        {
+            var transformation = geometryInstruction.TransformationValue.Resolve(_valueBuffer);
+
+            PackedFloat3 positionOS = default;
+
+
+            var positionWSValue = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
+
+            //todo add SIMD version
+            for (var j = 0; j < 4; j++)
+            {
+                var positionWSSlice = new float4(positionWSValue.x.PackedValues[j], positionWSValue.y.PackedValues[j],
+                    positionWSValue.z.PackedValues[j], 1);
+                var positionOSSlice = mul(transformation, positionWSSlice);
+                positionOS.x.PackedValues[j] = positionOSSlice.x;
+                positionOS.y.PackedValues[j] = positionOSSlice.y;
+                positionOS.z.PackedValues[j] = positionOSSlice.z;
+            }
+
+            return positionOS;
         }
 
         #endregion

@@ -3,7 +3,7 @@ using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometrySystems.GeometryMath;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;

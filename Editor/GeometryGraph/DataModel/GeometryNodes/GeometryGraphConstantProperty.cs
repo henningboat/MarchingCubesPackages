@@ -1,7 +1,7 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometrySystems.GeometryMath;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {

@@ -16,7 +16,9 @@ namespace henningboat.CubeMarching.GeometryComponents
         public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer)
         {
             var period = Period.Resolve(valueBuffer);
-            return positionWS % period;
+            positionWS += 1000 * period;
+           positionWS= SimdMath.mod(positionWS + 0.5f * period, period) - 0.5f * period;
+           return positionWS;
         }
     }
 }

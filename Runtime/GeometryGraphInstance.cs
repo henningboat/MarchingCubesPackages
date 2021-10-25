@@ -25,7 +25,6 @@ namespace henningboat.CubeMarching
                     _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
                 }
 
-                UpdateOverwritesInValueBuffer();
                 return _graphData;
             }
         }
@@ -57,6 +56,11 @@ namespace henningboat.CubeMarching
         private void OnDisable()
         {
             _graphData.Dispose();
+        }
+
+        public void UpdateOverwrites()
+        {
+            UpdateOverwritesInValueBuffer();
         }
     }
 }

@@ -81,7 +81,8 @@ namespace henningboat.CubeMarching.TerrainChunkSystem
             var blendedSurfaceDistance = lerp(a, b, h) - blendFactor * h * (1.0f - h);
 
             var bIsSmaller = terrainDataA.SurfaceDistance.PackedValues > terrainDataB.SurfaceDistance.PackedValues;
-            var combinedMaterial = PackedTerrainMaterial.Select(terrainDataA.TerrainMaterial, terrainDataB.TerrainMaterial, bIsSmaller);
+            
+            var combinedMaterial = PackedTerrainMaterial.Lerp(terrainDataA.TerrainMaterial, terrainDataB.TerrainMaterial, h);
 
             return new PackedDistanceFieldData(blendedSurfaceDistance, combinedMaterial);
         }

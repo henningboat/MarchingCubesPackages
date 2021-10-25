@@ -1,6 +1,8 @@
 ﻿using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.GeometrySystems
@@ -9,7 +11,8 @@ namespace henningboat.CubeMarching.GeometrySystems
     public class GeometryFieldManager : MonoBehaviour
     {
         private GeometryFieldData _geometryFieldData;
-        private BuileRenderGraphSystem _buildRenderGraphSystem;
+        private PrepareGraphsSystem _prepareGraphsSystem;
+        private BuildMainGraphSystem _buildRenderGraphSystem;
         private DistanceFieldPrepassSystem _distanceFieldPrepass;
         private UpdateDistanceFieldSystem _updateDistanceFieldSystem;
         private UpdateMeshesSystem _updateMeshesSystem;
@@ -22,10 +25,13 @@ namespace henningboat.CubeMarching.GeometrySystems
                 Debug.Log("initializing");
                 _geometryFieldData = new GeometryFieldData();
                 _updateMeshesSystem = new UpdateMeshesSystem();
-                _buildRenderGraphSystem = new BuileRenderGraphSystem();
+                _prepareGraphsSystem = new PrepareGraphsSystem();
+                _buildRenderGraphSystem = new BuildMainGraphSystem();
                 _updateDistanceFieldSystem = new UpdateDistanceFieldSystem();
                 _distanceFieldPrepass = new DistanceFieldPrepassSystem();
+                
                 _geometryFieldData.Initialize(1);
+                _prepareGraphsSystem.Initialize();
                 _buildRenderGraphSystem.Initialize(_geometryFieldData);
                 _distanceFieldPrepass.Initialize(_geometryFieldData);
                 _updateDistanceFieldSystem.Initialize(_geometryFieldData);
@@ -33,7 +39,9 @@ namespace henningboat.CubeMarching.GeometrySystems
                 _initialized = true;
             }
 
-            var jobHandle = _buildRenderGraphSystem.Update();
+            JobHandle jobHandle = new JobHandle();
+             jobHandle = _prepareGraphsSystem.Update(jobHandle);
+            jobHandle = _buildRenderGraphSystem.Update(jobHandle);
             jobHandle=_distanceFieldPrepass.Update(_buildRenderGraphSystem.MainRenderGraph,jobHandle);
             jobHandle =_updateDistanceFieldSystem.Update(jobHandle, _buildRenderGraphSystem.MainRenderGraph);
             _updateMeshesSystem.Update(jobHandle);

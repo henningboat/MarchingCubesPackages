@@ -8,7 +8,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometrySystems.GeometryMath;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -52,7 +52,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
             OriginalGeometryStackData = new GeometryStackData() {Color = DefaultColor, Transformation = OriginTransformation};
             
-            _combinerStack.Push(new CombinerInstruction(CombinerOperation.Min, ZeroFloatProperty, 0));
+            _combinerStack.Push(new CombinerInstruction(CombinerOperation.Min, ZeroFloatProperty, -1));
         }
 
 
@@ -63,8 +63,13 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
         public void FinishWritingCombiner()
         {
-            var combinerToFinish = _combinerStack.Pop();
-            _instructions.Add(combinerToFinish);
+            _combinerStack.Pop();
+
+            //bit confusing: to write the combiner into it's parent, we need the parents combiner settings
+            CombinerInstruction instruction = new CombinerInstruction(CurrentCombiner.Operation,
+                CurrentCombiner.Property, CurrentCombiner.Depth + 1);
+            
+            _instructions.Add(instruction);
         }
 
         public void WriteShape(ShapeType shapeType, GeometryStackData stackData, List<GeometryGraphProperty> getProperties)

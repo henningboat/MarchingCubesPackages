@@ -1,4 +1,4 @@
-﻿namespace henningboat.CubeMarching.GeometrySystems.GeometryMath
+﻿namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
 {
     public enum MathOperatorType
     {

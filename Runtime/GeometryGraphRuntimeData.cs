@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometrySystems.GeometryMath;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using UnityEngine;

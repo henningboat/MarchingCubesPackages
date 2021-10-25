@@ -69,11 +69,12 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
                          {
                              if (isWriting[k])
                              {
-                                 var hash128 = hashPerChunk[k*4+j];
-                                 hash128.Append(ref currentGeometryInstruction);
-                                 hashPerChunk[k + j*4] = hash128;
+                                 var hash128 = hashPerChunk[k * 4 + j];
+                                 var hashOfInstruction = _graph.HashPerInstruction[i];
+                                 hash128.Append(ref hashOfInstruction);
+                                 hashPerChunk[k + j * 4] = hash128;
                              }
-                         }   
+                         }
                      }
                  }
              }
@@ -89,6 +90,10 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
                  var chunkParameters = chunk.Parameters;
                  chunkParameters.InstructionsChangedSinceLastFrame = newInstructionHash != chunkParameters.CurrentGeometryInstructionsHash;
                  chunkParameters.CurrentGeometryInstructionsHash = newInstructionHash;
+                 
+                 
+                 clusterParameters.WriteMask[i] = true;
+                 chunkParameters.InstructionsChangedSinceLastFrame = true;
                  
                  chunk.Parameters = chunkParameters;
              }

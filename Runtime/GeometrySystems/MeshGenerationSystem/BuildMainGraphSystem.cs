@@ -4,7 +4,7 @@ using Unity.Jobs;
 
 namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 {
-    internal class BuileRenderGraphSystem
+    internal class BuildMainGraphSystem
     {
         private GeometryFieldData _geometryFieldData;
         private GeometryGraphInstance[] _allGeometryGraphInstance;
@@ -14,12 +14,12 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             _geometryFieldData = geometryFieldData;
         }
 
-        public JobHandle Update()
+        public JobHandle Update(JobHandle jobHandle)
         {
             //todo initialize in a nicer way
             _allGeometryGraphInstance = UnityEngine.Object.FindObjectsOfType<GeometryGraphInstance>();
             MainRenderGraph = _allGeometryGraphInstance[0].GraphData;
-            return default;
+            return jobHandle;
         }
 
         public GeometryGraphData MainRenderGraph { get; private set; }

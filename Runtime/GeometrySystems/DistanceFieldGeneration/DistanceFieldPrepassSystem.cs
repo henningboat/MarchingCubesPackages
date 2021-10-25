@@ -1,10 +1,10 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using System;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Utils;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
 {
@@ -19,6 +19,9 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
         
         public JobHandle Update(GeometryGraphData graph, JobHandle jobHandle)
         {
+            var hashingJob = new JHashJob(graph);
+            jobHandle = hashingJob.Schedule(graph.GeometryInstructions.Length, 32, jobHandle);
+            
             var job = new JExecuteDistanceFieldPrepass(_geometryFieldData, graph);
             jobHandle = job.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
             // jobHandle.Complete();
