@@ -46,7 +46,7 @@ namespace henningboat.CubeMarching.Rendering
             result._mesh = MeshGeneratorBuilder.GenerateClusterMesh().mesh;
 
             result._clusterCounts = geometryFieldData.ClusterCounts;
-            result._chunkCounts = geometryFieldData.ClusterCounts*global::henningboat.CubeMarching.Constants.chunkLengthPerCluster;
+            result._chunkCounts = geometryFieldData.ClusterCounts*Constants.chunkLengthPerCluster;
             
             return result;
         }
@@ -56,7 +56,6 @@ namespace henningboat.CubeMarching.Rendering
             NativeSlice<CTriangulationInstruction> triangulationInstructions,
             NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices,
             int materialIDFilter, 
-            int3 cluster,
             CClusterParameters clusterParameters)
         {
             const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
@@ -72,7 +71,7 @@ namespace henningboat.CubeMarching.Rendering
             {
                // clusterParameters.lastVertexBufferChangeTimestamp = frameTimeStamp;
                 
-                var clusterPositionWS = clusterParameters.PositionGS * 8;
+                var clusterPositionWS = clusterParameters.PositionWS;
 
                 indexCount = math.min(_mesh.vertexCount, cSubChunkWithTrianglesIndices.Length * maxTrianglesPerSubChunk * 3);
 
@@ -156,7 +155,7 @@ namespace henningboat.CubeMarching.Rendering
 
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
 
-            Graphics.DrawMesh(_mesh, Matrix4x4.identity, DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
+            Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
         }
 
         public const int ChunkLength = 8;
@@ -171,6 +170,15 @@ namespace henningboat.CubeMarching.Rendering
             _triangleCountPerSubChunk.Dispose();
             _indexBufferCounter.Dispose();
             _countPerSubChunkReadback.Dispose();
+
+            if (Application.isPlaying)
+            {
+                Object.Destroy(_mesh);
+            }
+            else
+            {
+                Object.DestroyImmediate(_mesh);
+            }
         }
     }
 }

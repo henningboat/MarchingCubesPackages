@@ -22,9 +22,20 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
 
         public void Dispose()
         {
-            GeometryBuffer.Dispose();
-            ClusterParameters.Dispose();
-            DistanceFieldChunkDatas.Dispose();
+            if (GeometryBuffer.IsCreated)
+            {
+                GeometryBuffer.Dispose();
+            }
+
+            if (ClusterParameters.IsCreated)
+            {
+                ClusterParameters.Dispose();
+            }
+
+            if (DistanceFieldChunkDatas.IsCreated)
+            {
+                DistanceFieldChunkDatas.Dispose();
+            }
         }
 
         public void Initialize(int3 clusterCounts)
@@ -47,10 +58,17 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
             var clusterIndex = 0;
 
             for (var x = 0; x < clusterCounts.x; x++)
-            for (var y = 0; y < clusterCounts.y; y++)
-            for (var z = 0; z < clusterCounts.z; z++)
-                ClusterParameters[clusterIndex] = new CClusterParameters
-                    {ClusterIndex = clusterIndex, PositionGS = new int3(x, y, z)};
+            {
+                for (var y = 0; y < clusterCounts.y; y++)
+                {
+                    for (var z = 0; z < clusterCounts.z; z++)
+                    {
+                        ClusterParameters[clusterIndex] = new CClusterParameters
+                            {ClusterIndex = clusterIndex, PositionWS = new int3(x, y, z) * Constants.clusterLength};
+                        clusterIndex++;
+                    }
+                }
+            }
 
             var initializeChunkData = new JInitializeChunkParameters
             {
@@ -83,20 +101,23 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
             public void Execute()
             {
                 for (var clusterIndex = 0; clusterIndex < GeometryClusterParameters.Length; clusterIndex++)
-                for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
                 {
-                    var totalIndex = chunkIndex + clusterIndex * Constants.chunksPerCluster;
-
-                    var positionWS =
-                        TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex,
-                            Constants.chunkLengthPerCluster) * Constants.chunkLength;
-
-                    var chunkParameters = new GeometryChunkParameters
+                    var clusterParameter = GeometryClusterParameters[clusterIndex];
+                    for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
                     {
-                        IndexInCluster = chunkIndex,
-                        PositionWS = positionWS
-                    };
-                    GeometryChunkParameters[totalIndex] = chunkParameters;
+                        var totalIndex = chunkIndex + clusterIndex * Constants.chunksPerCluster;
+
+                        var positionWS =
+                            TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex,
+                                Constants.chunkLengthPerCluster) * Constants.chunkLength + clusterParameter.PositionWS;
+
+                        var chunkParameters = new GeometryChunkParameters
+                        {
+                            IndexInCluster = chunkIndex,
+                            PositionWS = positionWS
+                        };
+                        GeometryChunkParameters[totalIndex] = chunkParameters;
+                    }
                 }
             }
         }

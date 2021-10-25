@@ -53,7 +53,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
             {
                 var chunkParameters = cluster.GetChunk(chunkIndex).Parameters;
-                var positionOfChunkWS = TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex, new int3(Constants.chunkLengthPerCluster))*Constants.chunkLength;
+                var positionOfChunkWS = chunkParameters.PositionWS;
 
                 // var currentHash = dynamicData.DistanceFieldChunkData.CurrentGeometryInstructionsHash;
 

@@ -36,7 +36,82 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
 
         private static float NoiseSlice(PackedFloat3 input, int slice)
         {
-            return noise.cnoise(-new float3(input.x.PackedValues[slice], input.y.PackedValues[slice], input.z.PackedValues[slice]));
+            return noise.cnoise(-new float3(input.x.PackedValues[slice], input.y.PackedValues[slice],
+                input.z.PackedValues[slice]));
         }
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
+    public struct CShapeVoronoi : ITerrainModifierShape
+    {
+        [FieldOffset(4)] public FloatValue valueOffset;
+        [FieldOffset(12)] public Float3Value scale;
+        public ShapeType Type => ShapeType.Noise;
+
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+        {
+            positionOS *= scale.Resolve(valueBuffer);
+            return Voronoi(positionOS) - new PackedFloat(valueOffset.Resolve(valueBuffer));
+        }
+
+
+        public PackedFloat3 Hash(PackedFloat3 x)
+        {
+            x = new PackedFloat3(
+                SimdMath.dot(x,
+                    new PackedFloat3(new PackedFloat(127.1f), new PackedFloat(311.7f), new PackedFloat(74.7f))),
+                SimdMath.dot(x,
+                    new PackedFloat3(new PackedFloat(269.5f), new PackedFloat(183.3f), new PackedFloat(246.1f))),
+                SimdMath.dot(x,
+                    new PackedFloat3(new PackedFloat(113.5f), new PackedFloat(271.9f), new PackedFloat(124.6f))));
+
+            return SimdMath.frac(SimdMath.sin(x) * 43758.5453123f);
+        }
+
+        //from https://www.shadertoy.com/view/ldl3Dl
+        public PackedFloat Voronoi(PackedFloat3 x)
+        {
+            PackedFloat3 p = SimdMath.floor(x);
+            PackedFloat3 f = SimdMath.frac(x);
+
+            PackedFloat id = 0.0f;
+
+            PackedFloat res = new PackedFloat(100f);
+            for (int k = -1; k <= 1; k++)
+            for (int j = -1; j <= 1; j++)
+            for (int i = -1; i <= 1; i++)
+            {
+                PackedFloat3 b = new PackedFloat3(new PackedFloat(i), new PackedFloat(j), new PackedFloat(k));
+                PackedFloat3 r =  b - f + Hash(p + b);
+                PackedFloat d = SimdMath.dot(r, r);
+
+                bool4 greater = d.PackedValues < res.PackedValues;
+
+                for (int packedFloatIndex = 0; packedFloatIndex < 4; packedFloatIndex++)
+                {
+                    if (greater[packedFloatIndex])
+                    {
+                        res = d;
+                    }
+                }
+              
+                
+                // if (d < res.x)
+                // {
+                //     id = dot(p + b, vec3(1.0f, 57.0f, 113.0f));
+                //     res = vec2(d, res.x);
+                // }
+                // else if (d < res.y)
+                // {
+                //     res.y = d;
+                // }
+            }
+
+            return SimdMath.sqrt(res);
+
+            // return vec3(sqrt(res), abs(id));
+
+        }
+
     }
 }

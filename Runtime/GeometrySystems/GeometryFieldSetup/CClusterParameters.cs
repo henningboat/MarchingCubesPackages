@@ -10,7 +10,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
         public int vertexCount;
         public int lastVertexBufferChangeTimestamp;
         public int triangulationInstructionCount;
-        public int3 PositionGS;
+        public int3 PositionWS;
         public int ClusterIndex;
         public int subChunksWithTrianglesCount;
     }

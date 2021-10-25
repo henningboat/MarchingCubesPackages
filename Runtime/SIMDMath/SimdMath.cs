@@ -67,6 +67,32 @@ namespace Code.SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat floor(PackedFloat a)
+        {
+            return new PackedFloat(math.floor(a.PackedValues));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat ceil(PackedFloat a)
+        {
+            return new PackedFloat(math.ceil(a.PackedValues));
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat3 floor(PackedFloat3 a)
+        {
+            return new PackedFloat3(floor(a.x),floor(a.y),floor(a.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat3 ceil(PackedFloat3 a)
+        {
+            return new PackedFloat3(ceil(a.x),ceil(a.y),ceil(a.z));
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat lerp(PackedFloat a, PackedFloat b, PackedFloat t)
         {
             return new(math.lerp(a.PackedValues, b.PackedValues, t.PackedValues));
@@ -144,6 +170,13 @@ namespace Code.SIMDMath
         public static PackedFloat sin(PackedFloat value)
         {
             return new() {PackedValues = math.sin(value.PackedValues)};
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat3 sin(PackedFloat3 value)
+        {
+            return new PackedFloat3(sin(value.x), sin(value.y), sin(value.z));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
