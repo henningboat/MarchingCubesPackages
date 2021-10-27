@@ -59,7 +59,7 @@ namespace henningboat.CubeMarching
         }
 
         public void UpdateOverwrites()
-        {
+        { 
             UpdateOverwritesInValueBuffer();
         }
     }

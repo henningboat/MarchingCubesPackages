@@ -1,10 +1,11 @@
 ﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Rendering;
-using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 {
@@ -12,7 +13,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
     {
         private NativeArray<CTriangulationInstruction> _triangulationInstructions;
         private NativeArray<CSubChunkWithTrianglesIndex> _subChunksWithTrianglesData;
-        private NativeArray<CVertexCountPerSubCluster> _vertexCountPerSubChunk;
+        private NativeArray<int> _vertexCountPerSubChunk;
 
         private GeometryFieldData _geometryFieldData;
 
@@ -20,6 +21,9 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
         private ComputeBuffer _indexMapComputeBuffer;
 
         private ClusterMeshGPUBuffers[] _gpuDataPerCluster;
+        private int _frameCount;
+
+        private GPUVertexCountReadbackHandler _gpuReadbackHandler;
 
 
         public void Initialize(GeometryFieldData geometryFieldData)
@@ -31,31 +35,32 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                 new NativeArray<CSubChunkWithTrianglesIndex>(geometryFieldData.TotalSubChunkCount,
                     Allocator.Persistent);
             _vertexCountPerSubChunk =
-                new NativeArray<CVertexCountPerSubCluster>(geometryFieldData.TotalSubChunkCount, Allocator.Persistent);
-            
-            _distanceFieldComputeBuffer = new ComputeBuffer(_geometryFieldData.GeometryBuffer.Length, 4 * 4 * 2);
+                new NativeArray<int>(geometryFieldData.TotalSubChunkCount, Allocator.Persistent);
 
-            
+            _distanceFieldComputeBuffer = new ComputeBuffer(_geometryFieldData.GeometryBuffer.Length, 4 * 4 * 2);
+            _gpuReadbackHandler = new GPUVertexCountReadbackHandler(geometryFieldData);
+
             var indexMap = new int[_geometryFieldData.TotalChunkCount];
-            for (int clusterIndex = 0; clusterIndex < _geometryFieldData.ClusterCount; clusterIndex++)
+            for (var clusterIndex = 0; clusterIndex < _geometryFieldData.ClusterCount; clusterIndex++)
             {
                 var cluster = _geometryFieldData.GetCluster(clusterIndex);
-                for (int i = 0; i < Constants.chunksPerCluster; i++)
+                for (var i = 0; i < Constants.chunksPerCluster; i++)
                 {
                     var chunk = cluster.GetChunk(i);
 
                     //the whole index map is horrible legacy stuff I should get rid of
                     var totalFieldSizeGS = _geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;
-                    int indexInIndexMap =
-                        TerrainChunkEntitySystem.Utils.PositionToIndex(chunk.Parameters.PositionWS/Constants.chunkLengthPerCluster, totalFieldSizeGS);
-                 
+                    var indexInIndexMap =
+                        TerrainChunkEntitySystem.Utils.PositionToIndex(
+                            chunk.Parameters.PositionWS / Constants.chunkLengthPerCluster, totalFieldSizeGS);
+
                     indexMap[indexInIndexMap] = clusterIndex * Constants.chunksPerCluster + i;
                 }
             }
-            
+
             _indexMapComputeBuffer = new ComputeBuffer(indexMap.Length, 4);
             _indexMapComputeBuffer.SetData(indexMap);
-            
+
             _gpuDataPerCluster = new ClusterMeshGPUBuffers[geometryFieldData.ClusterCount];
             for (var i = 0; i < geometryFieldData.ClusterCount; i++)
                 _gpuDataPerCluster[i] = ClusterMeshGPUBuffers.CreateGPUData(geometryFieldData);
@@ -63,7 +68,11 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
         public void Update(JobHandle jobHandle)
         {
-            var job = new JCalculateTriangulationIndicesJob
+            _frameCount++;
+
+            _gpuReadbackHandler.ApplyReadbacks(jobHandle, _vertexCountPerSubChunk);
+
+            var calculateIndeicesJob = new JCalculateTriangulationIndicesJob
             {
                 GeometryField = _geometryFieldData,
                 TriangulationInstructions = _triangulationInstructions,
@@ -71,7 +80,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                 SubChunksWithTrianglesData = _subChunksWithTrianglesData
             };
 
-            var handle = job.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
+            var handle = calculateIndeicesJob.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
             handle.Complete();
 
             _distanceFieldComputeBuffer.SetData(_geometryFieldData.GeometryBuffer);
@@ -90,7 +99,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
-                    clusterParameters);
+                    clusterParameters, _frameCount, _gpuReadbackHandler);
             }
         }
 
@@ -106,6 +115,74 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             _triangulationInstructions.Dispose();
             _subChunksWithTrianglesData.Dispose();
             _vertexCountPerSubChunk.Dispose();
+            
+            _gpuReadbackHandler.Dispose();
+        }
+    }
+
+    internal class GPUVertexCountReadbackHandler
+    {
+        private NativeArray<int> _vertexCountPerSubChunkReadback;
+
+        public GPUVertexCountReadbackHandler(GeometryFieldData geometryFieldData)
+        {
+            _vertexCountPerSubChunkReadback = new NativeArray<int>(
+                geometryFieldData.ClusterCount * Constants.subChunksPerCluster,
+                Allocator.Persistent);
+        }
+
+        public void Dispose()
+        {
+            _vertexCountPerSubChunkReadback.Dispose();
+        }
+
+        public JobHandle ApplyReadbacks(JobHandle jobHandle, NativeArray<int> vertexCountPerSubChunk)
+        {
+            //todo turn into job
+            jobHandle.Complete();
+            vertexCountPerSubChunk.CopyFrom(_vertexCountPerSubChunkReadback);
+            return jobHandle;
+        }
+        
+        public void RequestReadback(CClusterParameters clusterParameters, ComputeBuffer vertexCountComputeBuffer)
+        {
+            int clusterIndex = clusterParameters.ClusterIndex;
+            
+            AsyncGPUReadback.Request(vertexCountComputeBuffer, request =>
+            {
+                if (request.hasError)
+                    Debug.LogWarning("Could not receive vertex count of cluster " + clusterParameters.ClusterIndex);
+
+                //since this code is executed async, we might be in a new scene already
+                if (_vertexCountPerSubChunkReadback.IsCreated == false)
+                {
+                    return;
+                }
+                
+                var targetSlice = _vertexCountPerSubChunkReadback.Slice(clusterIndex * Constants.subChunksPerCluster,
+                    Constants.subChunksPerCluster);
+                    var data = request.GetData<int>();
+                    
+                    
+                targetSlice.CopyFrom(data);
+                
+                
+                //todo find out where the negative numbers come from
+                for (int i = 0; i < targetSlice.Length; i++)
+                {
+                    targetSlice[i] = math.max(0, targetSlice[i]);
+                }
+                
+                
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    Debug.Log("queue update");
+                    EditorApplication.QueuePlayerLoopUpdate();
+                    UnityEditor.SceneView.RepaintAll();
+                }
+#endif
+            });
         }
     }
 }

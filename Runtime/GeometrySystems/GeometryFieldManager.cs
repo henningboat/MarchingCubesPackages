@@ -4,6 +4,7 @@ using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.GeometrySystems
@@ -22,6 +23,13 @@ namespace henningboat.CubeMarching.GeometrySystems
 
         public void Update()
         {
+            #if UNITY_EDITOR
+            if (BuildPipeline.isBuildingPlayer)
+            {
+                return;
+            }
+            #endif
+            
             var targetClusterCount = _clusterCounts;
 
             targetClusterCount = math.clamp(targetClusterCount, 1, 5);
@@ -61,9 +69,11 @@ namespace henningboat.CubeMarching.GeometrySystems
 
         private void OnDestroy()
         {
-            Debug.Log("Disposing");
-            _geometryFieldData.Dispose();
-            _updateMeshesSystem.Dispose();
+            if (_initialized)
+            {
+                _geometryFieldData.Dispose();
+                _updateMeshesSystem.Dispose();
+            }
         }
     }
 }

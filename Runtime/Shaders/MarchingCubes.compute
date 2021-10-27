@@ -108,8 +108,7 @@ int GetSubChunkIndexFromPosition(int3 positionWS)
 void ResetSubChunkTriangleCount (uint3 id : SV_DispatchThreadID)
 {
     const uint chunkIndex = id.x;
-    //the +2 is probably unnecessary
-    const int3 terrainChunkBasePosition = _TerrainChunkBasePosition[chunkIndex].xyz + 2;
+    const int3 terrainChunkBasePosition = _TerrainChunkBasePosition[chunkIndex].xyz+2;
     const int subChunkIndexInCluster = GetSubChunkIndexFromPosition(terrainChunkBasePosition);
 
     _TriangleCountPerSubChunk[subChunkIndexInCluster] = 0;

@@ -40,6 +40,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             //     }
             //  }
             // Debug.Log(count);
+            
             return jobHandle;
         }
     }

@@ -4,7 +4,6 @@ using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using UnityEngine;
-using Hash128 = UnityEngine.Hash128;
 
 namespace henningboat.CubeMarching
 {
@@ -12,7 +11,7 @@ namespace henningboat.CubeMarching
     {
         [SerializeField] private Hash128 _contentHash;
         [SerializeField] private Float4X4Value _mainTransformation;
-    
+
         [SerializeField] private float[] _valueBuffer;
         [SerializeField] private MathInstruction[] _mathInstructions;
         [SerializeField] private GeometryInstruction[] _geometryInstructions;
@@ -31,11 +30,13 @@ namespace henningboat.CubeMarching
             _mainTransformation = mainTransformation;
         }
 
-        public void AllocateNativeArrays(out NativeArray<float> values, out NativeArray<MathInstruction> mathInstructions, out NativeArray<GeometryInstruction> geometryInstructions)
+        public void AllocateNativeArrays(out NativeArray<float> values,
+            out NativeArray<MathInstruction> mathInstructions,
+            out NativeArray<GeometryInstruction> geometryInstructions)
         {
-            values = MemoryHandler.CreateNativeArray<float>(_valueBuffer, Allocator.Persistent);
-            mathInstructions = MemoryHandler.CreateNativeArray<MathInstruction>(_mathInstructions, Allocator.Persistent);
-            geometryInstructions = MemoryHandler.CreateNativeArray<GeometryInstruction>(_geometryInstructions, Allocator.Persistent);
+            values = new NativeArray<float>(_valueBuffer, Allocator.Persistent);
+            mathInstructions = new NativeArray<MathInstruction>(_mathInstructions, Allocator.Persistent);
+            geometryInstructions = new NativeArray<GeometryInstruction>(_geometryInstructions, Allocator.Persistent);
         }
     }
 }

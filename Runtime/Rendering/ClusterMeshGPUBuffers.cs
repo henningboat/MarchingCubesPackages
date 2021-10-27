@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.Rendering
 {
@@ -35,7 +38,7 @@ namespace henningboat.CubeMarching.Rendering
             result._chunksToTriangulize = new ComputeBuffer(10000, 4 * 4, ComputeBufferType.Default);
             result._indexBufferCounter = new ComputeBuffer(2, 4, default);
 
-            result._triangleCountPerSubChunk.SetData(new[] {result._triangleCountPerSubChunk.count});
+            result._triangleCountPerSubChunk.SetData(new int[] {result._triangleCountPerSubChunk.count});
 
             result._countPerSubChunkReadback = new NativeArray<int>(512 * 8, Allocator.Persistent);
             
@@ -55,8 +58,9 @@ namespace henningboat.CubeMarching.Rendering
             ComputeBuffer globalTerrainIndexMap,
             NativeSlice<CTriangulationInstruction> triangulationInstructions,
             NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices,
-            int materialIDFilter, 
-            CClusterParameters clusterParameters)
+            int materialIDFilter,
+            CClusterParameters clusterParameters, int timeStamp,
+            GPUVertexCountReadbackHandler gpuVertexCountReadbackHandler)
         {
             const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
 
@@ -64,6 +68,8 @@ namespace henningboat.CubeMarching.Rendering
 
             if (cSubChunkWithTrianglesIndices.Length == 0)
             {
+
+                gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk);
                 return;
                 indexCount = 0;
             }
@@ -149,10 +155,22 @@ namespace henningboat.CubeMarching.Rendering
                 meshIndexBuffer.Dispose();
             }
 
-            //todo reimplement
-           // AsyncReadbackUtility.AddCallbackIfNeeded(cluster.ClusterIndex, _triangleCountPerSubChunk, frameTimeStamp, clusterParameters.lastVertexBufferChangeTimestamp);
+            gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk);
+            
+            //hack
+            clusterParameters.lastVertexBufferChangeTimestamp = timeStamp;
 
-
+            if (clusterParameters.vertexCount < 0)
+            {
+                Debug.LogError($"Total vertex count for submesh {clusterParameters.vertexCount} is <0");
+                return;
+            }
+            if (clusterParameters.vertexCount > _mesh.vertexCount)
+            {
+                Debug.LogError($"Total vertex count for submesh {clusterParameters.ClusterIndex} is above _mesh.vertexCount");
+                return;
+            }
+            
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
 
             Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);

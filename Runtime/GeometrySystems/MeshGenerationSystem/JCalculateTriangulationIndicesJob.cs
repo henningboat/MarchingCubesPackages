@@ -13,9 +13,9 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
     {
         [NativeDisableParallelForRestriction] public NativeArray<CTriangulationInstruction> TriangulationInstructions;
         [NativeDisableParallelForRestriction] public NativeArray<CSubChunkWithTrianglesIndex> SubChunksWithTrianglesData;
-        [NativeDisableParallelForRestriction] public NativeArray<CVertexCountPerSubCluster> VertexCountPerSubChunk;
+        [NativeDisableParallelForRestriction] public NativeArray<int> VertexCountPerSubChunk;
         [NativeDisableParallelForRestriction] public GeometryFieldData GeometryField;
-
+        
         public void Execute(int clusterIndex)
         {
             var cluster = GeometryField.GetCluster(clusterIndex);
@@ -26,27 +26,9 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
             int subChunksWithTrianglesCount=0;
 
-            // NativeSlice<int> vertexCountData = default;
-            //     var hasVertexCountReadback = false;
-            //     var vertexCountReadbackTimesStamp = 0;
-    
-            //todo reimplement GPUReadbacks
-            // for (var i = 0; i < gpuReadbackDataClusterIndex.Length; i++)
-            // {
-            //     if (gpuReadbackDataClusterIndex[i] == clusterPosition.ClusterIndex)
-            //     {
-            //         vertexCountData = new NativeSlice<int>(gpuReadbackDataVertexCount, Constants.SubChunksInCluster * i, Constants.SubChunksInCluster);
-            //         vertexCountReadbackTimesStamp = gpuReadbackDataFrameTimestamp[i];
-            //         hasVertexCountReadback = true;
-            //         break;
-            //     }
-            // }
-    
             var totalVertexCount = 0;
 
-            NativeSlice<CVertexCountPerSubCluster> vertexCountPerSubChunk = VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
-            // NativeSlice<CSubChunkWithTrianglesIndex> subChunksWithTriangles = SubChunksWithTrianglesData.Slice(offsetInSubChunkBuffer, GeometryFieldData.subChunksPerCluster);
-            //
+            NativeSlice<int> vertexCountPerSubChunk = VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
 
             var triangulationInstructions = TriangulationInstructions.SliceList(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
 
@@ -63,15 +45,6 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                 {
                     var subChunkIndex = chunkIndex * 8 + i;
 
-                    // if (hasVertexCountReadback)
-                    // {
-                    //     if (dynamicData.DistanceFieldChunkData.InstructionChangeFrameCount <= vertexCountReadbackTimesStamp)
-                    //     {
-                    //         vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = vertexCountData[subChunkIndex]};
-                    //         clusterParameters.needsIndexBufferUpdate = true;
-                    //     }
-                    // }
-
                     if (chunkParameters.InnerDataMask.GetBit(i))
                     {
                         var subChunkOffset = TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, 2) * 4;
@@ -80,7 +53,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                         if (chunkParameters.InstructionsChangedSinceLastFrame)
                         {
                             triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
-                            vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = 32};
+                            //vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = 32};
                         }
 
                         SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex
@@ -89,7 +62,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                         };
                         subChunksWithTrianglesCount++;
                            
-                        totalVertexCount += vertexCountPerSubChunk[subChunkIndex].vertexCount;
+                        totalVertexCount += vertexCountPerSubChunk[subChunkIndex];
                     }
                 }
             }
