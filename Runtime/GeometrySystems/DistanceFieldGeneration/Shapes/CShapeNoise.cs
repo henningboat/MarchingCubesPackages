@@ -77,6 +77,9 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
             PackedFloat id = 0.0f;
 
             PackedFloat res = new PackedFloat(100f);
+            PackedFloat res2 = new PackedFloat(100f);
+            
+            
             for (int k = -1; k <= 1; k++)
             for (int j = -1; j <= 1; j++)
             for (int i = -1; i <= 1; i++)
@@ -85,17 +88,11 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 PackedFloat3 r =  b - f + Hash(p + b);
                 PackedFloat d = SimdMath.dot(r, r);
 
-                bool4 greater = d.PackedValues < res.PackedValues;
-
-                for (int packedFloatIndex = 0; packedFloatIndex < 4; packedFloatIndex++)
-                {
-                    if (greater[packedFloatIndex])
-                    {
-                        res = d;
-                    }
-                }
-              
+                var newDistanceIsSmallest = d.PackedValues < res.PackedValues;
                 
+                res.PackedValues = math.@select(res.PackedValues, d.PackedValues, newDistanceIsSmallest);
+                res2.PackedValues = math.@select(SimdMath.min(res2, d).PackedValues, res2.PackedValues, newDistanceIsSmallest);
+
                 // if (d < res.x)
                 // {
                 //     id = dot(p + b, vec3(1.0f, 57.0f, 113.0f));
@@ -107,10 +104,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 // }
             }
 
-            return SimdMath.sqrt(res);
-
-            // return vec3(sqrt(res), abs(id));
-
+            return -(res2 - res);
         }
 
     }

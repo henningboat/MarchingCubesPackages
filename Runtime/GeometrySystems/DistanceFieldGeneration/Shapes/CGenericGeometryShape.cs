@@ -36,8 +36,8 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                         return ((CShapeTorus*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
                         break;
                     case ShapeType.Noise: 
-                        return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
-                        //return ((CShapeVoronoi*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        //return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapeVoronoi*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
                     case ShapeType.Plane:
                         return ((CShapePlane*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
                         break; 
