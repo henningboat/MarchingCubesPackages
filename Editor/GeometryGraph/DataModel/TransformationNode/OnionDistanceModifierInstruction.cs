@@ -14,4 +14,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         protected override DistanceModificationType Type => DistanceModificationType.Onion;
     }
+    
+    public class InversionDistanceModifierInstruction : DistanceModifierInstruction
+    {
+        public InversionDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData) :
+            base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation)
+        {
+        }
+
+        protected override DistanceModificationType Type => DistanceModificationType.Inversion;
+    }
 }

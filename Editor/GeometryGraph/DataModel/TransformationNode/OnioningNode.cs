@@ -41,4 +41,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             return new OnionDistanceModifierInstruction(_amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
         }
     }
+    
+    
+    [UsedImplicitly]
+    public class InversionNode : DistanceModificationNode
+    {
+        protected override DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData)
+        {
+            return new InversionDistanceModifierInstruction(context, stackData);
+        }
+    }
 }

@@ -3,5 +3,6 @@
     public enum DistanceModificationType
     {
         Onion,
+        Inversion
     }
 }

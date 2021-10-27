@@ -22,7 +22,8 @@ namespace henningboat.CubeMarching.GeometryComponents
                 {
                     case DistanceModificationType.Onion:
                         return ((OnionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance, valueBuffer);
-                        break;
+                    case DistanceModificationType.Inversion:
+                        return ((InversionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance, valueBuffer);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

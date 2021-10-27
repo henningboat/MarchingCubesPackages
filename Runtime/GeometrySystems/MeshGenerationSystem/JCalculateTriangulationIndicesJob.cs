@@ -80,7 +80,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                         if (chunkParameters.InstructionsChangedSinceLastFrame)
                         {
                             triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
-                            vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = Constants.maxVertsPerCluster};
+                            vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = 32};
                         }
 
                         SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex
