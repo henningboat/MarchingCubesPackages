@@ -45,8 +45,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
             base.OnDefineNode();
             BlendModeInput = this.AddDataInputPort<CombinerOperation>("Blend Mode", nameof(BlendModeInput));
 
-            GeometryInputA = this.AddExecutionInputPort("", nameof(GeometryInputA));
-            GeometryInputB = this.AddExecutionInputPort("", nameof(GeometryInputB));
+            GeometryInputA = AddExecutionInput( nameof(GeometryInputA));
+            GeometryInputB = AddExecutionInput(nameof(GeometryInputB));
             
             BlendFactor = this.AddDataInputPort<float>("BlendFactor", nameof(BlendFactor));
         }

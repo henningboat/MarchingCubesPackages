@@ -1,6 +1,5 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using UnityEditor.GraphToolsFoundation.Overdrive;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
-    public class ColorNode : NodeModel, IGeometryNode
+    public class ColorNode : GeometryNodeModel, IGeometryNode
     {
         private IPortModel _geometryIn;
         private IPortModel _colorIn;
@@ -17,8 +16,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 
         protected override void OnDefineNode()
         {
-            _geometryIn = this.AddExecutionInputPort("", nameof(_geometryIn));
-            _geometryOut = this.AddExecutionOutputPort("", nameof(_geometryOut));
+            _geometryIn = AddExecutionInput(nameof(_geometryIn));
+            _geometryOut = AddExecutionOutput(nameof(_geometryOut));
             _colorIn = this.AddDataInputPort<Color>("", nameof(_colorIn));
         }
 

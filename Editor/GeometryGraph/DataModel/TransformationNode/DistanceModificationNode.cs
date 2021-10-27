@@ -6,15 +6,15 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 {
-    public abstract class DistanceModificationNode : NodeModel, IGeometryNode
+    public abstract class DistanceModificationNode : GeometryNodeModel, IGeometryNode
     {
         private IPortModel _geometryInput;
         private IPortModel _geometryOutput;
 
         protected override void OnDefineNode()
         {
-            _geometryInput = this.AddExecutionInputPort("", nameof(_geometryInput));
-            _geometryOutput = this.AddExecutionOutputPort("", nameof(_geometryInput));
+            _geometryInput = AddExecutionInput(nameof(_geometryInput));
+            _geometryOutput = AddExecutionOutput(nameof(_geometryInput));
         }
 
 

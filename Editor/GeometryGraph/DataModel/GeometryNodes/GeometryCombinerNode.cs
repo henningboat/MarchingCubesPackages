@@ -1,10 +1,9 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
-    public abstract class GeometryCombinerNode : NodeModel, IGeometryNode
+    public abstract class GeometryCombinerNode : GeometryNodeModel, IGeometryNode
     {
         public IPortModel GeometryOut { get; set; }
 
@@ -12,7 +11,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         {
             base.OnDefineNode();
 
-            GeometryOut = this.AddExecutionOutputPort(null, nameof(GeometryOut));
+            GeometryOut = AddExecutionOutput(nameof(GeometryOut));
         }
 
         public abstract void Resolve(GeometryGraphResolverContext context, GeometryStackData parent);

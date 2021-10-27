@@ -5,13 +5,12 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
     [Serializable]
-    public abstract class ShapeNode<T> : NodeModel, IGeometryNode where T : struct, ITerrainModifierShape
+    public abstract class ShapeNode<T> : GeometryNodeModel, IGeometryNode where T : struct, ITerrainModifierShape
     {
         public IPortModel GeometryOut { get; set; }
 
@@ -19,7 +18,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
         {
             base.OnDefineNode();
 
-            GeometryOut = this.AddExecutionOutputPort(nameof(GeometryOut));
+            GeometryOut = AddExecutionOutput(nameof(GeometryOut));
 
             Color = new Color(0.4f, 0, 0);
         }

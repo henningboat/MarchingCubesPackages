@@ -1,12 +1,11 @@
 using System;
-using System.Linq;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
     [Serializable]
-    public class GraphResult : NodeModel
+    public class GraphResult : GeometryNodeModel
     {
         public override string Title
         {
@@ -18,7 +17,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 
         protected override void OnDefineNode()
         {
-            DataIn = this.AddExecutionInputPort("", nameof(DataIn));
+            DataIn = AddExecutionInput(nameof(DataIn));
         }
     }
 }
