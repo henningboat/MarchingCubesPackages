@@ -24,7 +24,10 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             var clusterParameters = cluster.Parameters;
             clusterParameters.needsIndexBufferUpdate = false;
 
-            int subChunksWithTrianglesCount=0;
+            int subChunksWithTrianglesCount = 0;
+            var subChunksWithTrianglesSlice =
+                SubChunksWithTrianglesData.Slice(clusterIndex * Constants.subChunksPerCluster,
+                    Constants.subChunksPerCluster);
 
             var totalVertexCount = 0;
 
@@ -49,14 +52,17 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                     {
                         var subChunkOffset = TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, 2) * 4;
 
+                        
+                        const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
+                        
                         //todo re-add checking for this 
                         if (chunkParameters.InstructionsChangedSinceLastFrame)
                         {
                             triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
-                            //vertexCountPerSubChunk[subChunkIndex] = new CVertexCountPerSubCluster() {vertexCount = 32};
+                            vertexCountPerSubChunk[subChunkIndex] = maxTrianglesPerSubChunk;
                         }
 
-                        SubChunksWithTrianglesData[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex
+                        subChunksWithTrianglesSlice[subChunksWithTrianglesCount] = new CSubChunkWithTrianglesIndex
                         {
                             SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
                         };
