@@ -184,6 +184,11 @@ void ClearVertexData (uint3 id : SV_DispatchThreadID)
     triangles[index]=(VertexData)0;
 }
 
+int interpolateMaterial(int a, int b, float t)
+{
+    return t<0.5?a:b;
+}
+
 [numthreads(1,512,1)]
 void Triangulation (uint3 id : SV_DispatchThreadID)
 {
@@ -265,9 +270,9 @@ void Triangulation (uint3 id : SV_DispatchThreadID)
         vertexC.normal = interpolateNormals(cubeNormals[a2], cubeNormals[b2],tC);
 
         //todo actually select the right one
-        vertexA.materialData=cubeVertexColors[0];
-        vertexB.materialData=cubeVertexColors[0];
-        vertexC.materialData=cubeVertexColors[0];
+        vertexA.materialData=interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0],tA);
+        vertexB.materialData=interpolateMaterial(cubeVertexColors[a1], cubeVertexColors[b1],tB);
+        vertexC.materialData=interpolateMaterial(cubeVertexColors[a2], cubeVertexColors[b2],tC);
     
         int baseIndex = valid_triangle_position_result.vertexBufferPosition + i;
         triangles[baseIndex+0]=vertexC;
