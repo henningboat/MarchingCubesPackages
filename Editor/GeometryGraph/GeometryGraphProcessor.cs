@@ -13,23 +13,34 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 {
     internal class GeometryGraphProcessor : IGraphProcessor
     {
+        public static void ResolveGraphAndWriteToRuntimeData(IGeometryNode rootNode, GeometryGraphRuntimeData data, IGraphModel graphModel)
+        {
+            
+            var result = Resolve(graphModel, rootNode);
+            
+            var contentHash = new Hash128();
+            contentHash.Append(result.PropertyValueBuffer);
+            contentHash.Append(result.MathInstructionBuffer);
+            contentHash.Append(result.GeometryInstructionBuffer.ToArray());
+
+            data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
+                result.GeometryInstructionBuffer, contentHash,
+                new Float4X4Value {Index = result.OriginTransformation.Index});
+        }
         public GraphProcessingResult ProcessGraph(IGraphModel graphModel)
         {
             EditorApplication.QueuePlayerLoopUpdate();
             
             try
             {
-                var result = Resolve(graphModel);
+                var resultNode = graphModel.NodeModels.FirstOrDefault(model => model is GraphResult) as GraphResult;
 
-                var contentHash = new Hash128();
-                contentHash.Append(result.PropertyValueBuffer);
-                contentHash.Append(result.MathInstructionBuffer);
-                contentHash.Append(result.GeometryInstructionBuffer.ToArray());
+                var rootNode = resultNode.DataIn.GetConnectedPorts().FirstOrDefault().NodeModel as IGeometryNode;
 
                 var data = GetRuntimeData(graphModel);
-                data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
-                    result.GeometryInstructionBuffer, contentHash,
-                    new Float4X4Value {Index = result.OriginTransformation.Index});
+
+                ResolveGraphAndWriteToRuntimeData(rootNode, data, graphModel);
+                
                 EditorUtility.SetDirty(data);
                 return new GraphProcessingResult() {Errors = { }};
             }
@@ -40,7 +51,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
                 return graphProcessingResult;
             }
         }
-
+        
         private static GeometryGraphRuntimeData GetRuntimeData(IGraphModel graphModel)
         {
             var assetPath = graphModel.AssetModel.GetPath();
@@ -56,13 +67,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             return data;
         }
 
-        private static GeometryGraphResolverContext Resolve(IGraphModel graphModel)
+        private static GeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
         {
             var context = new GeometryGraphResolverContext();
 
-            var resultNode = graphModel.NodeModels.FirstOrDefault(model => model is GraphResult) as GraphResult;
-
-            var rootNode = resultNode.DataIn.GetConnectedPorts().FirstOrDefault().NodeModel as IGeometryNode;
+       
 
             context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty, 0));
 

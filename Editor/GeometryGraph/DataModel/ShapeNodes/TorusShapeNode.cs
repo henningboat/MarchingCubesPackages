@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
@@ -8,6 +9,7 @@ using UnityEditor.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
+    [Serializable]
     public class TorusShapeNode : ShapeNode<CShapeTorus>
     {
         public override string Title

@@ -1,8 +1,10 @@
 using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Code.CubeMarching.GeometryGraph.Editor.GraphElements;
 using UnityEditor.GraphToolsFoundation.Overdrive;
+using UnityEngine;
 
 namespace Code.CubeMarching.GeometryGraph.Editor
 {
@@ -15,12 +17,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             ui.SetupBuildAndUpdate(model, commandDispatcher, elementBuilder.View, elementBuilder.Context);
             return ui;
         }
-
-        public static IModelUI CreateMathResultUI(this ElementBuilder elementBuilder, CommandDispatcher commandDispatcher, GraphResult model)
+        
+        public static IModelUI CreateGeometryNodeUI(this ElementBuilder elementBuilder, CommandDispatcher commandDispatcher, GeometryNodeModel geometryNodeModel)
         {
-            var ui = new MathResultUI();
-
-            ui.SetupBuildAndUpdate(model, commandDispatcher, elementBuilder.View, elementBuilder.Context);
+            var ui = new GeometryGraphUI();
+            ui.SetupBuildAndUpdate(geometryNodeModel, commandDispatcher, elementBuilder.View, elementBuilder.Context);
             return ui;
         }
 

@@ -1,14 +1,22 @@
 using System;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Code.CubeMarching.GeometryGraph.Editor
 {
     public class GeometryGraphMainToolbar : MainToolbar
     {
         public GeometryGraphMainToolbar(CommandDispatcher commandDispatcher, GraphView graphView)
-            : base(commandDispatcher, graphView) { }
+            : base(commandDispatcher, graphView)
+        {
+            var geometryGraphWindow = graphView.Window as GeometryGraphViewWindow;
+            var toggleButton = new Toggle("Preview Selected Element");
+            toggleButton.RegisterValueChangedCallback(geometryGraphWindow.OnLivePreviewToggle);
+            this.Add(toggleButton);
+        }
 
         protected override void BuildOptionMenu(GenericMenu menu)
         {

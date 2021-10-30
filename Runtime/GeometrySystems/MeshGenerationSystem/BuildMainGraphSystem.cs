@@ -18,7 +18,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
         {
             //todo initialize in a nicer way
             _allGeometryGraphInstance = UnityEngine.Object.FindObjectsOfType<GeometryGraphInstance>();
-            MainRenderGraph = _allGeometryGraphInstance[0].GraphData;
+            MainRenderGraph = _allGeometryGraphInstance[0].GetGraphData();
             return jobHandle;
         }
 

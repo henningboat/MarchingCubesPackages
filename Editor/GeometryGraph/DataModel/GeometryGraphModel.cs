@@ -1,5 +1,7 @@
 using System;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
@@ -11,5 +13,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             StencilType = null;
         }
         public override Type DefaultStencilType => typeof(GeometryGraphStencil);
+
+        public void OnLivePreviewToggle(ChangeEvent<bool> evt)
+        {
+            Debug.Log("preview");
+        }
     }
 }

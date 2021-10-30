@@ -18,7 +18,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
             {
                 graphInstance.UpdateOverwrites();
 
-                var job = new JUpdateGraphMath(graphInstance.GraphData);
+                var job = new JUpdateGraphMath(graphInstance.GetGraphData());
                 var graphInstanceJobHandle = job.Schedule();
                 jobHandle = JobHandle.CombineDependencies(jobHandle, graphInstanceJobHandle);
             }

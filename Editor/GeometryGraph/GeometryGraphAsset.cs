@@ -21,9 +21,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             const string path = "Assets";
             var template = new GraphTemplate<GeometryGraphStencil>(GeometryGraphStencil.GraphName);
             CommandDispatcher commandDispatcher = null;
-            if (EditorWindow.HasOpenInstances<SimpleGraphViewWindow>())
+            if (EditorWindow.HasOpenInstances<GeometryGraphViewWindow>())
             {
-                var window = EditorWindow.GetWindow<SimpleGraphViewWindow>();
+                var window = EditorWindow.GetWindow<GeometryGraphViewWindow>();
                 if (window != null)
                 {
                     commandDispatcher = window.CommandDispatcher;
@@ -39,7 +39,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var obj = EditorUtility.InstanceIDToObject(instanceId);
             if (obj is GeometryGraphAsset graphAssetModel)
             {
-                var window = GraphViewEditorWindow.FindOrCreateGraphWindow<SimpleGraphViewWindow>();
+                var window = GraphViewEditorWindow.FindOrCreateGraphWindow<GeometryGraphViewWindow>();
                 window.SetCurrentSelection(graphAssetModel, GraphViewEditorWindow.OpenMode.OpenAndFocus);
                 return window != null;
             }
