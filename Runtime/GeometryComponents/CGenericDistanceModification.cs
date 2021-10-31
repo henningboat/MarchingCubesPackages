@@ -7,13 +7,13 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace henningboat.CubeMarching.GeometryComponents
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential,Size = 16)]
     public struct CGenericDistanceModification: IDistanceModification
     {
-        public int16 Data;
+        public float32 Data;
         public DistanceModificationType Type;
         
-        public PackedFloat GetSurfaceDistance(PackedFloat surfaceDistance, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat surfaceDistance)
         {
             unsafe
             {
@@ -21,9 +21,11 @@ namespace henningboat.CubeMarching.GeometryComponents
                 switch (Type)
                 {
                     case DistanceModificationType.Onion:
-                        return ((OnionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance, valueBuffer);
+                        return ((OnionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance);
                     case DistanceModificationType.Inversion:
-                        return ((InversionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance, valueBuffer);
+                        return ((InversionDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance);
+                    case DistanceModificationType.Inflation:
+                        return ((InflationDistanceModification*) ptr)->GetSurfaceDistance(surfaceDistance);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

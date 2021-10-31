@@ -8,39 +8,26 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
     public class CombinerInstruction : GeometryGraphInstruction
     {
         public readonly CombinerOperation Operation;
-        public readonly GeometryGraphProperty Property;
+        public readonly GeometryGraphProperty blendFactorProperty;
 
-        public CombinerInstruction(CombinerOperation operation, GeometryGraphProperty property, int currentCombinerDepth) : base(currentCombinerDepth)
+        public CombinerInstruction(CombinerOperation operation, GeometryGraphProperty blendFactorProperty, int currentCombinerDepth) : base(currentCombinerDepth)
         {
             Operation = operation;
-            Property = property;
-        }
-
-        public CGeometryCombiner GetCombinerSetting()
-        {
-            return new()
-            {
-                Operation = Operation,
-                BlendFactor = new FloatValue() {Index = Property.Index}
-            };
+            this.blendFactorProperty = blendFactorProperty;
         }
 
         public override GeometryInstruction GetInstruction()
         {
-            var propertyIndexes = new int16();
+            var propertyIndexes = new int32();
             //todo
-            //propertyIndexes[0] = Depth + 1;
+            propertyIndexes[15] = blendFactorProperty.Index;
 
             return new GeometryInstruction()
             {
                 CombinerDepth = Depth,
                 GeometryInstructionType = GeometryInstructionType.Combiner,
-                Combiner = new CGeometryCombiner()
-                {
-                    Operation = Operation,
-                    BlendFactor = new FloatValue() {Index = Property.Index}
-                },
-                PropertyIndexes = propertyIndexes
+                PropertyIndexes = propertyIndexes,
+                CombinerBlendOperation = Operation,
             };
         }
     }

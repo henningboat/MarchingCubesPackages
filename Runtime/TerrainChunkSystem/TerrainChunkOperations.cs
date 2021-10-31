@@ -1,7 +1,6 @@
 ﻿using System;
 using Code.SIMDMath;
 using henningboat.CubeMarching.GeometryComponents;
-using Unity.Collections;
 using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
@@ -9,10 +8,10 @@ namespace henningboat.CubeMarching.TerrainChunkSystem
 {
     public static class TerrainChunkOperations
     {
-        public static PackedDistanceFieldData CombinePackedTerrainData(CGeometryCombiner combiner, PackedDistanceFieldData valuesA, PackedDistanceFieldData valuesB, NativeArray<float> propertyBuffer)
+        public static PackedDistanceFieldData CombinePackedTerrainData(CombinerOperation combinerOperation, float blendFactor, PackedDistanceFieldData valuesA, PackedDistanceFieldData valuesB)
         {
             PackedDistanceFieldData packedTerrainData;
-            switch (combiner.Operation)
+            switch (combinerOperation)
             {
                 case CombinerOperation.Min:
                     packedTerrainData = CombineTerrainMin(valuesA, valuesB);
@@ -21,10 +20,10 @@ namespace henningboat.CubeMarching.TerrainChunkSystem
                     packedTerrainData = CombineTerrainMax(valuesA, valuesB);
                     break;
                 case CombinerOperation.SmoothMin:
-                    packedTerrainData = CombineTerrainSmoothMin(valuesA, valuesB, combiner.BlendFactor.Resolve(propertyBuffer));
+                    packedTerrainData = CombineTerrainSmoothMin(valuesA, valuesB, blendFactor);
                     break;
                 case CombinerOperation.SmoothSubtract:
-                    packedTerrainData = CombineTerrainSmoothSubtract(valuesA, valuesB, combiner.BlendFactor.Resolve(propertyBuffer));
+                    packedTerrainData = CombineTerrainSmoothSubtract(valuesA, valuesB, blendFactor);
                     break;
                 case CombinerOperation.Add:
                     packedTerrainData = CombineTerrainAdd(valuesA, valuesB);

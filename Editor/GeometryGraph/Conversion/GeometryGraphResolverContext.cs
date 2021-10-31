@@ -35,7 +35,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
         private Stack<CombinerInstruction> _combinerStack = new();
         public readonly GeometryGraphProperty ZeroFloatProperty;
-        private List<GeometryTransformation> _translationsBuffer;
 
         public CombinerInstruction CurrentCombiner => _combinerStack.Peek();
         public GeometryGraphProperty OriginTransformation;
@@ -67,7 +66,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
             //bit confusing: to write the combiner into it's parent, we need the parents combiner settings
             CombinerInstruction instruction = new CombinerInstruction(CurrentCombiner.Operation,
-                CurrentCombiner.Property, CurrentCombiner.Depth + 1);
+                CurrentCombiner.blendFactorProperty, CurrentCombiner.Depth + 1);
             
             _instructions.Add(instruction);
         }
@@ -158,20 +157,5 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         {
             _instructions.Add(getDistanceModifierInstruction);
         }
-    }
-
-    public struct GeometryTransformation
-    {
-        public GeometryTransformationType Type;
-        public FloatValue Value;
-        public int ParentIndex;
-    }
-
-    public enum GeometryTransformationType
-    {
-        Translation = 1,
-        EulerRotation = 2,
-        Scale = 3,
-        Origin
     }
 }

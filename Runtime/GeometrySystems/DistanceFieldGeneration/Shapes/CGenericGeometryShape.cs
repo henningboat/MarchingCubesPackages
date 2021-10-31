@@ -12,14 +12,14 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
     {
         #region Public Fields
 
-        public int16 Data;
+        public float32 Data;
         public ShapeType ShapeType;
 
         #endregion
 
         #region Public methods
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
             unsafe
             {
@@ -27,22 +27,22 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 switch (ShapeType)
                 {
                     case ShapeType.Sphere:
-                        return ((CShapeSphere*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapeSphere*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.BoundingBox:
-                        return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.Torus:
-                        return ((CShapeTorus*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapeTorus*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.Noise: 
-                        //return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
-                        return ((CShapeVoronoi*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        //return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((CShapeVoronoi*) ptr)->GetSurfaceDistance(positionOS);
                     case ShapeType.Plane:
-                        return ((CShapePlane*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapePlane*) ptr)->GetSurfaceDistance(positionOS);
                         break; 
                     case ShapeType.Box:
-                        return ((CShapeBox*) ptr)->GetSurfaceDistance(positionOS, valueBuffer);
+                        return ((CShapeBox*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

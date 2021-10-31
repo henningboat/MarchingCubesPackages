@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using henningboat.CubeMarching.GeometryComponents;
-using Unity.Collections;
 using static Code.SIMDMath.SimdMath;
 
 
@@ -29,13 +28,13 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
 
         #region ActualData
 
-        [FieldOffset(0)] public FloatValue radius;
+        [FieldOffset(0)] public float radius;
 
         #endregion
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
-            var radiusValue = radius.Resolve(valueBuffer);
+            var radiusValue = radius;
             return length(positionOS) - radiusValue;
         }
 

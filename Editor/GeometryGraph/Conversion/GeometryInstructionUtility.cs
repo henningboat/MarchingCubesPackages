@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
@@ -8,32 +9,43 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {
     internal static class GeometryInstructionUtility
     {
-        public static GeometryInstruction CreateInstruction(GeometryInstructionType geometryInstructionType, int subType, int depth, CGeometryCombiner combiner, GeometryGraphProperty transformation,
+        public static GeometryInstruction CreateInstruction(GeometryInstructionType geometryInstructionType, int subType, int depth, CombinerOperation combinerOperation, GeometryGraphProperty combinerBlendValue, GeometryGraphProperty transformation,
             List<GeometryGraphProperty> shapeProperties, GeometryGraphProperty color)
         {
-            var transformationValue = new Float4X4Value() {Index = transformation.Index};
-            var propertyIndexes = new int16();
-           
-            for (int i = 0; i < shapeProperties.Count; i++)
-             {
-                 propertyIndexes[i] = shapeProperties[i].Index;
-             }
+            var propertyIndexes = new int32();
 
-            var material = new MaterialDataValue()
+            int propertyOffset = 0;
+            foreach (var shapeProperty in shapeProperties)
             {
-                Index = color?.Index ?? 0
-            };
+                for (int i = 0; i < shapeProperty.GetSizeInBuffer(); i++)
+                {
+                    propertyIndexes[propertyOffset] = shapeProperty.Index + i;
+                    propertyOffset++;
+                }
+            }
+
+            if (propertyOffset >= 14)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            //14 is used for the material color
+            propertyIndexes[14] = color?.Index ?? 0;
+            propertyIndexes[15] = combinerBlendValue.Index;
+
+            for (int i = 0; i < 16; i++)
+            {
+                propertyIndexes[16 + i] = transformation.Index + i;
+            }
 
             return new GeometryInstruction()
             {
                 GeometryInstructionType = geometryInstructionType,
                 GeometryInstructionSubType = subType,
-                Combiner = combiner,
                 CombinerDepth = depth,
-                TransformationValue = transformationValue,
+                CombinerBlendOperation = combinerOperation,
                 PropertyIndexes = propertyIndexes,
                 //HasMaterial = color != null,
-                MaterialData = material,
             };
         }
     }

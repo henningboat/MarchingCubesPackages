@@ -28,7 +28,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
         public override GeometryInstruction GetInstruction()
         {
-            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape, (int) ShapeType, Depth, _combiner.GetCombinerSetting(), Transformation, ShapeProperties, Color);
+            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape, (int) ShapeType, Depth,
+                _combiner.Operation, _combiner.blendFactorProperty, Transformation, ShapeProperties, Color);
         }
     }
 }

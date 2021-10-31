@@ -1,15 +1,14 @@
 ﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using henningboat.CubeMarching.GeometryComponents;
-using Unity.Collections;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeTorus : ITerrainModifierShape
     {
-        [FieldOffset(0)] public FloatValue radius;
-        [FieldOffset(4)] public FloatValue thickness;
+        [FieldOffset(0)] public float radius;
+        [FieldOffset(4)] public float thickness;
 
         //SDF code from
         //https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
@@ -19,9 +18,9 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
             return SimdMath.length(q) - thickness;
         }
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
-            return sdTorus(positionOS, radius.Resolve(valueBuffer), thickness.Resolve(valueBuffer));
+            return sdTorus(positionOS, radius, thickness);
         }
         
         public ShapeType Type => ShapeType.Torus;

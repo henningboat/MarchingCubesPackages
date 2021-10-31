@@ -22,7 +22,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         public override GeometryInstruction GetInstruction()
         {
-            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification, (int) Type, Depth, _combiner.GetCombinerSetting(), _transformation, _properties.ToList(),
+            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification, (int) Type, Depth, _combiner.Operation,_combiner.blendFactorProperty, _transformation, _properties.ToList(),
                 null);
         }
     }

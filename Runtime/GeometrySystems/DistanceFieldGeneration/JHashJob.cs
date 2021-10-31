@@ -21,18 +21,15 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             var instruction = _graph.GeometryInstructions[index];
 
             var hash = new Hash128();
-            hash.Append(ref instruction);
+            //todo
+//            hash.Append(ref instruction);
 
-            for (var i = 0; i < 16; i++)
-            {
-                //todo this does not really work right now, since we don't take the dimensions of 
-                //the property into account
-                //for example, the property might be a float3, but we only append the x component to the hash
-                var propertyIndex = instruction.PropertyIndexes[i];
-                hash.Append(valueBuffer[propertyIndex]);
-            }
-
-            for (var i = 0; i < 16; i++) hash.Append(valueBuffer[i + instruction.TransformationValue.Index]);
+            // for (var i = 0; i < 16; i++)
+            // {
+            //     hash.Append(ref instruction.ResolvedPropertyValues);
+            // }
+            //
+            // for (var i = 0; i < 16; i++) hash.Append(valueBuffer[i + instruction.TransformationValue.Index]);
 
             _graph.HashPerInstruction[index] = hash;
         }

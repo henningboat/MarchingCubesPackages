@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.GeometryComponents
 {
@@ -9,15 +10,14 @@ namespace henningboat.CubeMarching.GeometryComponents
     [StructLayout(LayoutKind.Explicit)]
     public struct CTerrainTransformationRepetition : ITerrainTransformation
     {
-        [FieldOffset(0)] public Float3Value Period;
+        [FieldOffset(0)] public float3 Period;
 
         public TerrainTransformationType TerrainTransformationType => TerrainTransformationType.Repetition;
 
-        public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer)
+        public PackedFloat3 TransformPosition(PackedFloat3 positionWS)
         {
-            var period = Period.Resolve(valueBuffer);
-            positionWS += 1000 * period;
-           positionWS= SimdMath.mod(positionWS + 0.5f * period, period) - 0.5f * period;
+            positionWS += 1000 * Period;
+           positionWS= SimdMath.mod(positionWS + 0.5f * Period, Period) - 0.5f * Period;
            return positionWS;
         }
     }

@@ -11,51 +11,49 @@ namespace henningboat.CubeMarching
         private static (ScriptableObject, GeometryGraphRuntimeData) _debugOverwrite;
         [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
-        private GeometryGraphData _graphData;
 
-        internal GeometryGraphData GetGraphData()
+        public void InitializeGraphDataIfNeeded()
         {
-                var graphData = _graphData;
-                GeometryGraphRuntimeData dataAssetToUse;
-                
-                //find a better way to compare if they come from the same asset
-                if (AssetDatabase.GetAssetPath(_geometryGraphRuntimeData) == AssetDatabase.GetAssetPath(_debugOverwrite.Item1))
-                    dataAssetToUse = _debugOverwrite.Item2;
-                else
-                    dataAssetToUse = _geometryGraphRuntimeData;
+            var graphData = GraphData;
+            GeometryGraphRuntimeData dataAssetToUse;
 
-                if (graphData.ContentHash != dataAssetToUse.ContentHash)
+            //find a better way to compare if they come from the same asset
+            if (AssetDatabase.GetAssetPath(_geometryGraphRuntimeData) ==
+                AssetDatabase.GetAssetPath(_debugOverwrite.Item1))
+                dataAssetToUse = _debugOverwrite.Item2;
+            else
+                dataAssetToUse = _geometryGraphRuntimeData;
+
+            if (graphData.ContentHash != dataAssetToUse.ContentHash)
+            {
+                if (graphData.GeometryInstructions.IsCreated)
                 {
-                    if (graphData.GeometryInstructions.IsCreated)
-                    {
-                        //todo deallocating this creates a memory leak that I don't really understand.
-                        //Needs to be fixed
-                    //    graphData.Dispose();
-                    }
-
-                    _graphData = new GeometryGraphData(dataAssetToUse);
+                    // graphData.Dispose();
                 }
 
-                return graphData;
+                GraphData = new GeometryGraphData(dataAssetToUse);
+            }
         }
 
         public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
 
+        public GeometryGraphData GraphData { get; set; }
+
 
         private void OnEnable()
         {
-            _graphData = new GeometryGraphData(_geometryGraphRuntimeData);
+            GraphData = new GeometryGraphData(_geometryGraphRuntimeData);
         }
 
         private void OnDisable()
         {
-            _graphData.Dispose();
+            GraphData.Dispose();
         }
 
         private void UpdateOverwritesInValueBuffer()
         {
             //apply main transformation
-            _graphData.ValueBuffer.Write(transform.worldToLocalMatrix,
+            GraphData.ValueBuffer.Write(transform.worldToLocalMatrix,
                 _geometryGraphRuntimeData.MainTransformation.Index);
         }
 

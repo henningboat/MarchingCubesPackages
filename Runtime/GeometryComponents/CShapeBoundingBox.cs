@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using Unity.Collections;
+using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
 namespace henningboat.CubeMarching.GeometryComponents
@@ -27,16 +27,16 @@ namespace henningboat.CubeMarching.GeometryComponents
 
     #region Public Fields
 
-    [FieldOffset(0)] public FloatValue boundWidth;
-    [FieldOffset(4)] public Float3Value extends;
+    [FieldOffset(0)] public float boundWidth;
+    [FieldOffset(4)] public float3 extends;
 
     #endregion
 
     #region ITerrainModifierShape Members
 
-    public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+    public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
     {
-        return ComputeBoundingBoxDistance(positionOS, extends.Resolve(valueBuffer), boundWidth.Resolve(valueBuffer));
+        return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
     }
     
     public ShapeType Type => ShapeType.BoundingBox;

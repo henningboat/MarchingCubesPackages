@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using henningboat.CubeMarching.GeometryComponents;
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
@@ -9,17 +8,17 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeNoise : ITerrainModifierShape
     {
-        [FieldOffset(0)] public FloatValue strength;
-        [FieldOffset(4)] public FloatValue valueOffset;
-        [FieldOffset(8)] public Float3Value offset;
-        [FieldOffset(12)] public Float3Value scale;
+        [FieldOffset(0)] public float strength;
+        [FieldOffset(4)] public float valueOffset;
+        [FieldOffset(20)] public float3 offset;
+        [FieldOffset(32)] public float3 scale;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS)
         {
-            var offsetValue = offset.Resolve(valueBuffer);
+            var offsetValue = offset;
 
-            var positionOS = scale.Resolve(valueBuffer) * (positionWS - offsetValue);
-            return ((cnoise4(positionOS)) + valueOffset.Resolve(valueBuffer)) * strength.Resolve(valueBuffer);
+            var positionOS = scale * (positionWS - offsetValue);
+            return ((cnoise4(positionOS)) + valueOffset) * strength;
         }
 
         public ShapeType Type => ShapeType.Noise;
@@ -44,14 +43,14 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct CShapeVoronoi : ITerrainModifierShape
     {
-        [FieldOffset(4)] public FloatValue valueOffset;
-        [FieldOffset(12)] public Float3Value scale;
+        [FieldOffset(4)] public float valueOffset;
+        [FieldOffset(20)] public float3 scale;
         public ShapeType Type => ShapeType.Noise;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
-            positionOS *= scale.Resolve(valueBuffer);
-            return Voronoi(positionOS) - new PackedFloat(valueOffset.Resolve(valueBuffer));
+            positionOS *= scale;
+            return Voronoi(positionOS) - new PackedFloat(valueOffset);
         }
 
 
