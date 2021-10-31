@@ -17,13 +17,10 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
     {
         private GeometryFieldData _geometryFieldData;
         private GeometryGraphData _graph;
-        private Random _random;
-
         public JExecuteDistanceFieldPrepass(GeometryFieldData geometryFieldData, GeometryGraphData graph)
         {
             _graph = graph;
             _geometryFieldData = geometryFieldData;
-            _random = new Random((uint)UnityEngine.Random.Range(0, 100000000));
         }
 
         public void Execute(int clusterIndex)
@@ -53,7 +50,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
                 positions[i] = position;
             }
             //
-             TerrainInstructionIterator iterator = new TerrainInstructionIterator(positions,_graph.GeometryInstructions,_graph.ValueBuffer,true);
+             TerrainInstructionIterator iterator = new TerrainInstructionIterator(positions,_graph.GeometryInstructions,true);
 
              for (int i = 0; i < _graph.GeometryInstructions.Length; i++)
              {

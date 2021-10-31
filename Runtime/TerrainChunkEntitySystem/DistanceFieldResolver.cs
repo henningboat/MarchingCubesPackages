@@ -12,7 +12,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, GeometryFieldData geometryField, GeometryGraphData geometryGraph)
+        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, GeometryGraphData geometryGraph)
         {
             var clusterParameters = cluster.Parameters;
             var chunkParameters = chunk.Parameters;
@@ -27,7 +27,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                     positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + offsetInChunk;
                 }
 
-                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
+                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryGraph.GeometryInstructions);
 
                 iterator.CalculateAllTerrainData();
 
@@ -52,7 +52,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
             {
                 CreatePositionsArray(chunk, out var positions);
 
-                detailIterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions, geometryGraph.ValueBuffer);
+                detailIterator = new TerrainInstructionIterator(positions, geometryGraph.GeometryInstructions);
                 detailIterator.CalculateAllTerrainData();
             }
             

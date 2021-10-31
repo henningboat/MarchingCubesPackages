@@ -6,6 +6,6 @@ namespace henningboat.CubeMarching.GeometryComponents
     public interface ITerrainTransformation
     {
         public TerrainTransformationType TerrainTransformationType { get; }
-        public PackedFloat3 TransformPosition(PackedFloat3 positionWS, NativeArray<float> valueBuffer);
+        public PackedFloat3 TransformPosition(PackedFloat3 positionWS);
     }
 }

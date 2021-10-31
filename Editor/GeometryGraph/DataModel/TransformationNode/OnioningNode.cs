@@ -38,7 +38,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         protected override DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            return new OnionDistanceModifierInstruction(_amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
+            return new InflationDistanceModificationInstruction(_amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
         }
     }
     

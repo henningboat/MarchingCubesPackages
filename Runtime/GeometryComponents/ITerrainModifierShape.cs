@@ -1,6 +1,5 @@
 ﻿using Code.SIMDMath;
 using JetBrains.Annotations;
-using Unity.Collections;
 
 namespace henningboat.CubeMarching.GeometryComponents
 {
@@ -9,6 +8,6 @@ namespace henningboat.CubeMarching.GeometryComponents
         ShapeType Type { get; }
 
         [UsedImplicitly]
-        PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, NativeArray<float> valueBuffer);
+        PackedFloat GetSurfaceDistance(PackedFloat3 positionOS);
     }
 }
