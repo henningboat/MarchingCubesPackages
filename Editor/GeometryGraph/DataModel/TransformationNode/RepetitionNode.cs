@@ -6,6 +6,7 @@ using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using JetBrains.Annotations;
+using Unity.Mathematics;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
@@ -61,7 +62,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
     public abstract class PositionModificationNode : GeometryNodeModel, IGeometryNode
     {
-        private IPortModel _geometryIn;
+        protected IPortModel _geometryIn;
         private IPortModel _geometryOut;
 
         protected override void OnDefineNode()
@@ -70,7 +71,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOut = AddExecutionOutput(nameof(_geometryOut));
         }
 
-        public void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
+        public virtual void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
         {
             context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
 
