@@ -17,20 +17,10 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
 
         public void Execute(int index)
         {
-            var valueBuffer = _graph.ValueBuffer;
             var instruction = _graph.GeometryInstructions[index];
 
             var hash = new Hash128();
-            //todo
-//            hash.Append(ref instruction);
-
-            // for (var i = 0; i < 16; i++)
-            // {
-            //     hash.Append(ref instruction.ResolvedPropertyValues);
-            // }
-            //
-            // for (var i = 0; i < 16; i++) hash.Append(valueBuffer[i + instruction.TransformationValue.Index]);
-
+            hash.Append(ref instruction);
             _graph.HashPerInstruction[index] = hash;
         }
     }

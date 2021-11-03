@@ -9,7 +9,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
         public byte InnerDataMask;
         public int IndexInDistanceFieldBuffer;
         public bool HasData => InnerDataMask != 0;
-        public int InstructionChangeFrameCount;
+        public int InstructionChangeTimeStamp;
 
         public Hash128 CurrentGeometryInstructionsHash;
         public bool InstructionsChangedSinceLastFrame;

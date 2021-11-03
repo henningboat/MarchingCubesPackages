@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
@@ -26,6 +27,10 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
                 var writeValuesJob = new JWriteValueBufferToInstruction(graphInstance.GraphData);
                 graphInstanceJobHandle = writeValuesJob.Schedule(graphInstance.GraphData.GeometryInstructions.Length,
                     JWriteValueBufferToInstruction.InnerGroupSize, graphInstanceJobHandle);
+
+                var updateHashesJob = new JHashJob(graphInstance.GraphData);
+                graphInstanceJobHandle = updateHashesJob.Schedule(graphInstance.GraphData.GeometryInstructions.Length, 32,
+                    graphInstanceJobHandle);
                 
                 jobHandle = JobHandle.CombineDependencies(jobHandle, graphInstanceJobHandle);
             }

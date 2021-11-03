@@ -69,7 +69,7 @@ namespace henningboat.CubeMarching.Rendering
             if (cSubChunkWithTrianglesIndices.Length == 0)
             {
 
-                gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk);
+                gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk,timeStamp);
                 return;
                 indexCount = 0;
             }
@@ -155,7 +155,7 @@ namespace henningboat.CubeMarching.Rendering
                 meshIndexBuffer.Dispose();
             }
 
-            gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk);
+            gpuVertexCountReadbackHandler.RequestReadback(clusterParameters, _triangleCountPerSubChunk,timeStamp);
             
             //hack
             clusterParameters.lastVertexBufferChangeTimestamp = timeStamp;
@@ -173,6 +173,8 @@ namespace henningboat.CubeMarching.Rendering
             
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
 
+            Debug.Log(clusterParameters.vertexCount);
+            
             Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
         }
 
