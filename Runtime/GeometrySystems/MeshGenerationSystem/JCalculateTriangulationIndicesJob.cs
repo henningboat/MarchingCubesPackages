@@ -70,6 +70,10 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                            
                         totalVertexCount += vertexCountPerSubChunk[subChunkIndex];
                     }
+                    else
+                    {
+                        vertexCountPerSubChunk[subChunkIndex] = 0;
+                    }
                 }
             }
 

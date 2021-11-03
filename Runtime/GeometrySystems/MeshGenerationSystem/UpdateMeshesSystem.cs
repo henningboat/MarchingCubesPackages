@@ -92,8 +92,9 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                 var subChunksWithTriangles =
                     _subChunksWithTrianglesData.Slice(subChunkIndex, clusterParameters.subChunksWithTrianglesCount);
                 var gpuBuffers = _gpuDataPerCluster[clusterIndex];
-
-
+             
+                Debug.Log(triangulationInstructions.Length);
+                
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
                     clusterParameters, _frameCount, _gpuReadbackHandler);

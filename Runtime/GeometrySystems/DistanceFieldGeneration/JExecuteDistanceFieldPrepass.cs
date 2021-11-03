@@ -69,7 +69,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
                         {
                             if (isWriting[k])
                             {
-                                var hash128 = hashPerChunk[k * 4 + j];
+                                var hash128 = hashPerChunk[k + 4 * j];
                                 var hashOfInstruction = _graph.HashPerInstruction[i];
                                 hash128.Append(ref hashOfInstruction);
                                 hashPerChunk[k + j * 4] = hash128;

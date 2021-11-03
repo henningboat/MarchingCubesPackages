@@ -173,7 +173,6 @@ namespace henningboat.CubeMarching.Rendering
             
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
 
-            Debug.Log(clusterParameters.vertexCount);
             
             Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
         }
