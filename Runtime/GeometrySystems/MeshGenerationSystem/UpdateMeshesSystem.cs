@@ -67,7 +67,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
         {
             _frameCount++;
 
-            _gpuReadbackHandler.ApplyReadbacks(jobHandle, _vertexCountPerSubChunk);
+            //_gpuReadbackHandler.ApplyReadbacks(jobHandle, _vertexCountPerSubChunk);
 
             var calculateIndeicesJob = new JCalculateTriangulationIndicesJob
             {

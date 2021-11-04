@@ -4,6 +4,7 @@ using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
 using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {
@@ -58,6 +59,34 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
         {
             var resolvedPropertyValue = ResolvedPropertyValues[14];
             return UnsafeCastHelper.Cast<float, TerrainMaterial>(ref resolvedPropertyValue);
+        }
+
+        /// <summary>
+        /// Returns a hash of all data of the instruction that is actually used
+        /// </summary>
+        /// <returns></returns>
+        public Hash128 GetRelevantHash()
+        {
+            Hash128 hash=default;
+            hash.Append(ref GeometryInstructionType);
+            hash.Append(ref GeometryInstructionSubType);
+            
+            hash.Append(CombinerDepth);
+
+            bool ignoreTransformation = GeometryInstructionType == GeometryInstructionType.Combiner ||
+                                        GeometryInstructionType == GeometryInstructionType.DistanceModification;
+
+            if (ignoreTransformation)
+            {
+                float4x4 propertyData = UnsafeCastHelper.Cast<float32, float4x4>(ref ResolvedPropertyValues);
+                hash.Append(ref propertyData);
+            }
+            else
+            {
+                hash.Append(ref ResolvedPropertyValues);
+            }
+
+            return hash;
         }
     }
 }

@@ -18,10 +18,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
         public void Execute(int index)
         {
             var instruction = _graph.GeometryInstructions[index];
-
-            var hash = new Hash128();
-            hash.Append(ref instruction);
-            _graph.HashPerInstruction[index] = hash;
+            _graph.HashPerInstruction[index] = instruction.GetRelevantHash();
         }
     }
 }

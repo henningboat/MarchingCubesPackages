@@ -48,6 +48,8 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
                 }
 
                 position += 3.5f;
+                
+                position += new PackedFloat3(cluster.Parameters.PositionWS);
 
                 positions[i] = position;
             }
