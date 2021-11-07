@@ -7,6 +7,7 @@ float4 _Time;
 #pragma kernel Triangulation
 #pragma kernel ClearVertexData
 #pragma kernel BuildIndexBuffer
+#pragma kernel WriteFromTransferToGlobalBuffer
 
 StructuredBuffer<TerrainData4> _GlobalTerrainBuffer;
 StructuredBuffer<int> _GlobalTerrainIndexMap;
@@ -318,4 +319,19 @@ void BuildIndexBuffer (uint3 id : SV_DispatchThreadID)
             _ClusterMeshIndexBuffer[(_IndexBufferSize-zeroIndexBufferOffset) - (i-vertexCountOfSubChunk)]=0;
         }
     }
+}
+
+StructuredBuffer<int> _ChunksWithChangedInstructions;
+StructuredBuffer<TerrainData4> _TransferBuffer;
+RWStructuredBuffer<TerrainData4> _RWGlobalTerrainBuffer;
+
+[numthreads(1,128,1)]
+void WriteFromTransferToGlobalBuffer (uint3 id : SV_DispatchThreadID)
+{
+    int chunkIndex = id.x;
+    int indexInsideChunk = id.y;
+
+    int targetChunkIndex = _ChunksWithChangedInstructions[chunkIndex];
+
+    _RWGlobalTerrainBuffer[targetChunkIndex * 128 + indexInsideChunk] = _TransferBuffer[chunkIndex*128+indexInsideChunk];
 }

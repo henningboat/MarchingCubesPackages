@@ -130,5 +130,11 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
             
             return new GeometryCluster(distanceField, clusterParameters, chunkParameters);
         }
+
+        public GeometryChunk GetChunk(int chunkIndex)
+        {
+            var cluster = GetCluster(chunkIndex / Constants.chunksPerCluster);
+            return cluster.GetChunk(chunkIndex % Constants.chunksPerCluster);
+        }
     }
 }

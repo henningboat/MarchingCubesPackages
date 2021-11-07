@@ -1,7 +1,6 @@
 ﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -31,31 +30,19 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
         public JobHandle ApplyReadbacks(JobHandle jobHandle, NativeArray<int> vertexCountPerSubChunk)
         {
-            //todo turn into job
-            jobHandle.Complete();
-
-            for (int clusterIndex = 0; clusterIndex < _geometryFieldData.ClusterCount; clusterIndex++)
+            JApplyGPUVertexCountReadBacks job = new JApplyGPUVertexCountReadBacks()
             {
-                int timeStampOfReadback = _readbackTimeStampPerCluster[clusterIndex];
-                var cluster = _geometryFieldData.GetCluster(clusterIndex);
+                GeometryFieldData = _geometryFieldData,
+                ReadbackTimeStampPerCluster = _readbackTimeStampPerCluster,
+                VertexCountPerSubChunk = vertexCountPerSubChunk,
+                VertexCountPerSubChunkReadback = _vertexCountPerSubChunkReadback
+            };
 
-                for (int chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
-                {
-                    var chunk = cluster.GetChunk(chunkIndex);
-                    if (chunk.Parameters.InstructionChangeTimeStamp <= timeStampOfReadback)
-                    {
-                        for (int i = 0; i < 8; i++)
-                        {
-                            var subChunkIndex = clusterIndex*Constants.subChunksPerCluster+chunkIndex*Constants.subChunksPerChunk+i;
-                            vertexCountPerSubChunk[subChunkIndex] = _vertexCountPerSubChunkReadback[subChunkIndex];
-                        }
-                    }
-                }
-            }
+            jobHandle = job.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
 
             return jobHandle;
         }
-        
+
         public void RequestReadback(CClusterParameters clusterParameters, ComputeBuffer vertexCountComputeBuffer, int timeStamp)
         {
             int clusterIndex = clusterParameters.ClusterIndex;
@@ -78,14 +65,9 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
                 targetSlice.CopyFrom(data);
                 
-                
-                //todo find out where the negative numbers come from
-                for (int i = 0; i < targetSlice.Length; i++)
-                {
-                    targetSlice[i] = math.max(0, targetSlice[i]);
-                }
-
                 _readbackTimeStampPerCluster[clusterIndex] = timeStampOfRequest;
+
+                targetSlice.CopyFrom(data);
                 
 #if UNITY_EDITOR
                 if (!Application.isPlaying)

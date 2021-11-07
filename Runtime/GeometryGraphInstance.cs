@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace henningboat.CubeMarching
 {
@@ -17,12 +19,18 @@ namespace henningboat.CubeMarching
             var graphData = GraphData;
             GeometryGraphRuntimeData dataAssetToUse;
 
+#if UNITY_EDITOR
             //find a better way to compare if they come from the same asset
             if (AssetDatabase.GetAssetPath(_geometryGraphRuntimeData) ==
                 AssetDatabase.GetAssetPath(_debugOverwrite.Item1))
+            {
                 dataAssetToUse = _debugOverwrite.Item2;
+            }
             else
+#endif
+            {
                 dataAssetToUse = _geometryGraphRuntimeData;
+            }
 
             if (graphData.ContentHash != dataAssetToUse.ContentHash)
             {
