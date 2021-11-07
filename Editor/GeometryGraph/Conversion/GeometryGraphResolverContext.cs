@@ -13,6 +13,7 @@ using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEditor;
+using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
@@ -37,13 +38,17 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         public readonly GeometryGraphProperty ZeroFloatProperty;
 
         public CombinerInstruction CurrentCombiner => _combinerStack.Peek();
+        public ExposedVariable[] ExposedVariables { get; private set; }
+
         public GeometryGraphProperty OriginTransformation;
         public GeometryGraphProperty DefaultColor;
         public GeometryStackData OriginalGeometryStackData;
         public GeometryGraphProperty DefaultColorFloat3;
+        private GeometryGraphModel _graphModel;
 
-        public GeometryGraphResolverContext()
+        public GeometryGraphResolverContext(GeometryGraphModel graphModel)
         {
+            _graphModel = graphModel;
             ZeroFloatProperty = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(0.0f, this, GeometryPropertyType.Float, "Zero Float Constant"));
             OriginTransformation = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(Matrix4x4.Translate(Vector3.one*-32), this, GeometryPropertyType.Float4X4, "Origin Matrix"));
             DefaultColorFloat3 = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(new Vector3(1,1,1), this, GeometryPropertyType.Float3, "Default Material Float3"));
@@ -147,6 +152,21 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             {
                 GeometryInstructionBuffer.Add(_instructions[i].GetInstruction());
             }
+
+            ExposedVariables = _graphModel.VariableDeclarations.Select(CreateExposedVariable).ToArray();
+        }
+
+        private ExposedVariable CreateExposedVariable(IVariableDeclarationModel variable)
+        {
+            var geometryGraphProperty = _properties[variable.Guid];
+            List<float> defaultValue = new List<float>();
+
+            for (int i = 0; i < geometryGraphProperty.GetSizeInBuffer(); i++)
+            {
+                defaultValue.Add(_propertyValueBuffer[geometryGraphProperty.Index + i]);
+            }
+
+            return new ExposedVariable(variable.Guid, geometryGraphProperty.Type, defaultValue.ToArray(), geometryGraphProperty.Index, variable.GetVariableName());
         }
 
         public void WriteDistanceModifier(DistanceModifierInstruction getDistanceModifierInstruction)

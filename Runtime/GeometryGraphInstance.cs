@@ -60,6 +60,16 @@ namespace henningboat.CubeMarching
 
         private void UpdateOverwritesInValueBuffer()
         {
+            foreach (GeometryGraphPropertyOverwrite overwrite in _overwrites)
+            {
+                var variable = _geometryGraphRuntimeData.GetIndexOfProperty(overwrite.PropertyGUID);
+
+                for (int i = 0; i < overwrite.Value.Length; i++)
+                {
+                    GraphData.ValueBuffer.Write(overwrite.Value[i], variable.IndexInValueBuffer + i);
+                }
+            }
+            
             //apply main transformation
             GraphData.ValueBuffer.Write(transform.worldToLocalMatrix,
                 _geometryGraphRuntimeData.MainTransformation.Index);

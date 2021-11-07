@@ -9,7 +9,7 @@ namespace henningboat.CubeMarching
     {
         [SerializeField] private SerializableGUID _propertyGUID;
         [SerializeField] private float[] _value;
-        [SerializeField] private MonoBehaviour _providerObject;
+        [SerializeField] private GeometryPropertyValueProvider _providerObject;
 
         public GeometryGraphPropertyOverwrite(SerializableGUID guid)
         {
@@ -29,5 +29,21 @@ namespace henningboat.CubeMarching
                 _value = new float[length];
             }
         }
+
+        public void SetProviderObject(GeometryPropertyValueProvider valueProvider)
+        {
+            _providerObject = valueProvider;
+        }
+
+        public void Reset(ExposedVariable variable)
+        {
+            _providerObject = null;
+            _value = variable.DefaultValue;
+        }
+    }
+
+    public abstract class GeometryPropertyValueProvider : MonoBehaviour
+    {
+        public abstract float[] GetValue(GeometryGraphInstance graphInstance, GeometryPropertyType geometryPropertyType);
     }
 }

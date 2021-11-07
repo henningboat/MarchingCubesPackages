@@ -27,6 +27,8 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
         public CombinerOperation CombinerBlendOperation;
         public float CombinerBlendFactor => ResolvedPropertyValues[15];
 
+        public Hash128 GeometryInstructionHash;
+        
         #endregion
 
         public void AddValueBufferOffset(int valueBufferOffset)
@@ -65,7 +67,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
         /// Returns a hash of all data of the instruction that is actually used
         /// </summary>
         /// <returns></returns>
-        public Hash128 GetRelevantHash()
+        public void UpdateHash()
         {
             Hash128 hash=default;
             hash.Append(ref GeometryInstructionType);
@@ -86,7 +88,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                 hash.Append(ref ResolvedPropertyValues);
             }
 
-            return hash;
+            GeometryInstructionHash = hash;
         }
     }
 }

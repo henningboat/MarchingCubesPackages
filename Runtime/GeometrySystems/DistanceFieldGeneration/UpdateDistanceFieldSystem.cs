@@ -1,5 +1,7 @@
 ﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using Unity.Collections;
 using Unity.Jobs;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
@@ -13,7 +15,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             _geometryFieldData = geometryFieldData;
         }
 
-        public JobHandle Update(JobHandle dependency, GeometryGraphData graphData)
+        public JobHandle Update(JobHandle dependency, NativeArray<GeometryInstruction> graphData)
         {
             var job = new JCalculateDistanceField(_geometryFieldData, graphData);
             dependency = job.Schedule(_geometryFieldData.TotalChunkCount, 1, dependency);

@@ -41,6 +41,10 @@ namespace henningboat.CubeMarching.GeometrySystems
                 {
                     _geometryFieldData.Dispose();
                     _updateMeshesSystem.Dispose();
+                    if (_buildRenderGraphSystem != null)
+                    {
+                        _buildRenderGraphSystem.Dispose();
+                    }
                 }
                 
                 _geometryFieldData = new GeometryFieldData();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
@@ -25,7 +26,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
             data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
                 result.GeometryInstructionBuffer, contentHash,
-                new Float4X4Value {Index = result.OriginTransformation.Index});
+                new Float4X4Value {Index = result.OriginTransformation.Index},result.ExposedVariables);
         }
         public GraphProcessingResult ProcessGraph(IGraphModel graphModel)
         {
@@ -69,10 +70,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
         private static GeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
         {
-            var context = new GeometryGraphResolverContext();
-
-       
-
+            var context = new GeometryGraphResolverContext(graphModel as GeometryGraphModel);
+            
             context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty, 0));
 
             rootNode.Resolve(context, context.OriginalGeometryStackData);

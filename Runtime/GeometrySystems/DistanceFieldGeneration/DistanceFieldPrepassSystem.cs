@@ -1,6 +1,7 @@
 ﻿using System;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using henningboat.CubeMarching.Utils;
 using Unity.Collections;
 using Unity.Jobs;
@@ -17,9 +18,9 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             _geometryFieldData = geometryFieldData;
         }
         
-        public JobHandle Update(GeometryGraphData graph, JobHandle jobHandle)
+        public JobHandle Update(NativeArray<GeometryInstruction> instructions, JobHandle jobHandle)
         {
-            var job = new JExecuteDistanceFieldPrepass(_geometryFieldData, graph);
+            var job = new JExecuteDistanceFieldPrepass(_geometryFieldData, instructions);
             jobHandle = job.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
             // jobHandle.Complete();
             // int count = 0;

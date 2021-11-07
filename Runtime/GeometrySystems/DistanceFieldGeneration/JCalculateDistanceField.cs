@@ -2,6 +2,7 @@
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Jobs;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
@@ -10,11 +11,11 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
     internal struct JCalculateDistanceField : IJobParallelFor
     {
         private GeometryFieldData _geometryFieldData;
-        private GeometryGraphData _graph;
+        private NativeArray<GeometryInstruction> _geometryInstructions;
 
-        public JCalculateDistanceField(GeometryFieldData geometryFieldData, GeometryGraphData graph)
+        public JCalculateDistanceField(GeometryFieldData geometryFieldData, NativeArray<GeometryInstruction> geometryInstructions)
         {
-            _graph = graph;
+            _geometryInstructions = geometryInstructions;
             _geometryFieldData = geometryFieldData;
         }
 
@@ -26,7 +27,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             var cluster = _geometryFieldData.GetCluster(clusterIndex);
             var chunk = cluster.GetChunk(chunkIndexInCluster);
 
-            DistanceFieldResolver.CalculateDistanceFieldForChunk(cluster, chunk, _graph);
+            DistanceFieldResolver.CalculateDistanceFieldForChunk(cluster, chunk, _geometryInstructions);
         }
     }
 }

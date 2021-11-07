@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using Object = UnityEngine.Object;
 
 namespace Code.CubeMarching.GeometryGraph.Editor
 {
@@ -38,31 +39,31 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var geometryGraphInstance = (GeometryGraphInstance) target;
             var currentOverwrites = geometryGraphInstance.GetOverwrites();
 
-            foreach (var variableDeclarationModel in graphAsset.GraphModel.VariableDeclarations)
+            foreach (var variableDeclarationModel in graph.Variables)
             {
                 EditorGUILayout.BeginHorizontal();
 
-                var currentOverwrite = currentOverwrites.FirstOrDefault(overwrite => overwrite.PropertyGUID == variableDeclarationModel.Guid);
+                var currentOverwrite = currentOverwrites.FirstOrDefault(overwrite => overwrite.PropertyGUID == variableDeclarationModel.ID);
                 if (currentOverwrite == null)
                 {
-                    currentOverwrite = new GeometryGraphPropertyOverwrite(variableDeclarationModel.Guid);
+                    currentOverwrite = new GeometryGraphPropertyOverwrite(variableDeclarationModel.ID);
                     currentOverwrites.Add(currentOverwrite);
 
                     ResetProperty(variableDeclarationModel, currentOverwrite);
                 }
 
-                if (variableDeclarationModel.DataType == TypeHandle.Float)
+                if (variableDeclarationModel.Type == GeometryPropertyType.Float)
                 {
                     currentOverwrite.SetValueCapacity(1);
-                    currentOverwrite.Value[0] = EditorGUILayout.FloatField(variableDeclarationModel.GetVariableName(), currentOverwrite.Value[0]);
+                    currentOverwrite.Value[0] = EditorGUILayout.FloatField(variableDeclarationModel.Name, currentOverwrite.Value[0]);
                 }
 
-                if (variableDeclarationModel.DataType == TypeHandle.Vector3)
+                if (variableDeclarationModel.Type==GeometryPropertyType.Float3)
                 {
                     currentOverwrite.SetValueCapacity(3);
 
                     var currentValue = new Vector3(currentOverwrite.Value[0], currentOverwrite.Value[1], currentOverwrite.Value[2]);
-                    currentValue = EditorGUILayout.Vector3Field(variableDeclarationModel.GetVariableName(), currentValue);
+                    currentValue = EditorGUILayout.Vector3Field(variableDeclarationModel.Name, currentValue);
 
                     currentOverwrite.Value[0] = currentValue.x;
                     currentOverwrite.Value[1] = currentValue.y;
@@ -73,6 +74,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
                 {
                     ResetProperty(variableDeclarationModel, currentOverwrite);
                 }
+
+                var valueProvider = EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject, typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
+                currentOverwrite.SetProviderObject(valueProvider);
 
                 EditorGUILayout.EndHorizontal();
             }
@@ -85,28 +89,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             }
         }
 
-        private void ResetProperty(IVariableDeclarationModel variableDeclarationModel, GeometryGraphPropertyOverwrite currentOverwrite)
+        private void ResetProperty(ExposedVariable variable, GeometryGraphPropertyOverwrite currentOverwrite)
         {
-            if (variableDeclarationModel.DataType == TypeHandle.Float)
-            {
-                currentOverwrite.SetValueCapacity(1);
-                currentOverwrite.Value[0] = (float) variableDeclarationModel.InitializationModel.ObjectValue;
-            }
-
-            else if (variableDeclarationModel.DataType == TypeHandle.Vector3)
-            {
-                currentOverwrite.SetValueCapacity(3);
-
-                var newValue = (Vector3) variableDeclarationModel.InitializationModel.ObjectValue;
-
-                currentOverwrite.Value[0] = newValue.x;
-                currentOverwrite.Value[1] = newValue.y;
-                currentOverwrite.Value[2] = newValue.z;
-            }
-            else
-            {
-                throw new Exception();
-            }
+            currentOverwrite.Reset(variable);
         }
     }
 }
