@@ -185,9 +185,40 @@ void ClearVertexData (uint3 id : SV_DispatchThreadID)
     triangles[index]=(VertexData)0;
 }
 
-int interpolateMaterial(int a, int b, float t)
+float4 unpackVertexColor(uint i)
 {
-    return t<0.5?a:b;
+    float4 unpack;
+    
+    unpack.x = float((i & uint(0xff000000)) >> 24);
+    unpack.y = float((i & uint(0x00ff0000)) >> 16);
+    unpack.z = float((i & uint(0x0000ff00)) >> 8);
+    unpack.w = float((i & uint(0x000000ff)) >> 0);
+    
+    return unpack;
+}
+
+uint packVertexColor(float4 data)
+{
+    uint packed=0;
+
+    packed |= uint(data.x) << 24;
+    packed |= uint(data.y) << 16;
+    packed |= uint(data.z) << 8;
+    packed |= uint(data.w);
+    
+    return packed;
+}
+
+uint interpolateMaterial(uint a, uint b, float t)
+{
+    float4 aUnpacked = unpackVertexColor(a);
+    float4 bUnpacked = unpackVertexColor(b);
+    
+    //todo check if saturate is actually needed here
+    
+    float4 blended = lerp(aUnpacked, bUnpacked, saturate(t));
+
+    return packVertexColor(blended);
 }
 
 [numthreads(1,512,1)]
