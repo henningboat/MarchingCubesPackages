@@ -2,6 +2,7 @@
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
 using henningboat.CubeMarching.TerrainChunkSystem;
+using henningboat.CubeMarching.Utils.Containers;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;

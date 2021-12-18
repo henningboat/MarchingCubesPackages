@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.Utils
+namespace henningboat.CubeMarching.Utils.Containers
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct BitArray512

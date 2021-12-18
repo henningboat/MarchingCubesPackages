@@ -1,5 +1,6 @@
 ﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Utils;
+using henningboat.CubeMarching.Utils.Containers;
 
 namespace henningboat.CubeMarching.TerrainChunkEntitySystem
 {

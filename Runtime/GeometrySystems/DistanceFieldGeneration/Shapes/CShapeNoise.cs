@@ -50,7 +50,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
             positionOS *= scale;
-            return Voronoi(positionOS) - new PackedFloat(valueOffset);
+            return (Voronoi(positionOS) - new PackedFloat(valueOffset)) / scale.x;
         }
 
 

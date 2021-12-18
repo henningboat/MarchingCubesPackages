@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
+using henningboat.CubeMarching.Utils.Containers;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 

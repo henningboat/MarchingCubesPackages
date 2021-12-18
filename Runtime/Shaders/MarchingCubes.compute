@@ -211,6 +211,7 @@ uint packVertexColor(float4 data)
 
 uint interpolateMaterial(uint a, uint b, float t)
 {
+    //return t<0.5?a:b;
     float4 aUnpacked = unpackVertexColor(a);
     float4 bUnpacked = unpackVertexColor(b);
     

@@ -17,7 +17,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
         [NativeDisableParallelForRestriction] public NativeArray<GeometryChunkParameters> DistanceFieldChunkDatas;
         [NativeDisableParallelForRestriction]  public NativeArray<CClusterParameters> ClusterParameters;
         public int3 GeometryClusterChunkCounts;
-        public int ClusterCount { get; private set; }
+        public int ClusterCount { get; private set; } 
 
 
         public void Dispose()

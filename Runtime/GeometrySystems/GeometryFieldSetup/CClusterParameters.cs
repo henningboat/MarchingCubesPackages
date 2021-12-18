@@ -1,4 +1,5 @@
 ﻿using henningboat.CubeMarching.Utils;
+using henningboat.CubeMarching.Utils.Containers;
 using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup

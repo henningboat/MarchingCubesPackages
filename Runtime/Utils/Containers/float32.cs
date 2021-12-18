@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Utils.Containers
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct float32

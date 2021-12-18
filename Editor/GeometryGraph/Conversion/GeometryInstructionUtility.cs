@@ -4,6 +4,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Utils.Containers;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {
