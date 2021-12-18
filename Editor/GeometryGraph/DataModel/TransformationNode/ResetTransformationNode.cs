@@ -20,12 +20,12 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            GeometryGraphResolverContext context, GeometryStackData stackData)
+            EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             return null;
         }
 
-        public override void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
+        public override void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(),
                 new GeometryGraphConstantProperty(Matrix4x4.identity, context, GeometryPropertyType.Float4X4,

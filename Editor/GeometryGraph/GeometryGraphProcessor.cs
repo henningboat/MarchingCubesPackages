@@ -20,13 +20,16 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var result = Resolve(graphModel, rootNode);
             
             var contentHash = new Hash128();
-            contentHash.Append(result.PropertyValueBuffer);
-            contentHash.Append(result.MathInstructionBuffer);
-            contentHash.Append(result.GeometryInstructionBuffer.ToArray());
-
-            data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
-                result.GeometryInstructionBuffer, contentHash,
-                new Float4X4Value {Index = result.OriginTransformation.Index},result.ExposedVariables);
+         
+            //todo reimplement 
+            throw new NotImplementedException();
+            // contentHash.Append(result.PropertyValueBuffer);
+            // contentHash.Append(result.MathInstructionBuffer);
+            // contentHash.Append(result.GeometryInstructionBuffer.ToArray());
+            //
+            // data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
+            //     result.GeometryInstructionBuffer, contentHash,
+            //     new Float4X4Value {Index = result.OriginTransformation.Index},result.ExposedVariables);
         }
         public GraphProcessingResult ProcessGraph(IGraphModel graphModel)
         {
@@ -68,19 +71,21 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             return data;
         }
 
-        private static GeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
+        private static EditorGeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
         {
-            var context = new GeometryGraphResolverContext(graphModel as GeometryGraphModel);
-            
-            context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty, 0));
+            using (var context = new EditorGeometryGraphResolverContext(graphModel as GeometryGraphModel))
+            {
+                context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty,
+                    0));
 
-            rootNode.Resolve(context, context.OriginalGeometryStackData);
+                rootNode.Resolve(context, context.OriginalGeometryStackData);
 
-            context.FinishWritingCombiner();
+                context.FinishWritingCombiner();
 
-            context.BuildBuffers();
+                context.BuildBuffers();
 
-            return context;
+                return context;
+            }
         }
     }
 }

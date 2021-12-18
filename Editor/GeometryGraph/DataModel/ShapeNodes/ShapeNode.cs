@@ -29,9 +29,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 
         protected abstract ShapeType GetShapeType();
 
-        public abstract List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context);
+        public abstract List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context);
 
-        public void Resolve(GeometryGraphResolverContext context, GeometryStackData stack)
+        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stack)
         {
             context.WriteShape(GetShapeType(), stack, GetProperties(context));
         }

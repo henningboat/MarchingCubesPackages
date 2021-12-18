@@ -11,7 +11,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
     {
         public IVariableDeclarationModel Variable;
 
-        public GeometryGraphExposedVariableNode(IVariableDeclarationModel variableDeclarationModel, object defaultValue, GeometryGraphResolverContext context,
+        public GeometryGraphExposedVariableNode(IVariableDeclarationModel variableDeclarationModel, object defaultValue, EditorGeometryGraphResolverContext context,
             GeometryPropertyType geometryPropertyType, string variableName,
             string debugInformation) : base(
             geometryPropertyType, debugInformation)

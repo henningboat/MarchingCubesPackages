@@ -31,7 +31,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             return ShapeType.Box;
         }
 
-        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
         {
             return new() {ExtendsIn.ResolvePropertyInput(context, GeometryPropertyType.Float3)};
         }

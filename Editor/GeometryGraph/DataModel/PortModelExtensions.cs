@@ -15,7 +15,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
     public static class PortModelExtensions
     {
-        public static void ResolveGeometryInput(this IPortModel port, GeometryGraphResolverContext context, GeometryStackData stack)
+        public static void ResolveGeometryInput(this IPortModel port, EditorGeometryGraphResolverContext context, GeometryStackData stack)
         {
             var connectedPort = port.GetConnectedPorts().FirstOrDefault(model => model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow  && model.NodeModel != null);
             if (connectedPort != null && connectedPort.NodeModel is IGeometryNode geometryNode)
@@ -24,7 +24,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             }
         }
 
-        public static GeometryGraphProperty ResolvePropertyInput(this MathNode self, GeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+        public static GeometryGraphProperty ResolvePropertyInput(this MathNode self, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
         {
             GeometryGraphProperty resultProperty;
 
@@ -45,7 +45,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             }
         }
 
-        public static GeometryGraphProperty ResolvePropertyInput(this IPortModel self, GeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+        public static GeometryGraphProperty ResolvePropertyInput(this IPortModel self, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
         {
             if (self == null)
             {

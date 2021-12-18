@@ -18,12 +18,12 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
 
-        public void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             _geometryInput.ResolveGeometryInput(context, stackData);
             context.WriteDistanceModifier(GetDistanceModifierInstruction(context, stackData));
         }
 
-        protected abstract DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext geometryGraphResolverContext, GeometryStackData stackData);
+        protected abstract DistanceModifierInstruction GetDistanceModifierInstruction(EditorGeometryGraphResolverContext geometryGraphResolverContext, GeometryStackData stackData);
     }
 }

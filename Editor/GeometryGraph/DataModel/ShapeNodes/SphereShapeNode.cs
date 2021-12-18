@@ -30,7 +30,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             return ShapeType.Sphere;
         }
 
-        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
         {
             return new() {RadiusIn.ResolvePropertyInput(context, GeometryPropertyType.Float)};
         }

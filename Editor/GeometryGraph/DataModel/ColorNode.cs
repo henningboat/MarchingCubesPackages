@@ -21,7 +21,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             _colorIn = this.AddDataInputPort<Color>("", nameof(_colorIn));
         }
 
-        public void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             var colorFloat3Property = _colorIn.ResolvePropertyInput(context, GeometryPropertyType.Float3);
             var color32Property = context.GetOrCreateProperty(Guid,

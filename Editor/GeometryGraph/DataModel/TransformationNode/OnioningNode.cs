@@ -18,7 +18,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _thicknessInput = this.AddDataInputPort<float>("Thickness", nameof(_thicknessInput), defaultValue: 2);
         }
 
-        protected override DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData)
+        protected override DistanceModifierInstruction GetDistanceModifierInstruction(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             return new OnionDistanceModifierInstruction(_thicknessInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context,stackData);
         }
@@ -36,7 +36,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _amountInput = this.AddDataInputPort<float>("Amount", nameof(_amountInput));
         }
 
-        protected override DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData)
+        protected override DistanceModifierInstruction GetDistanceModifierInstruction(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             return new InflationDistanceModificationInstruction(_amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
         }
@@ -46,7 +46,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
     [UsedImplicitly]
     public class InversionNode : DistanceModificationNode
     {
-        protected override DistanceModifierInstruction GetDistanceModifierInstruction(GeometryGraphResolverContext context, GeometryStackData stackData)
+        protected override DistanceModifierInstruction GetDistanceModifierInstruction(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             return new InversionDistanceModifierInstruction(context, stackData);
         }

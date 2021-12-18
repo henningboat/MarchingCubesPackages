@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using henningboat.CubeMarching.Utils.Containers;
 
@@ -10,15 +9,16 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 {
     internal static class GeometryInstructionUtility
     {
-        public static GeometryInstruction CreateInstruction(GeometryInstructionType geometryInstructionType, int subType, int depth, CombinerOperation combinerOperation, GeometryGraphProperty combinerBlendValue, GeometryGraphProperty transformation,
-            List<GeometryGraphProperty> shapeProperties, GeometryGraphProperty color)
+        public static GeometryInstruction CreateInstruction(GeometryInstructionType geometryInstructionType, int subType,
+            int depth, CombinerOperation combinerOperation, GeometryGraphValue combinerBlendValue, GeometryGraphValue transformation,
+            List<GeometryGraphValue> shapeProperties, GeometryGraphValue color)
         {
             var propertyIndexes = new int32();
 
             int propertyOffset = 0;
             foreach (var shapeProperty in shapeProperties)
             {
-                for (int i = 0; i < shapeProperty.GetSizeInBuffer(); i++)
+                for (int i = 0; i < shapeProperty.Size; i++)
                 {
                     propertyIndexes[propertyOffset] = shapeProperty.Index + i;
                     propertyOffset++;

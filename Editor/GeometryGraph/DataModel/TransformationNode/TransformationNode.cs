@@ -17,9 +17,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOutput = AddExecutionOutput(nameof(_geometryInput));
         }
 
-        protected abstract GeometryGraphProperty GetTransformationProperty(GeometryGraphResolverContext context, GeometryGraphProperty parent);
+        protected abstract GeometryGraphProperty GetTransformationProperty(EditorGeometryGraphResolverContext context, GeometryGraphProperty parent);
 
-        public void Resolve(GeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             stackData.Transformation = GetTransformationProperty(context, stackData.Transformation);
             _geometryInput.ResolveGeometryInput(context, stackData);

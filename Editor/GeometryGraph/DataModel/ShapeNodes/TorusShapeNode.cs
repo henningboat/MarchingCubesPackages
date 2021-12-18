@@ -34,7 +34,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             return ShapeType.Torus;
         }
 
-        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
         {
             return new() {RadiusIn.ResolvePropertyInput(context, GeometryPropertyType.Float), Thickness.ResolvePropertyInput(context, GeometryPropertyType.Float)};
         }

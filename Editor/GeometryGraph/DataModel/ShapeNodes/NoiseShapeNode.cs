@@ -37,7 +37,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             return ShapeType.Noise;
         }
 
-        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
         {
             return new()
             {
@@ -67,7 +67,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             return ShapeType.Plane;
         }
 
-        public override List<GeometryGraphProperty> GetProperties(GeometryGraphResolverContext context)
+        public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
         {
             return new()
             {

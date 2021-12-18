@@ -10,6 +10,7 @@ using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEditor;
@@ -18,26 +19,19 @@ using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
-{
-    public class GeometryGraphResolverContext
+{    
+    public class EditorGeometryGraphResolverContext:IDisposable
     {
         private Dictionary<SerializableGUID, GeometryGraphProperty> _properties = new();
-        private List<GeometryGraphInstruction> _instructions = new();
 
-        public int CurrentCombinerDepth => _combinerStack.Count - 1;
-        private List<float> _propertyValueBuffer;
-        private List<GeometryInstruction> _geometryInstructionBuffer;
-        private List<MathInstruction> _mathInstructionsBuffer;
+        public int CurrentCombinerDepth => _runtimeResolver.CurrentCombinerDepth;
 
-        public List<float> PropertyValueBuffer => _propertyValueBuffer;
-        public List<MathInstruction> MathInstructionBuffer => _mathInstructionsBuffer;
+        public NativeList<GeometryInstruction> GeometryInstructionBuffer => _runtimeResolver.GeometryInstructionBuffer;
 
-        public List<GeometryInstruction> GeometryInstructionBuffer => _geometryInstructionBuffer;
-
-        private Stack<CombinerInstruction> _combinerStack = new();
+        
         public readonly GeometryGraphProperty ZeroFloatProperty;
 
-        public CombinerInstruction CurrentCombiner => _combinerStack.Peek();
+        public CombinerInstruction CurrentCombiner => _runtimeResolver.CurrentCombiner;
         public ExposedVariable[] ExposedVariables { get; private set; }
 
         public GeometryGraphProperty OriginTransformation;
@@ -45,9 +39,12 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         public GeometryStackData OriginalGeometryStackData;
         public GeometryGraphProperty DefaultColorFloat3;
         private GeometryGraphModel _graphModel;
+        private readonly RuntimeGeometryGraphResolverContext _runtimeResolver;
 
-        public GeometryGraphResolverContext(GeometryGraphModel graphModel)
+        public EditorGeometryGraphResolverContext(GeometryGraphModel graphModel)
         {
+            _runtimeResolver = new RuntimeGeometryGraphResolverContext();
+            
             _graphModel = graphModel;
             ZeroFloatProperty = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(0.0f, this, GeometryPropertyType.Float, "Zero Float Constant"));
             OriginTransformation = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphConstantProperty(Matrix4x4.Translate(Vector3.one*-32), this, GeometryPropertyType.Float4X4, "Origin Matrix"));
@@ -55,8 +52,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             DefaultColor = GetOrCreateProperty(SerializableGUID.Generate(), new GeometryGraphMathOperatorProperty(this,GeometryPropertyType.Color32,MathOperatorType.Float3ToColor32,DefaultColorFloat3,ZeroFloatProperty, "Default Material Color"));
 
             OriginalGeometryStackData = new GeometryStackData() {Color = DefaultColor, Transformation = OriginTransformation};
-            
-            _combinerStack.Push(new CombinerInstruction(CombinerOperation.Min, ZeroFloatProperty, -1));
         }
 
 
@@ -73,18 +68,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             CombinerInstruction instruction = new CombinerInstruction(CurrentCombiner.Operation,
                 CurrentCombiner.blendFactorProperty, CurrentCombiner.Depth + 1);
             
-            _instructions.Add(instruction);
+            _geometryInstructionBuffer.Add(instruction.GetInstruction());
         }
 
         public void WriteShape(ShapeType shapeType, GeometryStackData stackData, List<GeometryGraphProperty> getProperties)
         {
-            _instructions.Add(new ShapeInstruction(shapeType, stackData.Transformation, stackData.Color, getProperties, CurrentCombinerDepth, CurrentCombiner));
-        }
-
-        public GeometryGraphExposedVariableNode GetExposedVariableProperty(SerializableGUID guid)
-        {
-            return _properties.Values.Where(property => property is GeometryGraphExposedVariableNode).FirstOrDefault(property => ((GeometryGraphExposedVariableNode) property).Variable.Guid == guid) as
-                GeometryGraphExposedVariableNode;
+            var shape = new ShapeInstruction(shapeType, stackData.Transformation, stackData.Color, getProperties, CurrentCombinerDepth, CurrentCombiner);
+            
+            GeometryInstructionBuffer.Add(shape.GetInstruction());
         }
 
         public GeometryGraphProperty GetOrCreateProperty(SerializableGUID guid, GeometryGraphProperty newProperty)
@@ -93,67 +84,57 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             {
                 return existingProperty;
             }
-            else
+            
+            AddPropertyToValueBuffer(newProperty);
+            
+            if (newProperty is GeometryGraphMathOperatorProperty mathOperator)
             {
-                _properties[guid] = newProperty;
-                return newProperty;
+                _mathInstructionsBuffer.Add(mathOperator.GetMathInstruction());
             }
+            
+            
+            _properties[guid] = newProperty;
+            return newProperty;
         }
 
         public void BuildBuffers()
         {
-            _propertyValueBuffer = new List<float>();
-            var geometryGraphProperties = _properties.Values;
-            foreach (var property in geometryGraphProperties)
-            {
-                property.Index = _propertyValueBuffer.Count;
-                switch (property.Type)
-                {
-                    case GeometryPropertyType.Float:
-                        var constantFloatValue = property.GetValue<float>();
-                        _propertyValueBuffer.Add(constantFloatValue);
-                        break;
-                    case GeometryPropertyType.Float3:
-                        var constantFloat3Value = property.GetValue<Vector3>();
-                        for (var i = 0; i < 3; i++)
-                        {
-                            _propertyValueBuffer.Add(constantFloat3Value[i]);
-                        }
-
-                        break;
-                    case GeometryPropertyType.Float4X4:
-                        var constantFloat4X4Value = property.GetValue<Matrix4x4>();
-                        for (var i = 0; i < 16; i++)
-                        {
-                            _propertyValueBuffer.Add(constantFloat4X4Value[i]);
-                        }
-                        break;
-                    case GeometryPropertyType.Color32:
-                        //colors are always calculated by math instructions, so we don't
-                        //need to write any default values
-                        _propertyValueBuffer.Add(-1);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            _mathInstructionsBuffer = new List<MathInstruction>();
-            foreach (var geometryGraphProperty in geometryGraphProperties)
-            {
-                if (geometryGraphProperty is GeometryGraphMathOperatorProperty mathOperator)
-                {
-                    _mathInstructionsBuffer.Add(mathOperator.GetMathInstruction());
-                }
-            }
-
-            _geometryInstructionBuffer = new List<GeometryInstruction>();
-            for (var i = 0; i < _instructions.Count; i++)
-            {
-                GeometryInstructionBuffer.Add(_instructions[i].GetInstruction());
-            }
-
             ExposedVariables = _graphModel.VariableDeclarations.Select(CreateExposedVariable).ToArray();
+        }
+
+        private void AddPropertyToValueBuffer(GeometryGraphProperty property)
+        {
+            property.Index = _propertyValueBuffer.Length;
+            switch (property.Type)
+            {
+                case GeometryPropertyType.Float:
+                    var constantFloatValue = property.GetValue<float>();
+                    _propertyValueBuffer.Add(constantFloatValue);
+                    break;
+                case GeometryPropertyType.Float3:
+                    var constantFloat3Value = property.GetValue<Vector3>();
+                    for (var i = 0; i < 3; i++)
+                    {
+                        _propertyValueBuffer.Add(constantFloat3Value[i]);
+                    }
+
+                    break;
+                case GeometryPropertyType.Float4X4:
+                    var constantFloat4X4Value = property.GetValue<Matrix4x4>();
+                    for (var i = 0; i < 16; i++)
+                    {
+                        _propertyValueBuffer.Add(constantFloat4X4Value[i]);
+                    }
+
+                    break;
+                case GeometryPropertyType.Color32:
+                    //colors are always calculated by math instructions, so we don't
+                    //need to write any default values
+                    _propertyValueBuffer.Add(-1);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private ExposedVariable CreateExposedVariable(IVariableDeclarationModel variable)
@@ -171,11 +152,18 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
 
         public void WriteDistanceModifier(DistanceModifierInstruction getDistanceModifierInstruction)
         {
-            _instructions.Add(getDistanceModifierInstruction);
+            _geometryInstructionBuffer.Add(getDistanceModifierInstruction.GetInstruction());
         }
         public void WritePositionModificationModifier(PositionModificationInstruction getDistanceModifierInstruction)
         {
-            _instructions.Add(getDistanceModifierInstruction);
+            _geometryInstructionBuffer.Add(getDistanceModifierInstruction.GetInstruction());
+        }
+
+        public void Dispose()
+        {
+            _geometryInstructionBuffer.Dispose();
+            _mathInstructionsBuffer.Dispose();
+            _propertyValueBuffer.Dispose();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
     public class GeometryGraphConstantProperty : GeometryGraphProperty
     {
-        public GeometryGraphConstantProperty(object objectValue, GeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType, string debugInformation) : base(geometryPropertyType,
+        public GeometryGraphConstantProperty(object objectValue, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType, string debugInformation) : base(geometryPropertyType,
             debugInformation)
         {
             Value = objectValue;
@@ -20,7 +20,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         public GeometryGraphProperty A { get; }
         public GeometryGraphProperty B { get; }
 
-        public GeometryGraphMathOperatorProperty(GeometryGraphResolverContext context, GeometryPropertyType type, MathOperatorType operatorType, GeometryGraphProperty a, GeometryGraphProperty b,
+        public GeometryGraphMathOperatorProperty(EditorGeometryGraphResolverContext context, GeometryPropertyType type, MathOperatorType operatorType, GeometryGraphProperty a, GeometryGraphProperty b,
             string debugInformation) : base(type, debugInformation)
         {
             OperatorType = operatorType;
