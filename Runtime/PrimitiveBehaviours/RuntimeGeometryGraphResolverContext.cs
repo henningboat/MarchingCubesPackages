@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using Random = UnityEngine.Random;
 
 namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
@@ -51,7 +53,10 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
             OriginTransformation = Constant(Matrix4x4.identity);
             DefaultColor = Constant(0);
+            ZeroFloatProperty = Constant(0);
             DefaultColorFloat3 = Constant(float3.zero);
+
+            _combinerStack.Push(new CombinerState(CombinerOperation.Min, ZeroFloatProperty));
         }
 
 
@@ -110,6 +115,18 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public void AddShape(GeometryInstructionProxy sphereShapeProxy)
         {
             _geometryInstructionBuffer.Add(sphereShapeProxy.GetGeometryInstruction(this));
+        }
+
+        public GeometryGraphData GetGeometryGraphData()
+        {
+            return new GeometryGraphData()
+            {
+                ContentHash = Hash128.Compute(Random.value), //todo
+                GeometryInstructions =
+                    new NativeArray<GeometryInstruction>(_geometryInstructionBuffer, Allocator.Persistent),
+                MathInstructions = new NativeArray<MathInstruction>(_mathInstructionsBuffer, Allocator.Persistent),
+                ValueBuffer = new NativeArray<float>(_propertyValueBuffer, Allocator.Persistent),
+            };
         }
     }
 

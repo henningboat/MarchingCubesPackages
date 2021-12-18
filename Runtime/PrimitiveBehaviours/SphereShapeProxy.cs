@@ -7,7 +7,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
     {
         private GeometryGraphValue _radius;
 
-        public SphereShapeProxy(GeometryGraphValue radius)
+        public SphereShapeProxy(GeometryGraphValue radius, GeometryGraphValue transformation) : base(transformation)
         {
             _radius = radius;
         }

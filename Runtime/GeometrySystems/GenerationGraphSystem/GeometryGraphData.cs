@@ -15,6 +15,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
 
         public Hash128 ContentHash;
 
+
         public GeometryGraphData(GeometryGraphRuntimeData geometryGraphRuntimeData)
         {
             ContentHash = geometryGraphRuntimeData.ContentHash;

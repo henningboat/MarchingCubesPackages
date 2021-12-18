@@ -1,27 +1,31 @@
-using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
-using henningboat.CubeMarching.Utils.Containers;
-using Unity.Collections;
-using UnityEngine;
 
 namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
-    public abstract class PrimitiveShapeBase : MonoBehaviour
+    public abstract class PrimitiveShapeBase : GeometryInstanceBase
     {
-        protected RuntimeGeometryGraphResolverContext PrimitiveBuilder;
-
-        private void BuildPrimitive()
+        protected override GeometryGraphData GetGeometryGraphData()
         {
-            PrimitiveBuilder = new RuntimeGeometryGraphResolverContext();
-            PrimitiveBuilder.AddShape(GetShapeProxy());
-            
-            
-            
-            PrimitiveBuilder.Dispose();
+            using (var context = new RuntimeGeometryGraphResolverContext())
+            {
+                var shapeProxy = GetShapeProxy(context);
+                TransformationValue = shapeProxy.TransformationValue;
+                context.AddShape(shapeProxy);
+                return context.GetGeometryGraphData();
+            }
         }
 
-        protected abstract GeometryInstructionProxy GetShapeProxy();
+        public override void InitializeGraphDataIfNeeded()
+        {
+        }
+
+        public override void UpdateOverwrites()
+        {
+            WriteTransformationToValueBuffer();
+        }
+        
+        protected abstract GeometryInstructionProxy GetShapeProxy(RuntimeGeometryGraphResolverContext context);
     }
 
     public abstract class ShapeProxy:GeometryInstructionProxy
@@ -29,33 +33,8 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         public override GeometryInstructionType GeometryInstructionType => GeometryInstructionType.Shape;
 
-    }
-
-    public class GeometryGraphBuilder
-    {
-        private GeometryGraphData _result;
-
-        private NativeList<float> _valueBuffer;
-        private NativeList<GeometryInstruction> _instructions;
-
-        public GeometryGraphBuilder()
+        protected ShapeProxy(GeometryGraphValue transformation) : base(transformation)
         {
-            _valueBuffer = new NativeList<float>(Allocator.Temp);
-            _instructions = new NativeList<GeometryInstruction>(Allocator.Temp);
-
-            AddSphere();
-        }
-
-        private void AddSphere()
-        {
-            _instructions.Add(new GeometryInstruction()
-            {
-                _flags = GeometryInstructionFlags.None,
-                CombinerDepth = 0,
-                GeometryInstructionType = GeometryInstructionType.Shape,
-                GeometryInstructionSubType = (int)ShapeType.Sphere,
-                
-            });
         }
     }
 }

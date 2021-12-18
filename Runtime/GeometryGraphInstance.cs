@@ -8,13 +8,22 @@ using UnityEditor;
 namespace henningboat.CubeMarching
 {
     [ExecuteInEditMode]
-    public class GeometryGraphInstance : MonoBehaviour
+    public class GeometryGraphInstance : GeometryInstanceBase
     {
         private static (ScriptableObject, GeometryGraphRuntimeData) _debugOverwrite;
         [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
 
-        public void InitializeGraphDataIfNeeded()
+
+        public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
+
+        protected override GeometryGraphData GetGeometryGraphData()
+        {
+            return new GeometryGraphData(_geometryGraphRuntimeData);
+        }
+
+
+        public override void InitializeGraphDataIfNeeded()
         {
             var graphData = GraphData;
             GeometryGraphRuntimeData dataAssetToUse;
@@ -23,14 +32,10 @@ namespace henningboat.CubeMarching
             //find a better way to compare if they come from the same asset
             if (AssetDatabase.GetAssetPath(_geometryGraphRuntimeData) ==
                 AssetDatabase.GetAssetPath(_debugOverwrite.Item1))
-            {
                 dataAssetToUse = _debugOverwrite.Item2;
-            }
             else
 #endif
-            {
                 dataAssetToUse = _geometryGraphRuntimeData;
-            }
 
             if (graphData.ContentHash != dataAssetToUse.ContentHash)
             {
@@ -43,38 +48,18 @@ namespace henningboat.CubeMarching
             }
         }
 
-        public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
-
-        public GeometryGraphData GraphData { get; set; }
-
-
-        private void OnEnable()
-        {
-            GraphData = new GeometryGraphData(_geometryGraphRuntimeData);
-        }
-
-        private void OnDisable()
-        {
-            GraphData.Dispose();
-        }
-
         private void UpdateOverwritesInValueBuffer()
         {
-            foreach (GeometryGraphPropertyOverwrite overwrite in _overwrites)
+            foreach (var overwrite in _overwrites)
             {
                 var variable = _geometryGraphRuntimeData.GetIndexOfProperty(overwrite.PropertyGUID);
 
-                for (int i = 0; i < overwrite.Value.Length; i++)
-                {
+                for (var i = 0; i < overwrite.Value.Length; i++)
                     GraphData.ValueBuffer.Write(overwrite.Value[i], variable.IndexInValueBuffer + i);
-                }
             }
-            
-            //apply main transformation
-            GraphData.ValueBuffer.Write(transform.worldToLocalMatrix,
-                _geometryGraphRuntimeData.MainTransformation.Index);
-        }
 
+            WriteTransformationToValueBuffer();
+        }
         public List<GeometryGraphPropertyOverwrite> GetOverwrites()
         {
             return Overwrites;
@@ -85,7 +70,7 @@ namespace henningboat.CubeMarching
             _overwrites = newOverwrites;
         }
 
-        public void UpdateOverwrites()
+        public override void UpdateOverwrites()
         {
             UpdateOverwritesInValueBuffer();
         }

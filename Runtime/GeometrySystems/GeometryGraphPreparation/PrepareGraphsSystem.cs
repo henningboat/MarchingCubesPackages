@@ -14,7 +14,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
 
         public JobHandle Update(JobHandle jobHandle)
         {
-            var allGraphs = Object.FindObjectsOfType<GeometryGraphInstance>();
+            var allGraphs = Object.FindObjectsOfType<GeometryInstanceBase>();
             foreach (var graphInstance in allGraphs)
             {
                 graphInstance.InitializeGraphDataIfNeeded();

@@ -10,7 +10,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
     internal class BuildMainGraphSystem
     {
         private GeometryFieldData _geometryFieldData;
-        private GeometryGraphInstance[] _allGeometryGraphInstances;
+        private GeometryInstanceBase[] _allGeometryGraphInstances;
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
 
         public void Initialize(GeometryFieldData geometryFieldData)
@@ -26,13 +26,13 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             jobHandle.Complete();
         
             //todo initialize in a nicer way
-            _allGeometryGraphInstances = UnityEngine.Object.FindObjectsOfType<GeometryGraphInstance>();
+            _allGeometryGraphInstances = UnityEngine.Object.FindObjectsOfType<GeometryInstanceBase>();
 
             _allGeometryInstructionsList.Clear();
 
             int offset = 0;
             //could be turned into a job, but doesnt cost much right now
-            foreach (GeometryGraphInstance graphInstance in _allGeometryGraphInstances)
+            foreach (var graphInstance in _allGeometryGraphInstances)
             {
                 _allGeometryInstructionsList.AddRange(graphInstance.GraphData.GeometryInstructions);
             }

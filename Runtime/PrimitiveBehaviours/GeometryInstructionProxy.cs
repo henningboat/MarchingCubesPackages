@@ -7,11 +7,18 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
     public abstract class GeometryInstructionProxy
     {
+        public GeometryGraphValue TransformationValue { get; private set; }
+
+        public GeometryInstructionProxy(GeometryGraphValue transformation)
+        {
+            TransformationValue = transformation;
+        }
+
         public GeometryInstruction GetGeometryInstruction(RuntimeGeometryGraphResolverContext context)
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType, GeometryInstructionSubType,
                 context.CurrentCombinerDepth, context.CurrentCombinerOperation, context.Constant(0),
-                context.Constant(Matrix4x4.identity), GetProperties(), context.Constant(0));
+                TransformationValue, GetProperties(), context.Constant(0));
         }
 
         protected abstract List<GeometryGraphValue> GetProperties();

@@ -4,6 +4,7 @@ using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 using static Unity.Mathematics.math;
 
 namespace henningboat.CubeMarching.TerrainChunkEntitySystem
@@ -156,12 +157,13 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                     {
                         var shape = geometryInstruction.GetShapeInstruction();
 
-                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i);
+                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out float inverseUniformScale);
 
                         var materialData = geometryInstruction.GetMaterialData();
                         var packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS);
+                        surfaceDistance /= inverseUniformScale;
 
                         if (_allowPerInstructionReadback)
                             CurrentInstructionSurfaceDistanceReadback[i] = surfaceDistance;
@@ -175,7 +177,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                         break;
                     case GeometryInstructionType.PositionModification:
                     {
-                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i);
+                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out float _);
                         _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction
                             .GetTerrainTransformation().TransformPosition(positionOS);
                     }
@@ -196,9 +198,11 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
             _lastCombinerDepth = geometryInstruction.CombinerDepth;
         }
 
-        private PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i)
+        private PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i, out float inverseUniformScale)
         {
             var transformation = geometryInstruction.GetTransformation();
+
+            inverseUniformScale = transformation[0][0];
 
             PackedFloat3 positionOS = default;
 
