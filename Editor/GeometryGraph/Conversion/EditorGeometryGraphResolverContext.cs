@@ -131,5 +131,20 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         {
             throw new NotImplementedException();
         }
+
+        public void WriteMathProperty(MathOperatorType mathOperationType, GeometryGraphProperty a,GeometryGraphProperty b,GeometryGraphProperty result )
+        {
+            var mathInstruction = new MathInstruction()
+            {
+                MathOperationType = mathOperationType,
+                InputAIndex = a.Index,
+                InputAType = a.Type,
+                InputBIndex = b.Index,
+                InputBType = b.Type,
+                ResultIndex = result.Index,
+                ResultType = result.Type,
+            };
+            _runtimeResolver.AddMathInstruction(mathInstruction);
+        }
     }
 }

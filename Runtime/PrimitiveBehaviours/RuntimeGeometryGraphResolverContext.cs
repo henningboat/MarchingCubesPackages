@@ -92,6 +92,8 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
                     return Constant(floatValue);
                 case float3 float3Value:
                     return Constant(float3Value);
+                case Vector3 float3Value:
+                    return Constant(float3Value);
                 case Matrix4x4 matrixValue:
                     return Constant(matrixValue);
                 case Color _:
@@ -151,6 +153,11 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             values = _propertyValueBuffer.ToArray();
             geometryInstructions = _geometryInstructionBuffer.ToArray();
             mathInstructions = _mathInstructionsBuffer.ToArray();
+        }
+
+        public void AddMathInstruction(MathInstruction mathInstruction)
+        {
+            _mathInstructionsBuffer.Add(mathInstruction);
         }
     }
 }
