@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
@@ -9,10 +10,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
     {
         private GeometryGraphProperty[] _properties;
         private GeometryGraphProperty _transformation;
-        private CombinerInstruction _combiner;
+        private CombinerState _combiner;
         protected abstract DistanceModificationType Type { get; }
 
-        protected DistanceModifierInstruction(int depth, CombinerInstruction combiner, GeometryGraphProperty transformation,  params GeometryGraphProperty[] properties) : base(depth)
+        protected DistanceModifierInstruction(int depth, CombinerState combiner, GeometryGraphProperty transformation,  params GeometryGraphProperty[] properties) : base(depth)
         {
             _combiner = combiner;
             _transformation = transformation;
@@ -22,7 +23,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         public override GeometryInstruction GetInstruction()
         {
-            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification, (int) Type, Depth, _combiner.Operation,_combiner.blendFactorProperty, _transformation, _properties.ToList(),
+            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification, (int) Type, Depth, _combiner.Operation,_combiner.BlendValue, _transformation, _properties.ToList(),
                 null);
         }
     }

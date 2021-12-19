@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -24,7 +25,7 @@ namespace henningboat.CubeMarching
 
 
         public override void InitializeGraphDataIfNeeded()
-        {
+        {   
             var graphData = GraphData;
             GeometryGraphRuntimeData dataAssetToUse;
 
@@ -44,8 +45,11 @@ namespace henningboat.CubeMarching
                     // graphData.Dispose();
                 }
 
-                GraphData = new GeometryGraphData(dataAssetToUse);
-            }
+                GraphData = GetGeometryGraphData();
+           }  
+            
+            TransformationValue = new GeometryGraphConstantProperty(dataAssetToUse.MainTransformation.Index,new Matrix4x4(),GeometryPropertyType.Float4X4);
+
         }
 
         private void UpdateOverwritesInValueBuffer()

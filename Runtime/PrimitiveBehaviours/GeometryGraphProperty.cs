@@ -1,5 +1,4 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
@@ -31,8 +30,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
             };
         }
 
-        protected GeometryGraphProperty(GeometryPropertyType type, string debugInformation)
+        protected GeometryGraphProperty(int index, GeometryPropertyType type, string debugInformation)
         {
+            Index = index;
             Type = type;
             DebugInformation = debugInformation;
         }

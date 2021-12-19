@@ -27,8 +27,8 @@ namespace henningboat.CubeMarching
 
         public ExposedVariable[] Variables => _variables;
 
-        public void InitializeData(List<float> valueBuffer, List<MathInstruction> mathInstructions,
-            List<GeometryInstruction> geometryInstructions, Hash128 contentHash, Float4X4Value mainTransformation, ExposedVariable[] variables)
+        public void InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
+            GeometryInstruction[] geometryInstructions, Hash128 contentHash, Float4X4Value mainTransformation, ExposedVariable[] variables)
         {
             _valueBuffer = valueBuffer.ToArray();
             _mathInstructions = mathInstructions.ToArray();

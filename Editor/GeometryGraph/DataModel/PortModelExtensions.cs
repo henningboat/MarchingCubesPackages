@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
@@ -38,7 +39,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                     }
 
                     return context.GetOrCreateProperty(self.Guid,
-                        new GeometryGraphMathOperatorProperty(context, geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
+                        new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
                 default:
                     throw new ArgumentOutOfRangeException();
                     break;
@@ -61,14 +62,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 
                 case IVariableNodeModel varNode:
                     var objectValue = varNode.VariableDeclarationModel.InitializationModel.ObjectValue;
-                   
 
-                    return context.GetOrCreateProperty(varNode.VariableDeclarationModel.Guid,
-                        new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, objectValue, context, geometryPropertyType,
-                            varNode.VariableDeclarationModel.GetVariableName(), "Variable Node " + varNode.Title));
+                    throw new NetworkInformationException();
+                    // return context.GetOrCreateProperty(varNode.VariableDeclarationModel.Guid,
+                    //     new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, objectValue, context, geometryPropertyType,
+                    //         varNode.VariableDeclarationModel.GetVariableName(), "Variable Node " + varNode.Title));
 
                 case IConstantNodeModel constNode:
-                    return context.GetOrCreateProperty(constNode.Guid, new GeometryGraphConstantProperty(constNode.ObjectValue, context, geometryPropertyType, ""));
+                    return context.GetOrCreateProperty(constNode.Guid, constNode.ObjectValue);
 
                 case IEdgePortalExitModel portalModel:
                     throw new NotImplementedException("Portals are not supported right now");
@@ -91,8 +92,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                         embeddedValue = new Vector3(color.r, color.g, color.b);
                     }
                     
-                    return context.GetOrCreateProperty(self.Guid,
-                        new GeometryGraphConstantProperty(embeddedValue, context, geometryPropertyType, $"Embedded Value Node{self.UniqueName} port {self.UniqueName}"));
+                    return context.GetOrCreateProperty(self.Guid, embeddedValue);
             }
         }
     }

@@ -4,6 +4,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
@@ -25,9 +26,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             RadiusIn = this.AddDataInputPort<float>(nameof(RadiusIn), defaultValue: 8);
         }
 
-        protected override ShapeType GetShapeType()
+
+        protected override ShapeProxy GetShape(EditorGeometryGraphResolverContext context,GeometryStackData stackData)
         {
-            return ShapeType.Sphere;
+            return new SphereShapeProxy(RadiusIn.ResolvePropertyInput(context, GeometryPropertyType.Float),
+                stackData.Transformation);
         }
 
         public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)

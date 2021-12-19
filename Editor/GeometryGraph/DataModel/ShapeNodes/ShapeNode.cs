@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -27,13 +28,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
         {
         }
 
-        protected abstract ShapeType GetShapeType();
+        protected abstract ShapeProxy GetShape(EditorGeometryGraphResolverContext context,
+            GeometryStackData stackData);
 
         public abstract List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context);
 
         public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stack)
         {
-            context.WriteShape(GetShapeType(), stack, GetProperties(context));
+            context.WriteShape(GetShape(context, stack));
         }
     }
 }

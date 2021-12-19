@@ -26,7 +26,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         protected override GeometryGraphProperty GetTransformationProperty(EditorGeometryGraphResolverContext context, GeometryGraphProperty parent)
         {
             var translationProperty = _inTranslation.ResolvePropertyInput(context, GeometryPropertyType.Float3);
-            var transformationProperty = new GeometryGraphMathOperatorProperty(context, GeometryPropertyType.Float4X4, MathOperatorType.Translate, parent, translationProperty, "Translation");
+            var transformationProperty = new GeometryGraphMathOperatorProperty(GeometryPropertyType.Float4X4, MathOperatorType.Translate, parent, translationProperty, "Translation");
             return context.GetOrCreateProperty(Guid, transformationProperty);
         }
     }

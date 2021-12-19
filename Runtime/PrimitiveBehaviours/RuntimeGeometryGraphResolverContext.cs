@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
@@ -16,9 +17,9 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
     public  class CombinerState
     {
         public readonly CombinerOperation Operation;
-        public readonly GeometryGraphValue BlendValue;
+        public readonly GeometryGraphProperty BlendValue;
 
-        public CombinerState(CombinerOperation operation, GeometryGraphValue blendValue)
+        public CombinerState(CombinerOperation operation, GeometryGraphProperty blendValue)
         {
             Operation = operation;
             BlendValue = blendValue;
@@ -35,15 +36,15 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public NativeList<GeometryInstruction> GeometryInstructionBuffer => _geometryInstructionBuffer;
 
         private Stack<CombinerState> _combinerStack = new();
-        public readonly GeometryGraphValue ZeroFloatProperty;
+        public readonly GeometryGraphProperty ZeroFloatProperty;
 
         public CombinerState CurrentCombiner => _combinerStack.Peek();
         public ExposedVariable[] ExposedVariables { get; private set; }
         public CombinerOperation CurrentCombinerOperation { get; }
 
-        public GeometryGraphValue OriginTransformation;
-        public GeometryGraphValue DefaultColor;
-        public GeometryGraphValue DefaultColorFloat3;
+        public GeometryGraphProperty OriginTransformation { get; }
+        public GeometryGraphProperty DefaultColor{ get; }
+        public GeometryGraphProperty DefaultColorFloat3{ get; }
 
         public RuntimeGeometryGraphResolverContext()
         {
@@ -68,12 +69,11 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public void FinishWritingCombiner()
         {
             //bit confusing: to write the combiner into it's parent, we need the parents combiner settings
-            CombinerState state = new CombinerState(CurrentCombiner.Operation,
-                CurrentCombiner.BlendValue);
+            _combinerStack.Pop();
 
             _geometryInstructionBuffer.Add(GeometryInstructionUtility.CreateInstruction(
                 GeometryInstructionType.Combiner, (int) CurrentCombiner.Operation, CurrentCombinerDepth,
-                CurrentCombinerOperation, DefaultColor, OriginTransformation, new List<GeometryGraphValue>(),
+                CurrentCombinerOperation, DefaultColor, OriginTransformation, new List<GeometryGraphProperty>(),
                 DefaultColor));
         }
 
@@ -84,25 +84,42 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             _propertyValueBuffer.Dispose();
         }
 
-        public GeometryGraphValue Constant(float constant)
+        public GeometryGraphProperty CreateProperty<T>(T value, string debugInfo = "")
         {
-            var reference = new GeometryGraphValue(_propertyValueBuffer.Length,1 );
+            switch (value)
+            {
+                case float floatValue:
+                    return Constant(floatValue);
+                case float3 float3Value:
+                    return Constant(float3Value);
+                case Matrix4x4 matrixValue:
+                    return Constant(matrixValue);
+                case Color _:
+                    return Constant(0);
+                default:
+                    throw new Exception(typeof(T) + " is not supported");
+            }
+        }
+        
+        private GeometryGraphProperty Constant(float constant)
+        {
+            var reference = new GeometryGraphConstantProperty(_propertyValueBuffer.Length ,constant,GeometryPropertyType.Float);
             _propertyValueBuffer.Add(constant);
             return reference;
         }
 
-        public GeometryGraphValue Constant(float3 constant)
+        private GeometryGraphProperty Constant(float3 constant)
         {
-            var reference = new GeometryGraphValue(_propertyValueBuffer.Length,3);
+            var reference = new GeometryGraphConstantProperty(_propertyValueBuffer.Length, constant,GeometryPropertyType.Float3);
             _propertyValueBuffer.Add(constant.x);
             _propertyValueBuffer.Add(constant.y);
             _propertyValueBuffer.Add(constant.z);
             return reference;
         }
 
-        public GeometryGraphValue Constant(Matrix4x4 constant)
+        private GeometryGraphProperty Constant(Matrix4x4 constant)
         {
-            var reference = new GeometryGraphValue(_propertyValueBuffer.Length,16);
+            var reference = new GeometryGraphConstantProperty(_propertyValueBuffer.Length,constant, GeometryPropertyType.Float4X4);
             var constantFloat4X4Value = constant;
             for (var i = 0; i < 16; i++)
             {
@@ -128,17 +145,12 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
                 ValueBuffer = new NativeArray<float>(_propertyValueBuffer, Allocator.Persistent),
             };
         }
-    }
 
-    public class GeometryGraphValue
-    {
-        public readonly int Index;
-        public int Size;
-
-        public GeometryGraphValue(int index, int size)
+        public void ExportBuffers(out float[] values, out GeometryInstruction[] geometryInstructions, out MathInstruction[] mathInstructions)
         {
-            Size = size;
-            Index = index;
+            values = _propertyValueBuffer.ToArray();
+            geometryInstructions = _geometryInstructionBuffer.ToArray();
+            mathInstructions = _mathInstructionsBuffer.ToArray();
         }
     }
 }

@@ -27,9 +27,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         public override void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(),
-                new GeometryGraphConstantProperty(Matrix4x4.identity, context, GeometryPropertyType.Float4X4,
-                    "Identity Transformation"));
+            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(),Matrix4x4.identity);
             stackData.Transformation = zeroMatrixInstruction;
 
             _geometryIn.ResolveGeometryInput(context, stackData);

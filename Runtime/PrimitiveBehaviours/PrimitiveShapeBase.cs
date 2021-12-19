@@ -1,3 +1,4 @@
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
@@ -33,7 +34,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         public override GeometryInstructionType GeometryInstructionType => GeometryInstructionType.Shape;
 
-        protected ShapeProxy(GeometryGraphValue transformation) : base(transformation)
+        protected ShapeProxy(GeometryGraphProperty transformation) : base(transformation)
         {
         }
     }

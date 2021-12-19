@@ -4,6 +4,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
@@ -32,9 +33,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             ScaleIn = this.AddDataInputPort<Vector3>("Scale", nameof(ScaleIn), defaultValue: Vector3.one * 8);
         }
 
-        protected override ShapeType GetShapeType()
+        protected override ShapeProxy GetShape(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            return ShapeType.Noise;
+            throw new System.NotImplementedException();
         }
 
         public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)
@@ -62,9 +63,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
             base.OnDefineNode();
         }
 
-        protected override ShapeType GetShapeType()
+        protected override ShapeProxy GetShape(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            return ShapeType.Plane;
+            throw new System.NotImplementedException();
         }
 
         public override List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEngine;
 
@@ -7,9 +8,9 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
     public abstract class GeometryInstructionProxy
     {
-        public GeometryGraphValue TransformationValue { get; private set; }
+        public GeometryGraphProperty TransformationValue { get; private set; }
 
-        public GeometryInstructionProxy(GeometryGraphValue transformation)
+        public GeometryInstructionProxy(GeometryGraphProperty transformation)
         {
             TransformationValue = transformation;
         }
@@ -17,11 +18,11 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public GeometryInstruction GetGeometryInstruction(RuntimeGeometryGraphResolverContext context)
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType, GeometryInstructionSubType,
-                context.CurrentCombinerDepth, context.CurrentCombinerOperation, context.Constant(0),
-                TransformationValue, GetProperties(), context.Constant(0));
+                context.CurrentCombinerDepth, context.CurrentCombinerOperation, context.CreateProperty(0.0f),
+                TransformationValue, GetProperties(), context.CreateProperty(0.0f));
         }
 
-        protected abstract List<GeometryGraphValue> GetProperties();
+        protected abstract List<GeometryGraphProperty> GetProperties();
 
         public abstract int GeometryInstructionSubType { get; }
 

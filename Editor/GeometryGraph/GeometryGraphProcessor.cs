@@ -5,6 +5,8 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -20,16 +22,17 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var result = Resolve(graphModel, rootNode);
             
             var contentHash = new Hash128();
-         
-            //todo reimplement 
-            throw new NotImplementedException();
-            // contentHash.Append(result.PropertyValueBuffer);
-            // contentHash.Append(result.MathInstructionBuffer);
-            // contentHash.Append(result.GeometryInstructionBuffer.ToArray());
-            //
-            // data.InitializeData(result.PropertyValueBuffer, result.MathInstructionBuffer,
-            //     result.GeometryInstructionBuffer, contentHash,
-            //     new Float4X4Value {Index = result.OriginTransformation.Index},result.ExposedVariables);
+
+            contentHash.Append(result.ValueBuffer);
+            contentHash.Append(result.GeometryInstructions);
+            contentHash.Append(result.MathInstructions);
+            contentHash.Append(result.OriginTransformation.Index);
+            
+            data.InitializeData(result.ValueBuffer,result.MathInstructions,
+                result.GeometryInstructions, contentHash,
+                new Float4X4Value {Index = result.OriginTransformation.Index},result.ExposedVariables);
+            
+            result.Dispose();
         }
         public GraphProcessingResult ProcessGraph(IGraphModel graphModel)
         {
@@ -73,8 +76,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
         private static EditorGeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
         {
-            using (var context = new EditorGeometryGraphResolverContext(graphModel as GeometryGraphModel))
-            {
+            var context = new EditorGeometryGraphResolverContext(graphModel as GeometryGraphModel);
+            
                 context.BeginWriteCombiner(new CombinerInstruction(CombinerOperation.Min, context.ZeroFloatProperty,
                     0));
 
@@ -85,7 +88,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor
                 context.BuildBuffers();
 
                 return context;
-            }
         }
     }
 }

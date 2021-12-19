@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace henningboat.CubeMarching
     public abstract class GeometryInstanceBase : MonoBehaviour
     {
         public GeometryGraphData GraphData { get; set; }
-        protected GeometryGraphValue TransformationValue;
+        protected GeometryGraphProperty TransformationValue;
 
         private void OnEnable()
         {

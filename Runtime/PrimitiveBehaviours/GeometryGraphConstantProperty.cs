@@ -1,5 +1,4 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 
@@ -7,7 +6,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
     public class GeometryGraphConstantProperty : GeometryGraphProperty
     {
-        public GeometryGraphConstantProperty(object objectValue, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType, string debugInformation) : base(geometryPropertyType,
+        public GeometryGraphConstantProperty(int index, object objectValue,GeometryPropertyType geometryPropertyType,string debugInformation="") : base(index, geometryPropertyType,
             debugInformation)
         {
             Value = objectValue;
@@ -20,8 +19,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         public GeometryGraphProperty A { get; }
         public GeometryGraphProperty B { get; }
 
-        public GeometryGraphMathOperatorProperty(EditorGeometryGraphResolverContext context, GeometryPropertyType type, MathOperatorType operatorType, GeometryGraphProperty a, GeometryGraphProperty b,
-            string debugInformation) : base(type, debugInformation)
+        public GeometryGraphMathOperatorProperty(GeometryPropertyType type, MathOperatorType operatorType, GeometryGraphProperty a, GeometryGraphProperty b,
+            string debugInformation) : base(default,type, debugInformation)
         {
             OperatorType = operatorType;
             A = a;

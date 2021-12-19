@@ -4,6 +4,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -39,10 +40,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
     {
         private GeometryGraphProperty[] _properties;
         private GeometryGraphProperty _transformation;
-        private CombinerInstruction _combiner;
+        private CombinerState _combiner;
         private TerrainTransformationType _type;
 
-        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerInstruction combiner,
+        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerState combiner,
             GeometryGraphProperty transformation, params GeometryGraphProperty[] properties) : base(depth)
         {
             _type = type;
@@ -55,7 +56,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         public override GeometryInstruction GetInstruction()
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.PositionModification,
-                (int) _type, Depth, _combiner.Operation,_combiner.blendFactorProperty, _transformation, _properties.ToList(),
+                (int) _type, Depth, _combiner.Operation,_combiner.BlendValue, _transformation, _properties.ToList(),
                 null);
         }
     }
@@ -75,9 +76,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         {
             context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
 
-            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(),
-                new GeometryGraphConstantProperty(Matrix4x4.identity, context, GeometryPropertyType.Float4X4,
-                    "Identity Transformation"));
+            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(), Matrix4x4.identity);
             stackData.Transformation = zeroMatrixInstruction;
 
             _geometryIn.ResolveGeometryInput(context, stackData);

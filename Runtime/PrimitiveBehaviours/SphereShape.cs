@@ -6,7 +6,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
     {
         protected override GeometryInstructionProxy GetShapeProxy(RuntimeGeometryGraphResolverContext context)
         {
-            return new SphereShapeProxy(context.Constant(1), context.Constant(transform.localToWorldMatrix));
+            return new SphereShapeProxy(context.CreateProperty(1.0f), context.CreateProperty(transform.localToWorldMatrix));
         }
 
     }
