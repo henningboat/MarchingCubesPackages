@@ -3,13 +3,14 @@ using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
-    public class SphereShapeNode : ShapeNode<CShapeSphere>
+    public class SphereShapeNode : ShapeNode<SphereShapeResolver>
     {
         public override string Title
         {

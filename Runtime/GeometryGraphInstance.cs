@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
@@ -11,32 +12,33 @@ namespace henningboat.CubeMarching
     [ExecuteInEditMode]
     public class GeometryGraphInstance : GeometryInstanceBase
     {
-        private static (ScriptableObject, GeometryGraphRuntimeData) _debugOverwrite;
-        [SerializeField] private GeometryGraphRuntimeData _geometryGraphRuntimeData;
+        private static (ScriptableObject, GeometryGraphRuntimeAsset) _debugOverwrite;
+        [SerializeField] private GeometryGraphRuntimeAsset _geometryGraphRuntimeData;
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
 
 
         public List<GeometryGraphPropertyOverwrite> Overwrites => _overwrites;
 
-        protected override GeometryGraphData GetGeometryGraphData()
+        protected override NewGeometryGraphData GetGeometryGraphData()
         {
-            return new GeometryGraphData(_geometryGraphRuntimeData);
+            throw new NotImplementedException();
+            //n new GeometryGraphData(_geometryGraphRuntimeData.GeometryGraphData);
         }
 
 
         public override void InitializeGraphDataIfNeeded()
         {   
-            var graphData = GraphData;
-            GeometryGraphRuntimeData dataAssetToUse;
+            var graphData = GraphBuffers;
+            NewGeometryGraphData dataAssetToUse;
 
 #if UNITY_EDITOR
             //find a better way to compare if they come from the same asset
             if (AssetDatabase.GetAssetPath(_geometryGraphRuntimeData) ==
                 AssetDatabase.GetAssetPath(_debugOverwrite.Item1))
-                dataAssetToUse = _debugOverwrite.Item2;
+                dataAssetToUse = _debugOverwrite.Item2.GeometryGraphData;
             else
 #endif
-                dataAssetToUse = _geometryGraphRuntimeData;
+                dataAssetToUse = _geometryGraphRuntimeData.GeometryGraphData;
 
             if (graphData.ContentHash != dataAssetToUse.ContentHash)
             {
@@ -45,8 +47,8 @@ namespace henningboat.CubeMarching
                     // graphData.Dispose();
                 }
 
-                GraphData = GetGeometryGraphData();
-           }  
+                GraphBuffers = new GeometryGraphBuffers(GetGeometryGraphData());
+            }  
             
             TransformationValue = new GeometryGraphConstantProperty(dataAssetToUse.MainTransformation.Index,new Matrix4x4(),GeometryPropertyType.Float4X4);
 
@@ -56,10 +58,10 @@ namespace henningboat.CubeMarching
         {
             foreach (var overwrite in _overwrites)
             {
-                var variable = _geometryGraphRuntimeData.GetIndexOfProperty(overwrite.PropertyGUID);
+                var variable = _geometryGraphRuntimeData.GeometryGraphData.GetIndexOfProperty(overwrite.PropertyGUID);
 
                 for (var i = 0; i < overwrite.Value.Length; i++)
-                    GraphData.ValueBuffer.Write(overwrite.Value[i], variable.IndexInValueBuffer + i);
+                    GraphBuffers.ValueBuffer.Write(overwrite.Value[i], variable.IndexInValueBuffer + i);
             }
 
             WriteTransformationToValueBuffer();
@@ -79,7 +81,7 @@ namespace henningboat.CubeMarching
             UpdateOverwritesInValueBuffer();
         }
 
-        public static void SetDebugOverwrite(ScriptableObject graphModelAssetModel, GeometryGraphRuntimeData data)
+        public static void SetDebugOverwrite(ScriptableObject graphModelAssetModel, GeometryGraphRuntimeAsset data)
         {
             _debugOverwrite = (graphModelAssetModel, data);
         }

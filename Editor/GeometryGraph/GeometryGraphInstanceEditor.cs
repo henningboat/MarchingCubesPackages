@@ -22,7 +22,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            var graph = _geometryGraphProperty.objectReferenceValue as GeometryGraphRuntimeData;
+            var graph = _geometryGraphProperty.objectReferenceValue as GeometryGraphRuntimeAsset;
             var graphAsset = AssetDatabase.LoadAssetAtPath<GeometryGraphAsset>(AssetDatabase.GetAssetPath(graph));
 
             EditorGUILayout.PropertyField(_geometryGraphProperty);
@@ -39,7 +39,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var geometryGraphInstance = (GeometryGraphInstance) target;
             var currentOverwrites = geometryGraphInstance.GetOverwrites();
 
-            foreach (var variableDeclarationModel in graph.Variables)
+            foreach (var variableDeclarationModel in graph.GeometryGraphData.Variables)
             {
                 EditorGUILayout.BeginHorizontal();
 

@@ -5,7 +5,7 @@ using henningboat.CubeMarching.GeometryComponents;
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeTorus : ITerrainModifierShape
+    public struct CShapeTorus : IGeometryShapeResolver
     {
         [FieldOffset(0)] public float radius;
         [FieldOffset(4)] public float thickness;

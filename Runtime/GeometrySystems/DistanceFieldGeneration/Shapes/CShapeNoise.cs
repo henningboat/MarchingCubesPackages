@@ -6,7 +6,7 @@ using Unity.Mathematics;
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeNoise : ITerrainModifierShape
+    public struct CShapeNoise : IGeometryShapeResolver
     {
         [FieldOffset(0)] public float strength;
         [FieldOffset(4)] public float valueOffset;
@@ -41,7 +41,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeVoronoi : ITerrainModifierShape
+    public struct CShapeVoronoi : IGeometryShapeResolver
     {
         [FieldOffset(4)] public float valueOffset;
         [FieldOffset(20)] public float3 scale;

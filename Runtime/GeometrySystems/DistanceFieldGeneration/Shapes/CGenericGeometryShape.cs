@@ -2,6 +2,8 @@
 using System.Runtime.InteropServices;
 using Code.SIMDMath;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.GeometryComponents.Shapes;
+using henningboat.CubeMarching.GeometryComponents.Shapes.henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.Utils.Containers;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -28,7 +30,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 switch (ShapeType)
                 {
                     case ShapeType.Sphere:
-                        return ((CShapeSphere*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((SphereShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.BoundingBox:
                         return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS);

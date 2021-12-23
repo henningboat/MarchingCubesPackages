@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
     [Serializable]
-    public abstract class ShapeNode<T> : GeometryNodeModel, IGeometryNode where T : struct, ITerrainModifierShape
+    public abstract class ShapeNode<T> : GeometryNodeModel, IGeometryNode where T : struct, IGeometryShapeResolver
     {
         public IPortModel GeometryOut { get; set; }
 

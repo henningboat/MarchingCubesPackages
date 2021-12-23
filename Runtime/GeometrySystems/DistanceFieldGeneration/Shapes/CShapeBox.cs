@@ -7,7 +7,7 @@ using static Code.SIMDMath.SimdMath;
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapeBox : ITerrainModifierShape
+    public struct CShapeBox : IGeometryShapeResolver
     {
         [FieldOffset(0)] public float3 Extends;
         

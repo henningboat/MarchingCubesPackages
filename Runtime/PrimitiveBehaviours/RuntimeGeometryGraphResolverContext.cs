@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
@@ -37,9 +38,9 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         private Stack<CombinerState> _combinerStack = new();
         public readonly GeometryGraphProperty ZeroFloatProperty;
+        private List<ExposedVariable> _exposedProperties=new();
 
         public CombinerState CurrentCombiner => _combinerStack.Peek();
-        public ExposedVariable[] ExposedVariables { get; private set; }
         public CombinerOperation CurrentCombinerOperation { get; }
 
         public GeometryGraphProperty OriginTransformation { get; }
@@ -136,16 +137,16 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             _geometryInstructionBuffer.Add(sphereShapeProxy.GetGeometryInstruction(this));
         }
 
-        public GeometryGraphData GetGeometryGraphData()
+        public NewGeometryGraphData GetGeometryGraphData()
         {
-            return new GeometryGraphData()
-            {
-                ContentHash = Hash128.Compute(Random.value), //todo
-                GeometryInstructions =
-                    new NativeArray<GeometryInstruction>(_geometryInstructionBuffer, Allocator.Persistent),
-                MathInstructions = new NativeArray<MathInstruction>(_mathInstructionsBuffer, Allocator.Persistent),
-                ValueBuffer = new NativeArray<float>(_propertyValueBuffer, Allocator.Persistent),
-            };
+            var hash = new Hash128();
+            hash.Append(_geometryInstructionBuffer.ToArray());
+            hash.Append(_mathInstructionsBuffer.ToArray());
+            hash.Append(_geometryInstructionBuffer.ToArray());
+            return NewGeometryGraphData.InitializeData(_propertyValueBuffer.ToArray(),
+                _mathInstructionsBuffer.ToArray(), _geometryInstructionBuffer.ToArray(), hash,
+                new Float4X4Value() {Index = OriginTransformation.Index},
+                _exposedProperties.ToArray());
         }
 
         public void ExportBuffers(out float[] values, out GeometryInstruction[] geometryInstructions, out MathInstruction[] mathInstructions)
@@ -158,6 +159,25 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public void AddMathInstruction(MathInstruction mathInstruction)
         {
             _mathInstructionsBuffer.Add(mathInstruction);
+        }
+
+        public GeometryGraphProperty CreateOrGetExposedProperty<T>(SerializableGUID serializableGuid, T  value)
+        {
+            foreach (var variable in _exposedProperties)
+            {
+                if (variable.ID == serializableGuid)
+                {
+                    return new GeometryGraphConstantProperty(variable.IndexInValueBuffer, value, variable.Type, variable.Name);
+                }
+            }
+
+            var property = CreateProperty(value);
+
+            var exposedVariable = new ExposedVariable(serializableGuid, GeometryPropertyType.Float,
+                new []{10.0f}, property.Index, "");
+            _exposedProperties.Add(exposedVariable);
+            
+            return exposedVariable;
         }
     }
 }

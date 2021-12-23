@@ -34,7 +34,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             //could be turned into a job, but doesnt cost much right now
             foreach (var graphInstance in _allGeometryGraphInstances)
             {
-                _allGeometryInstructionsList.AddRange(graphInstance.GraphData.GeometryInstructions);
+                _allGeometryInstructionsList.AddRange(graphInstance.GraphBuffers.GeometryInstructions);
             }
 
             MainRenderGraph = _allGeometryInstructionsList.AsArray();

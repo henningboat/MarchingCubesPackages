@@ -1,6 +1,6 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using henningboat.CubeMarching.PrimitiveBehaviours;
 
-namespace henningboat.CubeMarching.PrimitiveBehaviours
+namespace henningboat.CubeMarching.GeometryComponents.Shapes
 {
     public class SphereShape : PrimitiveShapeBase
     {

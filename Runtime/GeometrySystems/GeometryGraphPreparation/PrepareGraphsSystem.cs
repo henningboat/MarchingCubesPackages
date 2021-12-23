@@ -21,15 +21,15 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
 
                 graphInstance.UpdateOverwrites();
                 
-                var updateGraphMathJob = new JUpdateGraphMath(graphInstance.GraphData);
+                var updateGraphMathJob = new JUpdateGraphMath(graphInstance.GraphBuffers);
                 var graphInstanceJobHandle = updateGraphMathJob.Schedule();
 
-                var writeValuesJob = new JWriteValueBufferToInstruction(graphInstance.GraphData);
-                graphInstanceJobHandle = writeValuesJob.Schedule(graphInstance.GraphData.GeometryInstructions.Length,
+                var writeValuesJob = new JWriteValueBufferToInstruction(graphInstance.GraphBuffers);
+                graphInstanceJobHandle = writeValuesJob.Schedule(graphInstance.GraphBuffers.GeometryInstructions.Length,
                     JWriteValueBufferToInstruction.InnerGroupSize, graphInstanceJobHandle);
 
-                var updateHashesJob = new JHashJob(graphInstance.GraphData);
-                graphInstanceJobHandle = updateHashesJob.Schedule(graphInstance.GraphData.GeometryInstructions.Length, 32,
+                var updateHashesJob = new JHashJob(graphInstance.GraphBuffers);
+                graphInstanceJobHandle = updateHashesJob.Schedule(graphInstance.GraphBuffers.GeometryInstructions.Length, 32,
                     graphInstanceJobHandle);
                 
                 jobHandle = JobHandle.CombineDependencies(jobHandle, graphInstanceJobHandle);
@@ -42,9 +42,9 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
     [BurstCompile]
     public struct JUpdateGraphMath : IJob
     {
-        private GeometryGraphData _graph;
+        private GeometryGraphBuffers _graph;
 
-        public JUpdateGraphMath(GeometryGraphData graph)
+        public JUpdateGraphMath(GeometryGraphBuffers graph)
         {
             _graph = graph;
         }
@@ -63,9 +63,9 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
     public struct JWriteValueBufferToInstruction : IJobParallelFor
     {
         public const int InnerGroupSize = 64;
-        private GeometryGraphData _graph;
+        private GeometryGraphBuffers _graph;
 
-        public JWriteValueBufferToInstruction(GeometryGraphData graph)
+        public JWriteValueBufferToInstruction(GeometryGraphBuffers graph)
         {
             _graph = graph;
         }

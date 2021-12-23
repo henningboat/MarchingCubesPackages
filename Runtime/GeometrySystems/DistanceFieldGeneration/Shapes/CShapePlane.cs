@@ -5,7 +5,7 @@ using henningboat.CubeMarching.GeometryComponents;
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct CShapePlane :  ITerrainModifierShape
+    public struct CShapePlane :  IGeometryShapeResolver
     {
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS)
         {

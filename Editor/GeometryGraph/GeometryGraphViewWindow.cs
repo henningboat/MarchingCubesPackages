@@ -93,7 +93,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             _currentlyPreviewedNode = node as IGeometryNode;
             if (_currentlyPreviewedNode == null) return;
 
-            var data = CreateInstance<GeometryGraphRuntimeData>();
+            var data = CreateInstance<GeometryGraphRuntimeAsset>();
             GeometryGraphProcessor.ResolveGraphAndWriteToRuntimeData(_currentlyPreviewedNode, data,
                 GraphView.GraphModel);
 

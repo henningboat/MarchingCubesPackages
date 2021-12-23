@@ -3,10 +3,8 @@ using JetBrains.Annotations;
 
 namespace henningboat.CubeMarching.GeometryComponents
 {
-    public interface ITerrainModifierShape
+    public interface IGeometryShapeResolver
     {
-        ShapeType Type { get; }
-
         [UsedImplicitly]
         PackedFloat GetSurfaceDistance(PackedFloat3 positionOS);
     }

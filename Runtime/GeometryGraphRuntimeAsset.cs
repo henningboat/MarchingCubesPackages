@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
@@ -10,7 +10,8 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching
 {
-    public class GeometryGraphRuntimeData : ScriptableObject
+    [Serializable]
+    public class NewGeometryGraphData
     {
         [SerializeField] private Hash128 _contentHash;
         [SerializeField] private Float4X4Value _mainTransformation;
@@ -19,23 +20,30 @@ namespace henningboat.CubeMarching
         [SerializeField] private MathInstruction[] _mathInstructions;
         [SerializeField] private GeometryInstruction[] _geometryInstructions;
         [SerializeField] private ExposedVariable[] _variables;
-        
-        
+
+
         public Hash128 ContentHash => _contentHash;
 
         public Float4X4Value MainTransformation => _mainTransformation;
 
         public ExposedVariable[] Variables => _variables;
 
-        public void InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
-            GeometryInstruction[] geometryInstructions, Hash128 contentHash, Float4X4Value mainTransformation, ExposedVariable[] variables)
+        private NewGeometryGraphData()
         {
-            _valueBuffer = valueBuffer.ToArray();
-            _mathInstructions = mathInstructions.ToArray();
-            _geometryInstructions = geometryInstructions.ToArray();
-            _contentHash = contentHash;
-            _mainTransformation = mainTransformation;
-            _variables = variables;
+        }
+
+        public static NewGeometryGraphData InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
+            GeometryInstruction[] geometryInstructions, Hash128 contentHash, Float4X4Value mainTransformation,
+            ExposedVariable[] variables)
+        {
+            NewGeometryGraphData data = new NewGeometryGraphData();
+            data._valueBuffer = valueBuffer.ToArray();
+            data._mathInstructions = mathInstructions.ToArray();
+            data._geometryInstructions = geometryInstructions.ToArray();
+            data._contentHash = contentHash;
+            data._mainTransformation = mainTransformation;
+            data._variables = variables;
+            return data;
         }
 
         public void AllocateNativeArrays(out NativeArray<float> values,
@@ -44,7 +52,8 @@ namespace henningboat.CubeMarching
         {
             values = new NativeArray<float>(_valueBuffer, Allocator.Persistent);
             mathInstructions = new NativeArray<MathInstruction>(_mathInstructions, Allocator.Persistent);
-            geometryInstructions = new NativeArray<GeometryInstruction>(_geometryInstructions, Allocator.Persistent);
+            geometryInstructions =
+                new NativeArray<GeometryInstruction>(_geometryInstructions, Allocator.Persistent);
         }
 
         public ExposedVariable GetIndexOfProperty(SerializableGUID overwritePropertyGuid)
@@ -52,9 +61,23 @@ namespace henningboat.CubeMarching
             return _variables.FirstOrDefault(variable => variable.ID == overwritePropertyGuid);
         }
     }
-    
+
+    public class GeometryGraphRuntimeAsset : ScriptableObject
+    {
+        [SerializeField] private NewGeometryGraphData _geometryGraphData;
+
+        public NewGeometryGraphData GeometryGraphData => _geometryGraphData;
+
+#if UNITY_EDITOR
+        public void Initialize(NewGeometryGraphData data)
+        {
+            _geometryGraphData = data;
+        }
+#endif
+    }
+
     [Serializable]
-    public class ExposedVariable
+    public class ExposedVariable:GeometryGraphProperty
     {
         [SerializeField] private SerializableGUID _id;
         [SerializeField] private GeometryPropertyType _type;
@@ -62,7 +85,7 @@ namespace henningboat.CubeMarching
         [SerializeField] private int _indexInValueBuffer;
         [SerializeField] private string _name;
 
-        public ExposedVariable(SerializableGUID id, GeometryPropertyType type, float[] defaultValue, int indexInValueBuffer, string name)
+        public ExposedVariable(SerializableGUID id, GeometryPropertyType type, float[] defaultValue, int indexInValueBuffer, string name):base(indexInValueBuffer,type,name)
         {
             _id = id;
             _type = type;

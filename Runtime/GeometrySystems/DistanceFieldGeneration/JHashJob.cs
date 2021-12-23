@@ -8,9 +8,9 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
     [BurstCompile]
     public struct JHashJob : IJobParallelFor
     {
-        private GeometryGraphData _graph;
+        private GeometryGraphBuffers _graph;
 
-        public JHashJob(GeometryGraphData graph)
+        public JHashJob(GeometryGraphBuffers graph)
         {
             _graph = graph;
         }

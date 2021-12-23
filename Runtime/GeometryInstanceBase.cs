@@ -8,26 +8,26 @@ namespace henningboat.CubeMarching
     [ExecuteInEditMode]
     public abstract class GeometryInstanceBase : MonoBehaviour
     {
-        public GeometryGraphData GraphData { get; set; }
+        public GeometryGraphBuffers GraphBuffers { get; set; }
         protected GeometryGraphProperty TransformationValue;
 
         private void OnEnable()
         {
-            GraphData = GetGeometryGraphData();
+            GraphBuffers = new GeometryGraphBuffers(GetGeometryGraphData());
         }
 
-        protected abstract GeometryGraphData GetGeometryGraphData();
+        protected abstract NewGeometryGraphData GetGeometryGraphData();
 
         private void OnDisable()
         {
-            GraphData.Dispose();
+            GraphBuffers.Dispose();
         }
         
 
         protected void WriteTransformationToValueBuffer()
         {
             //apply main transformation
-            GraphData.ValueBuffer.Write(transform.worldToLocalMatrix, TransformationValue.Index);
+            GraphBuffers.ValueBuffer.Write(transform.worldToLocalMatrix, TransformationValue.Index);
         }
 
         public abstract void InitializeGraphDataIfNeeded();

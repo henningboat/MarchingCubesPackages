@@ -1,5 +1,4 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
@@ -8,7 +7,7 @@ using UnityEngine;
 
 namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
 {
-    public struct GeometryGraphData : IDisposable
+    public struct GeometryGraphBuffers : IDisposable
     {
         [NativeDisableParallelForRestriction] public NativeArray<float> ValueBuffer;
         [NativeDisableParallelForRestriction] public NativeArray<MathInstruction> MathInstructions;
@@ -17,7 +16,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
         public Hash128 ContentHash;
 
 
-        public GeometryGraphData(GeometryGraphRuntimeData geometryGraphRuntimeData)
+        public GeometryGraphBuffers(NewGeometryGraphData geometryGraphRuntimeData)
         {
             ContentHash = geometryGraphRuntimeData.ContentHash;
             geometryGraphRuntimeData.AllocateNativeArrays(out ValueBuffer, out MathInstructions,
