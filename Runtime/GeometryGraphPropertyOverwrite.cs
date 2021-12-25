@@ -28,14 +28,6 @@ namespace henningboat.CubeMarching
             set => _value = value;
         }
 
-        public void SetValueCapacity(int length)
-        {
-            // if (_value == null || _value.Length != length)
-            // {
-            //     _value = new float[length];
-            // }
-        }
-
         public void SetProviderObject(GeometryPropertyValueProvider valueProvider)
         {
             _providerObject = valueProvider;

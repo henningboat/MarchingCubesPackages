@@ -47,6 +47,7 @@ namespace Editor.GeometryGraph
             
             foreach (var variableDeclarationModel in data.Variables)
             {
+                GUILayout.Space(5);
                 EditorGUILayout.BeginHorizontal();
             
                 var currentOverwrite = currentOverwrites.FirstOrDefault(overwrite => overwrite.PropertyGUID == variableDeclarationModel.ID);
@@ -60,30 +61,34 @@ namespace Editor.GeometryGraph
             
                 if (variableDeclarationModel.Type == GeometryPropertyType.Float)
                 {
-                    currentOverwrite.SetValueCapacity(1);
                     currentOverwrite.Value = new float32()
                     {
                         [0] = EditorGUILayout.FloatField(variableDeclarationModel.Name, currentOverwrite.Value[0])
                     };
                 }
-            
-                if (variableDeclarationModel.Type==GeometryPropertyType.Float3)
+
+                if (variableDeclarationModel.Type == GeometryPropertyType.Float3)
                 {
-                    currentOverwrite.SetValueCapacity(3);
-            
-                    var currentValue = new Vector3(currentOverwrite.Value[0], currentOverwrite.Value[1], currentOverwrite.Value[2]);
+                    var currentValue = new Vector3(currentOverwrite.Value[0], currentOverwrite.Value[1],
+                        currentOverwrite.Value[2]);
                     currentValue = EditorGUILayout.Vector3Field(variableDeclarationModel.Name, currentValue);
-            
-                    currentOverwrite.Value[0] = currentValue.x;
-                    currentOverwrite.Value[1] = currentValue.y;
-                    currentOverwrite.Value[2] = currentValue.z;
+
+                    currentOverwrite.Value = new float32()
+                    {
+                        [0] = currentValue.x,
+                        [1] = currentValue.y,
+                        [2] = currentValue.z,
+                    };
                 }
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
             
                 if (GUILayout.Button("Reset"))
                 {
                     ResetProperty(variableDeclarationModel, currentOverwrite);
                 }
-            
+                
                 var valueProvider = EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject, typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
                 currentOverwrite.SetProviderObject(valueProvider);
             
@@ -145,10 +150,13 @@ namespace Editor.GeometryGraph
                     ShapeTypes.Add(attribute.ShapeType, type);
 
                     //var typeInstance = Activator.CreateInstance(type) as ShapeProxy;
-                    PropertiesOfShapeType.Add(attribute.ShapeType,type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(info => info.FieldType.IsAssignableFrom(typeof(GeometryGraphProperty))).Select(info =>
-                    {
-                        return (GeometryPropertyType.Float,info.Name);
-                    }).ToList());
+                    PropertiesOfShapeType.Add(attribute.ShapeType, type
+                        .GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(info =>
+                            info.FieldType.IsAssignableFrom(typeof(GeometryGraphProperty))).Select(info =>
+                        {
+                            var propertyTypeAttribute = info.GetCustomAttribute<PropertyTypeAttribute>();
+                            return (propertyTypeAttribute.Type, info.Name);
+                        }).ToList());
                 }
             }
             catch (Exception e)

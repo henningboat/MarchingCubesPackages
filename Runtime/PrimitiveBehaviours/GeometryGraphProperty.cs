@@ -10,8 +10,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
     {
         public int Index;
         public SerializableGUID ID;
-        public readonly string DebugInformation;
-        public readonly GeometryPropertyType Type;
+        public string DebugInformation;
+        public GeometryPropertyType Type;
         public float32 DefaultValue;
 
         public bool IsExposed => ID != default;
