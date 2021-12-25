@@ -1,4 +1,6 @@
 ﻿using System;
+using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using henningboat.CubeMarching.Utils.Containers;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
@@ -8,7 +10,7 @@ namespace henningboat.CubeMarching
     public class GeometryGraphPropertyOverwrite
     {
         [SerializeField] private SerializableGUID _propertyGUID;
-        [SerializeField] private float[] _value;
+        [SerializeField] private float32 _value;
         [SerializeField] private GeometryPropertyValueProvider _providerObject;
 
         public GeometryGraphPropertyOverwrite(SerializableGUID guid)
@@ -20,14 +22,18 @@ namespace henningboat.CubeMarching
 
         public MonoBehaviour ProviderObject => _providerObject;
 
-        public float[] Value => _value;
+        public float32 Value
+        {
+            get => _value;
+            set => _value = value;
+        }
 
         public void SetValueCapacity(int length)
         {
-            if (_value == null || _value.Length != length)
-            {
-                _value = new float[length];
-            }
+            // if (_value == null || _value.Length != length)
+            // {
+            //     _value = new float[length];
+            // }
         }
 
         public void SetProviderObject(GeometryPropertyValueProvider valueProvider)
@@ -35,7 +41,7 @@ namespace henningboat.CubeMarching
             _providerObject = valueProvider;
         }
 
-        public void Reset(ExposedVariable variable)
+        public void Reset(GeometryGraphProperty variable)
         {
             _providerObject = null;
             _value = variable.DefaultValue;

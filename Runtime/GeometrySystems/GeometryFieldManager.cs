@@ -1,4 +1,6 @@
-﻿using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
@@ -29,7 +31,7 @@ namespace henningboat.CubeMarching.GeometrySystems
                 return;
             }
             #endif
-            
+
             var targetClusterCount = _clusterCounts;
 
             targetClusterCount = math.clamp(targetClusterCount, 1, 5);
@@ -62,10 +64,20 @@ namespace henningboat.CubeMarching.GeometrySystems
                 _updateMeshesSystem.Initialize(_geometryFieldData);
                 _initialized = true;
             }
+            
+            var allGraphs = Object.FindObjectsOfType<GeometryInstanceBase>();
+            List<GeometryGraphBuffers> geometryGraphBuffers = new List<GeometryGraphBuffers>();
+            foreach (var graph in allGraphs)
+            {
+                if (graph.TryInitializeAndGetBuffer(out GeometryGraphBuffers buffers))
+                {
+                    geometryGraphBuffers.Add(buffers);
+                }
+            }
 
             var jobHandle = new JobHandle();
-            jobHandle = _prepareGraphsSystem.Update(jobHandle);
-            jobHandle = _buildRenderGraphSystem.Update(jobHandle);
+            jobHandle = _prepareGraphsSystem.Update(jobHandle,geometryGraphBuffers);
+            jobHandle = _buildRenderGraphSystem.Update(jobHandle,geometryGraphBuffers);
             jobHandle = _distanceFieldPrepass.Update(_buildRenderGraphSystem.MainRenderGraph, jobHandle);
             jobHandle = _updateDistanceFieldSystem.Update(jobHandle, _buildRenderGraphSystem.MainRenderGraph);
             _updateMeshesSystem.Update(jobHandle);

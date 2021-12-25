@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using Unity.Burst;
 using Unity.Jobs;
@@ -12,24 +13,19 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
         {
         }
 
-        public JobHandle Update(JobHandle jobHandle)
+        public JobHandle Update(JobHandle jobHandle, List<GeometryGraphBuffers> allGraphs)
         {
-            var allGraphs = Object.FindObjectsOfType<GeometryInstanceBase>();
-            foreach (var graphInstance in allGraphs)
+            foreach (var graphBuffers in allGraphs)
             {
-                graphInstance.InitializeGraphDataIfNeeded();
-
-                graphInstance.UpdateOverwrites();
-                
-                var updateGraphMathJob = new JUpdateGraphMath(graphInstance.GraphBuffers);
+                var updateGraphMathJob = new JUpdateGraphMath(graphBuffers);
                 var graphInstanceJobHandle = updateGraphMathJob.Schedule();
 
-                var writeValuesJob = new JWriteValueBufferToInstruction(graphInstance.GraphBuffers);
-                graphInstanceJobHandle = writeValuesJob.Schedule(graphInstance.GraphBuffers.GeometryInstructions.Length,
+                var writeValuesJob = new JWriteValueBufferToInstruction(graphBuffers);
+                graphInstanceJobHandle = writeValuesJob.Schedule(graphBuffers.GeometryInstructions.Length,
                     JWriteValueBufferToInstruction.InnerGroupSize, graphInstanceJobHandle);
 
-                var updateHashesJob = new JHashJob(graphInstance.GraphBuffers);
-                graphInstanceJobHandle = updateHashesJob.Schedule(graphInstance.GraphBuffers.GeometryInstructions.Length, 32,
+                var updateHashesJob = new JHashJob(graphBuffers);
+                graphInstanceJobHandle = updateHashesJob.Schedule(graphBuffers.GeometryInstructions.Length, 32,
                     graphInstanceJobHandle);
                 
                 jobHandle = JobHandle.CombineDependencies(jobHandle, graphInstanceJobHandle);

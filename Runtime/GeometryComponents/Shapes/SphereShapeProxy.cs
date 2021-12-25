@@ -10,7 +10,7 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
     [ShapeProxyAttribute(ShapeType.Sphere)]
     public class SphereShapeProxy : ShapeProxy
     {
-        private GeometryGraphProperty _radius;
+        [PropertyTypeAttribute(GeometryPropertyType.Float)] private GeometryGraphProperty _radius;
 
         public SphereShapeProxy(GeometryGraphProperty radius, GeometryGraphProperty transformation) : base(transformation)
         {
@@ -38,6 +38,16 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
         }
     }
 
+    public class PropertyTypeAttribute : Attribute
+    {
+        public readonly GeometryPropertyType Type;
+
+        public PropertyTypeAttribute(GeometryPropertyType type)
+        {
+            Type = type;
+        }
+    }
+    
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]
     public struct SphereShapeResolver : IGeometryShapeResolver

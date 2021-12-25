@@ -32,14 +32,15 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             switch (self)
             {
                 case MathOperator mathOperator:
-                    var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
-                    if (inputs.Length != 2)
-                    {
-                        throw new Exception("inputs.Length != 2");
-                    }
-
-                    return context.GetOrCreateProperty(self.Guid,
-                        new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
+                    throw new NotImplementedException();
+                    // var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
+                    // if (inputs.Length != 2)
+                    // {
+                    //     throw new Exception("inputs.Length != 2");
+                    // }
+                    //
+                    // return context.GetOrCreateProperty(self.Guid,
+                    //     new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
                 default:
                     throw new ArgumentOutOfRangeException();
                     break;

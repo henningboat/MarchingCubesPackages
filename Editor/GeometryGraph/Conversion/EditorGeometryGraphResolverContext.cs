@@ -28,7 +28,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         public readonly GeometryGraphProperty ZeroFloatProperty;
 
         public CombinerState CurrentCombiner => _runtimeResolver.CurrentCombiner;
-        public ExposedVariable[] ExposedVariables { get; private set; }
         public int CurrentCombinerDepth => _runtimeResolver.CurrentCombinerDepth;
 
         public GeometryGraphProperty OriginTransformation;
@@ -87,30 +86,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
             return newProperty;
         }
 
-        public void BuildBuffers()
-        {
-            ExposedVariables = _graphModel.VariableDeclarations.Select(CreateExposedVariable).ToArray();
-            _runtimeResolver.ExportBuffers(out ValueBuffer,out  GeometryInstructions,out  MathInstructions);
-        }
-
-        public float[] ValueBuffer;
-        public GeometryInstruction[] GeometryInstructions;
-        public MathInstruction[] MathInstructions;
-
-        private ExposedVariable CreateExposedVariable(IVariableDeclarationModel variable)
-        {
-            throw new NotImplementedException();
-            // var geometryGraphProperty = _properties[variable.Guid];
-            // List<float> defaultValue = new List<float>();
-            //
-            // for (int i = 0; i < geometryGraphProperty.GetSizeInBuffer(); i++)
-            // {
-            //     defaultValue.Add(_propertyValueBuffer[geometryGraphProperty.Index + i]);
-            // }
-            //
-            // return new ExposedVariable(variable.Guid, geometryGraphProperty.Type, defaultValue.ToArray(), geometryGraphProperty.Index, variable.GetVariableName());
-        }
-
         public void WriteDistanceModifier(DistanceModifierInstruction getDistanceModifierInstruction)
         {
             throw new NotImplementedException();
@@ -125,11 +100,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
         public void Dispose()
         {
             _runtimeResolver.Dispose();
-        }
-
-        public GeometryGraphProperty CreateMathOperation(SerializableGUID guid, GeometryGraphMathOperatorProperty geometryGraphMathOperatorProperty)
-        {
-            throw new NotImplementedException();
         }
 
         public void WriteMathProperty(MathOperatorType mathOperationType, GeometryGraphProperty a,GeometryGraphProperty b,GeometryGraphProperty result )

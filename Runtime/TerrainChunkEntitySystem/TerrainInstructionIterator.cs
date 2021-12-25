@@ -163,7 +163,9 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
                         var packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS);
-                        surfaceDistance /= inverseUniformScale;
+                        
+                        //this did not really work
+                        //surfaceDistance /= inverseUniformScale;
 
                         if (_allowPerInstructionReadback)
                             CurrentInstructionSurfaceDistanceReadback[i] = surfaceDistance;

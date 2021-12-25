@@ -8,29 +8,15 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
     public class NewShapeProxy : GeometryInstanceBase
     {
         [SerializeField] private ShapeType _shapeType;
+        [SerializeField] private NewGeometryGraphData _graphData;
 
-        protected override NewGeometryGraphData GetGeometryGraphData()
+#if UNITY_EDITOR
+        public void Initialize(NewGeometryGraphData geometryGraphData)
         {
-            using (var context = new RuntimeGeometryGraphResolverContext())
-            {
-                var shapeProxy = new GenericShapeProxy(_shapeType, context.OriginTransformation);
-                TransformationValue = shapeProxy.TransformationValue;
-
-                var guid = new SerializableGUID(new Hash128(1, 2, 3, 4).ToString());
-
-                context.CreateOrGetExposedProperty(guid, 4.0f);
-                context.AddShape(shapeProxy);
-                return context.GetGeometryGraphData();
-            }
+            _graphData = geometryGraphData;
         }
-
-        public override void InitializeGraphDataIfNeeded()
-        {
-        }
-
-        public override void UpdateOverwrites()
-        {
-            WriteTransformationToValueBuffer();
-        }
+        #endif
+        
+        public override NewGeometryGraphData GeometryGraphData => _graphData;
     }
 }

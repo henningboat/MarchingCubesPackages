@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
@@ -10,7 +11,6 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
     internal class BuildMainGraphSystem
     {
         private GeometryFieldData _geometryFieldData;
-        private GeometryInstanceBase[] _allGeometryGraphInstances;
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
 
         public void Initialize(GeometryFieldData geometryFieldData)
@@ -20,21 +20,18 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
-        public JobHandle Update(JobHandle jobHandle)
+        public JobHandle Update(JobHandle jobHandle, List<GeometryGraphBuffers> geometryGraphBuffersList)
         {
             //todo placeholder
             jobHandle.Complete();
-        
-            //todo initialize in a nicer way
-            _allGeometryGraphInstances = UnityEngine.Object.FindObjectsOfType<GeometryInstanceBase>();
 
             _allGeometryInstructionsList.Clear();
 
             int offset = 0;
             //could be turned into a job, but doesnt cost much right now
-            foreach (var graphInstance in _allGeometryGraphInstances)
+            foreach (var graphInstance in geometryGraphBuffersList)
             {
-                _allGeometryInstructionsList.AddRange(graphInstance.GraphBuffers.GeometryInstructions);
+                _allGeometryInstructionsList.AddRange(graphInstance.GeometryInstructions);
             }
 
             MainRenderGraph = _allGeometryInstructionsList.AsArray();

@@ -21,8 +21,10 @@ namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
             ContentHash = geometryGraphRuntimeData.ContentHash;
             geometryGraphRuntimeData.AllocateNativeArrays(out ValueBuffer, out MathInstructions,
                 out GeometryInstructions);
+            IsValid = true;
         }
 
+        public bool IsValid { get; }
 
         public void Dispose()
         {

@@ -1,29 +1,29 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace henningboat.CubeMarching.Utils.Containers
 {
     [StructLayout(LayoutKind.Sequential)]
+    [Serializable]
     public struct float32
     {
-        private float4 c0;
-        private float4 c1;
-        private float4 c2;
-        private float4 c3;
-        private float4 c4;
-        private float4 c5;
-        private float4 c6;
-        private float4 c7;
+        [SerializeField] private float4 c0;
+        [SerializeField] private float4 c1;
+        [SerializeField] private float4 c2;
+        [SerializeField] private float4 c3;
+        [SerializeField] private float4 c4;
+        [SerializeField] private float4 c5;
+        [SerializeField] private float4 c6;
+        [SerializeField] private float4 c7;
 
         public unsafe ref float this[int index]
         {
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                if ((uint) index >= 32)
-                {
-                    throw new System.ArgumentException("index must be between[0...32]");
-                }
+                if ((uint) index >= 32) throw new ArgumentException("index must be between[0...32]");
 #endif
                 fixed (float32* array = &this)
                 {

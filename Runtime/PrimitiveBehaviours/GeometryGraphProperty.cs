@@ -1,41 +1,43 @@
 ﻿using System;
 using henningboat.CubeMarching;
+using henningboat.CubeMarching.Utils.Containers;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
-    public abstract class GeometryGraphProperty
+    [Serializable]
+    public sealed class GeometryGraphProperty
     {
         public int Index;
+        public SerializableGUID ID;
         public readonly string DebugInformation;
         public readonly GeometryPropertyType Type;
-        protected object Value { get; set; } = default;
+        public float32 DefaultValue;
 
-        public T GetValue<T>()
-        {
-            return Value switch
-            {
-                null => default,
-                T tValue => tValue,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-
+        public bool IsExposed => ID != default;
+        
         public int GetSizeInBuffer()
         {
             return Type switch
             {
                 GeometryPropertyType.Float => 1,
                 GeometryPropertyType.Float3 => 3,
+                GeometryPropertyType.Color32 => 1,
+                GeometryPropertyType.Float4X4 => 16,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
-
-        protected GeometryGraphProperty(int index, GeometryPropertyType type, string debugInformation)
+        public GeometryGraphProperty(int index, SerializableGUID id, GeometryPropertyType type, float32 value, string name, string debugInformation)
         {
+            ID = id;
             Index = index;
             Type = type;
             DebugInformation = debugInformation;
+            DefaultValue = value;
+            Name = name;
         }
+
+        public string Name;
 
         public override string ToString()
         {

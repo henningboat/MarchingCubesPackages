@@ -8,11 +8,15 @@ using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
 namespace henningboat.CubeMarching.GeometryComponents.Shapes
-{[ShapeProxy(ShapeType.BoundingBox)]
+{
+    [ShapeProxy(ShapeType.BoundingBox)]
     public class BoundingBoxShapeProxy : ShapeProxy
     {
-        private GeometryGraphProperty _extends;
+        [PropertyType(GeometryPropertyType.Float)]
         private GeometryGraphProperty _boundsWidth;
+
+        [PropertyType(GeometryPropertyType.Float3)]
+        private GeometryGraphProperty _extends;
 
         public BoundingBoxShapeProxy(GeometryGraphProperty extends, GeometryGraphProperty boundsWidth,
             GeometryGraphProperty transformation) : base(transformation)
@@ -28,14 +32,13 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
 
         public override ShapeType ShapeType => ShapeType.BoundingBox;
     }
-    
-    
+
+
     namespace henningboat.CubeMarching.GeometryComponents
     {
         [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-        public struct CShapeBoundingBox: IGeometryShapeResolver
+        public struct CShapeBoundingBox : IGeometryShapeResolver
         {
-
             #region Static Stuff
 
             //SDF code from
@@ -67,7 +70,6 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
             }
 
             #endregion
-
         }
     }
 }
