@@ -24,11 +24,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             ui.SetupBuildAndUpdate(geometryNodeModel, commandDispatcher, elementBuilder.View, elementBuilder.Context);
             return ui;
         }
-
+    
         public static IModelUI CreateGeometryGraphVariableDeclarationModelUI(this ElementBuilder elementBuilder, CommandDispatcher commandDispatcher, GeometryGraphVariableDeclarationModel model)
         {
             IModelUI ui;
-
+    
             if (elementBuilder.Context == BlackboardVariablePropertiesPart.blackboardVariablePropertiesPartCreationContext)
             {
                 ui = new GeometryGraphBBVarPropertyView();
@@ -38,7 +38,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             {
                 ui = UnityEditor.GraphToolsFoundation.Overdrive.GraphViewFactoryExtensions.CreateVariableDeclarationModelUI(elementBuilder, commandDispatcher, model);
             }
-
+    
             return ui;
         }
     }

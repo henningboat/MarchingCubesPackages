@@ -21,9 +21,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
         {
             base.UpdateElementFromModel();
             var geometryGraphViewWindow = GraphView.Window as GeometryGraphViewWindow;
-          
-            geometryGraphViewWindow.SetLivePreviewNode(NodeModel, IsSelected());
-                
+
+            if (geometryGraphViewWindow != null)
+            {
+                geometryGraphViewWindow.SetLivePreviewNode(NodeModel, IsSelected());
+            }
         }
     }
 }

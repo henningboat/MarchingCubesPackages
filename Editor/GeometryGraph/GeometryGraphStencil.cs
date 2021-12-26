@@ -6,6 +6,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode;
+using henningboat.CubeMarching.GeometryComponents;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
@@ -28,11 +29,18 @@ namespace Code.CubeMarching.GeometryGraph.Editor
         {
             SearcherItem MakeSearcherItem((Type t, string name) tuple)
             {
-                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(tuple.t,null,OnNodeCreated), tuple.name);
+                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(tuple.t), tuple.name);
             }
 
-            var shapes = TypeCache.GetTypesDerivedFrom(typeof(ShapeNode<>)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            var shapeItems = new SearcherItem("Shapes", "", shapes.ToList());
+            SearcherItem MakeShapeSearcherItem(ShapeType shapeType)
+            {
+                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(ShapeNode),null,
+                    model =>
+                    {
+                        ((ShapeNode)model).InitializeShapeType(shapeType);
+                    }), shapeType.ToString());
+            }
+            
 
             var combiners = TypeCache.GetTypesDerivedFrom(typeof(GeometryCombinerNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             var combinerItems = new SearcherItem("Combiners", "", combiners.ToList());
@@ -49,9 +57,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             mathNodes.Add( MakeSearcherItem((typeof(GraphResult), "Result")));
             mathNodes.Add( MakeSearcherItem((typeof(ColorNode), "Color")));
+
+            List<SearcherItem> shapes = new();
+            foreach (var shapeType in Enum.GetValues(typeof(ShapeType)))
+            {
+                shapes.Add(MakeShapeSearcherItem((ShapeType) shapeType));
+            }
+            var shapeItems = new SearcherItem("Shapes", "", shapes.ToList());
             
-            mathNodes.Add( MakeSearcherItem((typeof(GenericNodeTest<float>), "GenericFloat")));
-            mathNodes.Add( MakeSearcherItem((typeof(GenericNodeTest<int>), "GenericInt")));
             
             var mathNodeItems = new SearcherItem("MathNodes", "", mathNodes.ToList());
 
