@@ -5,7 +5,7 @@
         Sphere,
         BoundingBox,
         Torus,
-        Noise,
+        Voronoi,
         Plane,
         Box
     }

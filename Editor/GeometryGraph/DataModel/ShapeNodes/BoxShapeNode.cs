@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
-    public class BoxShapeNode : ShapeNode<CShapeTorus>
+    public class BoxShapeNode : ShapeNode<TorusShapeResolver>
     {
         public override string Title
         {

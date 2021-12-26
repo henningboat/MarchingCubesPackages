@@ -12,6 +12,7 @@ using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEditor.GraphToolsFoundation.Searcher;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using Node = UnityEditor.Graphs.Node;
 
 namespace Code.CubeMarching.GeometryGraph.Editor
 {
@@ -27,7 +28,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor
         {
             SearcherItem MakeSearcherItem((Type t, string name) tuple)
             {
-                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(tuple.t), tuple.name);
+                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(tuple.t,null,OnNodeCreated), tuple.name);
             }
 
             var shapes = TypeCache.GetTypesDerivedFrom(typeof(ShapeNode<>)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
@@ -49,6 +50,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             mathNodes.Add( MakeSearcherItem((typeof(GraphResult), "Result")));
             mathNodes.Add( MakeSearcherItem((typeof(ColorNode), "Color")));
             
+            mathNodes.Add( MakeSearcherItem((typeof(GenericNodeTest<float>), "GenericFloat")));
+            mathNodes.Add( MakeSearcherItem((typeof(GenericNodeTest<int>), "GenericInt")));
+            
             var mathNodeItems = new SearcherItem("MathNodes", "", mathNodes.ToList());
 
 
@@ -66,6 +70,11 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
             var searcherDatabase = new SearcherDatabase(items);
             m_Databases.Add(searcherDatabase);
+        }
+
+        private void OnNodeCreated(INodeModel obj)
+        {
+            Debug.Log(obj.Guid);
         }
 
         public override IToolbarProvider GetToolbarProvider()
@@ -164,6 +173,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor
 
             capacity = default;
             return false;
+        }
+    }
+
+    internal class GenericNodeTest<T> : NodeModel
+    {
+        protected override void OnDefineNode()
+        {
+             this.AddExecutionOutputPort("","InTest", PortOrientation.Vertical);
         }
     }
 }

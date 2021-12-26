@@ -27,26 +27,6 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
 
         public override ShapeType ShapeType => ShapeType.Sphere;
     }
-
-    public class ShapeProxyAttribute : Attribute
-    {
-        public readonly ShapeType ShapeType;
-
-        public ShapeProxyAttribute(ShapeType shapeType)
-        {
-            ShapeType = shapeType;
-        }
-    }
-
-    public class PropertyTypeAttribute : Attribute
-    {
-        public readonly GeometryPropertyType Type;
-
-        public PropertyTypeAttribute(GeometryPropertyType type)
-        {
-            Type = type;
-        }
-    }
     
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]

@@ -11,7 +11,7 @@ using UnityEditor.GraphToolsFoundation.Overdrive;
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
     [Serializable]
-    public class TorusShapeNode : ShapeNode<CShapeTorus>
+    public class TorusShapeNode : ShapeNode<TorusShapeResolver>
     {
         public override string Title
         {
