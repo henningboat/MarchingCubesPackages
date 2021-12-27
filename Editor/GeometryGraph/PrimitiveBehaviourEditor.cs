@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
@@ -20,6 +18,7 @@ namespace Editor.GeometryGraph
         private SerializedProperty _shapeType;
 
         private List<string> _properties = new();
+
         private void OnEnable()
         {
             _shapeType = serializedObject.FindProperty("_shapeType");
@@ -30,42 +29,39 @@ namespace Editor.GeometryGraph
         {
             EditorGUILayout.PropertyField(_shapeType);
 
-            foreach (var property in _properties)
-            {
-                GUILayout.Label(property);
-            }
+            foreach (var property in _properties) GUILayout.Label(property);
 
             serializedObject.ApplyModifiedProperties();
 
             var instance = target as NewShapeProxy;
             var data = instance.GeometryGraphData;
-           
-              GUILayout.Space(10);
-            
+
+            GUILayout.Space(10);
+
             var geometryGraphInstance = (GeometryInstanceBase) target;
             var currentOverwrites = geometryGraphInstance.GetOverwrites();
-            
+
             foreach (var variableDeclarationModel in data.Variables)
             {
                 GUILayout.Space(5);
                 EditorGUILayout.BeginHorizontal();
-            
-                var currentOverwrite = currentOverwrites.FirstOrDefault(overwrite => overwrite.PropertyGUID == variableDeclarationModel.ID);
+
+                var currentOverwrite =
+                    currentOverwrites.FirstOrDefault(overwrite =>
+                        overwrite.PropertyGUID == variableDeclarationModel.ID);
                 if (currentOverwrite == null)
                 {
                     currentOverwrite = new GeometryGraphPropertyOverwrite(variableDeclarationModel.ID);
                     currentOverwrites.Add(currentOverwrite);
-            
+
                     ResetProperty(variableDeclarationModel, currentOverwrite);
                 }
-            
+
                 if (variableDeclarationModel.Type == GeometryPropertyType.Float)
-                {
                     currentOverwrite.Value = new float32()
                     {
                         [0] = EditorGUILayout.FloatField(variableDeclarationModel.Name, currentOverwrite.Value[0])
                     };
-                }
 
                 if (variableDeclarationModel.Type == GeometryPropertyType.Float3)
                 {
@@ -77,33 +73,31 @@ namespace Editor.GeometryGraph
                     {
                         [0] = currentValue.x,
                         [1] = currentValue.y,
-                        [2] = currentValue.z,
+                        [2] = currentValue.z
                     };
                 }
 
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
-            
-                if (GUILayout.Button("Reset"))
-                {
-                    ResetProperty(variableDeclarationModel, currentOverwrite);
-                }
-                
-                var valueProvider = EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject, typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
+
+                if (GUILayout.Button("Reset")) ResetProperty(variableDeclarationModel, currentOverwrite);
+
+                var valueProvider =
+                    EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject,
+                        typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
                 currentOverwrite.SetProviderObject(valueProvider);
-            
+
                 EditorGUILayout.EndHorizontal();
             }
-            
+
             serializedObject.ApplyModifiedProperties();
             if (GUI.changed)
             {
                 geometryGraphInstance.SetOverwrites(currentOverwrites);
-                
+
                 EditorUtility.SetDirty(geometryGraphInstance);
-                
-                UpdateProperties((ShapeType) _shapeType.enumValueIndex,instance);
-                
+
+                UpdateProperties((ShapeType) _shapeType.enumValueIndex, instance);
             }
         }
 
@@ -116,60 +110,22 @@ namespace Editor.GeometryGraph
         {
             using (var context = new RuntimeGeometryGraphResolverContext())
             {
-                List<GeometryGraphProperty> exposedProperties = new List<GeometryGraphProperty>();
+                var exposedProperties = new List<GeometryGraphProperty>();
                 foreach (var property in GeometryTypeCache.GetPropertiesForType(shapeType))
                 {
+                    float32 defaultValue = default;
+                    if (property.Item3.Length != 0) defaultValue = float32.GetFloat32FromFloatArray(property.Item3);
+
                     exposedProperties.Add(context.CreateOrGetExposedProperty(new SerializableGUID(property.Item2),
-                        property.Item2, property.Item1));
+                        property.Item2, property.Item1, defaultValue));
                 }
 
-                var shapeProxy = new GenericShapeProxy(shapeType, context.OriginTransformation, exposedProperties.ToArray());
+                var shapeProxy =
+                    new GenericShapeProxy(shapeType, context.OriginTransformation, exposedProperties.ToArray());
 
                 context.AddShape(shapeProxy);
                 target.Initialize(context.GetGeometryGraphData());
             }
-        }
-    }
-    
-    public static class GeometryTypeCache
-    {
-        private static readonly Dictionary<ShapeType, Type> ShapeTypes;
-        private static readonly Dictionary<ShapeType, List<(GeometryPropertyType,string)>> PropertiesOfShapeType;
-
-        static GeometryTypeCache()
-        {
-            try
-            {
-                ShapeTypes = new Dictionary<ShapeType, Type>();
-                PropertiesOfShapeType = new();
-                
-                foreach (var type in TypeCache.GetTypesWithAttribute<ShapeProxyAttribute>().ToArray())
-                {
-                    var attribute =
-                        type.GetCustomAttribute(typeof(ShapeProxyAttribute)) as ShapeProxyAttribute;
-                    ShapeTypes.Add(attribute.ShapeType, type);
-
-                    //var typeInstance = Activator.CreateInstance(type) as ShapeProxy;
-                    PropertiesOfShapeType.Add(attribute.ShapeType, type
-                        .GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(info =>
-                            info.FieldType.IsAssignableFrom(typeof(GeometryGraphProperty))).Select(info =>
-                        {
-                            var propertyTypeAttribute = info.GetCustomAttribute<PropertyTypeAttribute>();
-                            return (propertyTypeAttribute.Type, info.Name);
-                        }).ToList());
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(
-                    $"Geometry Type Cache failed to initialize. This will break everything :/ The error was: \n + {e}");
-                throw;
-            }
-        }
-
-        public static List<(GeometryPropertyType,string)> GetPropertiesForType(ShapeType shapeType)
-        {
-            return PropertiesOfShapeType[shapeType];
         }
     }
 }

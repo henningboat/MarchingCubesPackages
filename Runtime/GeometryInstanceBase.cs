@@ -11,7 +11,7 @@ namespace henningboat.CubeMarching
     public abstract class GeometryInstanceBase : MonoBehaviour
     {
         private GeometryGraphBuffers _graphBuffer;
-        [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites;
+        [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites = new();
         public abstract NewGeometryGraphData GeometryGraphData { get; }
 
         private void OnDisable()

@@ -3,9 +3,11 @@ using JetBrains.Annotations;
 
 namespace henningboat.CubeMarching.GeometryComponents
 {
-    public interface IGeometryShapeResolver
+    public interface IGeometryShape
     {
         [UsedImplicitly]
         PackedFloat GetSurfaceDistance(PackedFloat3 positionOS);
+
+        ShapeType ShapeType { get; }
     }
 }

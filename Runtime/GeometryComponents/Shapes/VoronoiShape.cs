@@ -1,44 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using henningboat.CubeMarching.PrimitiveBehaviours;
 using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
 namespace henningboat.CubeMarching.GeometryComponents.Shapes
 {
-    [ShapeProxy(ShapeType.Voronoi)]
-    public class VoronoiShapeProxy : ShapeProxy
-    {
-        [PropertyType(GeometryPropertyType.Float)]
-        private GeometryGraphProperty _valueOffset;
-
-        [PropertyType(GeometryPropertyType.Float3)]
-        private GeometryGraphProperty _scale;
-
-        public VoronoiShapeProxy(GeometryGraphProperty valueOffset, GeometryGraphProperty scale,
-            GeometryGraphProperty transformation) : base(transformation)
-        {
-            _valueOffset = valueOffset;
-            _scale = scale;
-        }
-
-        protected override List<GeometryGraphProperty> GetProperties()
-        {
-            return new List<GeometryGraphProperty>()
-            {
-                _valueOffset,
-                _scale
-            };
-        }
-
-        public override ShapeType ShapeType => ShapeType.Voronoi;
-    }
-
-
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-    public struct VoronoiShapeResolver : IGeometryShapeResolver
+    public struct VoronoiShape : IGeometryShape
     {
         [FieldOffset(0)] public float valueOffset;
         [FieldOffset(4)] public float3 scale;
@@ -46,8 +14,10 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
             positionOS *= scale;
-            return (Voronoi(positionOS) - new PackedFloat(valueOffset)) / scale.x;
+            return (Voronoi(positionOS) - new PackedFloat(valueOffset)) * scale.x;
         }
+
+        public ShapeType ShapeType => ShapeType.Voronoi;
 
 
         public PackedFloat3 Hash(PackedFloat3 x)
@@ -90,4 +60,40 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
             return -(res2 - res);
         }
     }
+
+    //original noise implementation
+    // [StructLayout(LayoutKind.Explicit1, Size = 4 * 16)]
+    // public struct CShapeNoise : IGeometryShapeResolver
+    // {
+    //     [FieldOffset(0)] public float strength;
+    //     [FieldOffset(4)] public float valueOffset;
+    //     [FieldOffset(20)] public float3 offset;
+    //     [FieldOffset(32)] public float3 scale;
+    //
+    //     public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS)
+    //     {
+    //         var offsetValue = offset;
+    //
+    //         var positionOS = scale * (positionWS - offsetValue);
+    //         return ((cnoise4(positionOS)) + valueOffset) * strength;
+    //     }
+    //
+    //     public ShapeType Type => ShapeType.Noise;
+    //
+    //     private PackedFloat cnoise4(PackedFloat3 input)
+    //     {
+    //         PackedFloat result = default;
+    //         result.PackedValues[0] = NoiseSlice(input, 0);
+    //         result.PackedValues[1] = NoiseSlice(input, 1);
+    //         result.PackedValues[2] = NoiseSlice(input, 2);
+    //         result.PackedValues[3] = NoiseSlice(input, 3);
+    //         return result;
+    //     }
+    //
+    //     private static float NoiseSlice(PackedFloat3 input, int slice)
+    //     {
+    //         return noise.cnoise(-new float3(input.x.PackedValues[slice], input.y.PackedValues[slice],
+    //             input.z.PackedValues[slice]));
+    //     }
+    // }
 }

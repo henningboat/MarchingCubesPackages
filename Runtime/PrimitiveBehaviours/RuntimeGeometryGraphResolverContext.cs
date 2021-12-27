@@ -108,38 +108,9 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             }
         }
 
-        private float32 GetFloat32(float constant)
-        {
-            var value = new float32
-            {
-                [0] = constant
-            };
-            return value;
-        }
-
-        private float32 GetFloat32(float3 constant)
-        {
-            var value = new float32
-            {
-                [0] = constant.x,
-                [1] = constant.y,
-                [2] = constant.z
-            };
-            return value;
-        }
-
-        private float32 GetFloat32(Matrix4x4 constant)
-        {
-            var value = new float32();
-
-            for (var i = 0; i < 16; i++) value[i] = constant[i];
-
-            return value;
-        }
-
         private GeometryGraphProperty Constant(float constant)
         {
-            var valueContainer = GetFloat32(constant);
+            var valueContainer = float32.FromFloat(constant);
             const GeometryPropertyType type = GeometryPropertyType.Float;
             return GetGeometryGraphProperty(default, type, valueContainer, "",
                 $"Constant {type.ToString()} {constant}");
@@ -148,7 +119,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         private GeometryGraphProperty Constant(float3 constant)
         {
-            var valueContainer = GetFloat32(constant);
+            var valueContainer = float32.FromFloat3(constant);
             const GeometryPropertyType type = GeometryPropertyType.Float3;
             return GetGeometryGraphProperty(default, type, valueContainer, "",
                 $"Constant {type.ToString()} {constant}");
@@ -158,9 +129,10 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID serializableGuid, string name,
             float value)
         {
-            var valueContainer = GetFloat32(value);
+            var valueContainer = float32.FromFloat(value);
             const GeometryPropertyType type = GeometryPropertyType.Float;
-            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name, $"{name} {type.ToString()}");
+            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
+                $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
             return newProperty;
         }
@@ -169,33 +141,28 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             float3 value)
         {
             const GeometryPropertyType type = GeometryPropertyType.Float3;
-            if (TryGetExisting(serializableGuid,type, out GeometryGraphProperty existing))
-            {
-                return existing;
-            }
+            if (TryGetExisting(serializableGuid, type, out var existing)) return existing;
 
-            var valueContainer = GetFloat32(value);
-            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name, $"{name} {type.ToString()}");
+            var valueContainer = float32.FromFloat3(value);
+            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
+                $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
             return newProperty;
         }
 
-        private bool TryGetExisting(SerializableGUID id, GeometryPropertyType type, out GeometryGraphProperty geometryGraphProperty)
+        private bool TryGetExisting(SerializableGUID id, GeometryPropertyType type,
+            out GeometryGraphProperty geometryGraphProperty)
         {
             foreach (var exposedVariable in _exposedVariables)
-            {
                 if (exposedVariable.ID == id)
                 {
                     if (exposedVariable.Type != type)
-                    {
                         throw new ArgumentException(
                             $"You requested a variable with type {type}. A variable with GUID {id.ToString()} exists, but it it has the type {exposedVariable.Type}");
-                    }
 
-                    geometryGraphProperty=exposedVariable;
+                    geometryGraphProperty = exposedVariable;
                     return true;
                 }
-            }
 
             geometryGraphProperty = default;
             return false;
@@ -204,9 +171,10 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID serializableGuid, string name,
             float4x4 value)
         {
-            var valueContainer = GetFloat32(value);
+            var valueContainer = float32.FromFloat4x4(value);
             const GeometryPropertyType type = GeometryPropertyType.Float4X4;
-            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name, $"{name} {type.ToString()}");
+            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
+                $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
             return newProperty;
         }
@@ -214,7 +182,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         private GeometryGraphProperty Constant(Matrix4x4 constant)
         {
-            var valueContainer = GetFloat32(constant);
+            var valueContainer = float32.FromFloat4x4(constant);
             const GeometryPropertyType type = GeometryPropertyType.Float4X4;
             return GetGeometryGraphProperty(default, type, valueContainer, "",
                 $"Constant {type.ToString()} {constant}");
@@ -250,7 +218,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             hash.Append(_geometryInstructionBuffer.ToArray());
             return NewGeometryGraphData.InitializeData(_propertyValueBuffer.ToArray(),
                 _mathInstructionsBuffer.ToArray(), _geometryInstructionBuffer.ToArray(), hash,
-                OriginTransformation,_exposedVariables.ToArray());
+                OriginTransformation, _exposedVariables.ToArray());
         }
 
         public void ExportBuffers(out float[] values, out GeometryInstruction[] geometryInstructions,
@@ -266,15 +234,25 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             _mathInstructionsBuffer.Add(mathInstruction);
         }
 
-        public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name, GeometryPropertyType type)
+        public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name,
+            GeometryPropertyType type)
         {
-            if (TryGetExisting(id,type, out GeometryGraphProperty existing))
-            {
-                return existing;
-            }
+            if (TryGetExisting(id, type, out var existing)) return existing;
 
             //todo add support for default values
             float32 valueContainer = default;
+            var newProperty = GetGeometryGraphProperty(id, type, valueContainer, name, $"{name} {type.ToString()}");
+            _exposedVariables.Add(newProperty);
+            return newProperty;
+        }
+
+        public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name,
+            GeometryPropertyType type, float32 defaultValue)
+        {
+            if (TryGetExisting(id, type, out var existing)) return existing;
+
+            //todo add support for default values
+            var valueContainer = defaultValue;
             var newProperty = GetGeometryGraphProperty(id, type, valueContainer, name, $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
             return newProperty;

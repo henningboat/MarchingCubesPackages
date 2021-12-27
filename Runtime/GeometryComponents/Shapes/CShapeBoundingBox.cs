@@ -1,43 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+﻿using System.Runtime.InteropServices;
 using Code.SIMDMath;
-using henningboat.CubeMarching.PrimitiveBehaviours;
 using Unity.Mathematics;
 using static Code.SIMDMath.SimdMath;
 
 namespace henningboat.CubeMarching.GeometryComponents.Shapes
 {
-    [ShapeProxy(ShapeType.BoundingBox)]
-    public class BoundingBoxShapeProxy : ShapeProxy
-    {
-        [PropertyType(GeometryPropertyType.Float)]
-        private GeometryGraphProperty _boundsWidth;
-
-        [PropertyType(GeometryPropertyType.Float3)]
-        private GeometryGraphProperty _extends;
-
-        public BoundingBoxShapeProxy(GeometryGraphProperty extends, GeometryGraphProperty boundsWidth,
-            GeometryGraphProperty transformation) : base(transformation)
-        {
-            _extends = extends;
-            _boundsWidth = boundsWidth;
-        }
-
-        protected override List<GeometryGraphProperty> GetProperties()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override ShapeType ShapeType => ShapeType.BoundingBox;
-    }
-
-
     namespace henningboat.CubeMarching.GeometryComponents
     {
         [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
-        public struct CShapeBoundingBox : IGeometryShapeResolver
+        public struct CShapeBoundingBox : IGeometryShape
         {
             #region Static Stuff
 
@@ -57,8 +28,10 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
 
             #region Public Fields
 
-            [FieldOffset(0)] public float boundWidth;
-            [FieldOffset(4)] public float3 extends;
+            [FieldOffset(0)] [DefaultValue(2)] public float boundWidth;
+
+            [FieldOffset(4)] [DefaultValue(8, 8, 8)]
+            public float3 extends;
 
             #endregion
 
@@ -68,6 +41,8 @@ namespace henningboat.CubeMarching.GeometryComponents.Shapes
             {
                 return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
             }
+
+            public ShapeType ShapeType => ShapeType.BoundingBox;
 
             #endregion
         }

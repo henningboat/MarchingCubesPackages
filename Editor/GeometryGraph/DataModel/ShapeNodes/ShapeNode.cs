@@ -8,6 +8,8 @@ using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Utils.Containers;
+using Unity.Mathematics;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -15,9 +17,9 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 {
     [Serializable]
-    public class ShapeNode : GeometryNodeModel, IGeometryNode 
+    public class ShapeNode : GeometryNodeModel, IGeometryNode
     {
-        [SerializeField]private ShapeType _shapeType;
+        [SerializeField] private ShapeType _shapeType;
         private List<IPortModel> _properties;
         public IPortModel GeometryOut { get; set; }
 
@@ -25,23 +27,40 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
         {
             _shapeType = shapeType;
         }
-        
+
         protected override void OnDefineNode()
         {
             base.OnDefineNode();
 
             Title = _shapeType.ToString();
-            
+
             GeometryOut = AddExecutionOutput(nameof(GeometryOut));
 
             _properties = new List<IPortModel>();
-            
+
             foreach (var propertyDefinition in GeometryTypeCache.GetPropertiesForType(_shapeType))
             {
-                _properties.Add(this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1)));
+                var dataInputPort =
+                    this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1));
+                dataInputPort.EmbeddedValue.ObjectValue = FloatArrayToObject(propertyDefinition.Item3);
+                _properties.Add(dataInputPort);
             }
 
             Color = new Color(0.4f, 0, 0);
+        }
+
+        private static object FloatArrayToObject(float[] propertyDefinition)
+        {
+            switch (propertyDefinition.Length)
+            {
+                case 1:
+                    return propertyDefinition[0];
+                case 3:
+                    return new Vector3(propertyDefinition[0], propertyDefinition[1], propertyDefinition[2]);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(propertyDefinition.Length), propertyDefinition,
+                        "Default Values must have a length of 1 or 3");
+            }
         }
 
         private TypeHandle GetTypeHandle(GeometryPropertyType propertyDefinitionItem1)
@@ -61,8 +80,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
                     return TypeHandleHelpers.GenerateTypeHandle<Color>();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(propertyDefinitionItem1), propertyDefinitionItem1, null);
-            }   
+                    throw new ArgumentOutOfRangeException(nameof(propertyDefinitionItem1), propertyDefinitionItem1,
+                        null);
+            }
         }
 
         public void WriteGeometryInstruction(ref GeometryInstruction instruction)
@@ -76,11 +96,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
 
         public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stack)
         {
-            foreach (var portModel in _properties)
-            {
-                Debug.Log(portModel.UniqueName);
-            }
-          //  context.WriteShape(GetShape(context, stack));
+            foreach (var portModel in _properties) Debug.Log(portModel.UniqueName);
+            //  context.WriteShape(GetShape(context, stack));
         }
     }
 }

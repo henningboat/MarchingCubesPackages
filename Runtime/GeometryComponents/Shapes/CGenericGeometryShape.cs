@@ -5,7 +5,6 @@ using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.GeometryComponents.Shapes.henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.Utils.Containers;
-using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
@@ -30,22 +29,22 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 switch (ShapeType)
                 {
                     case ShapeType.Sphere:
-                        return ((SphereShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((SphereShape*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.BoundingBox:
                         return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     case ShapeType.Torus:
-                        return ((TorusShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((TorusShape*) ptr)->GetSurfaceDistance(positionOS);
                         break;
-                    case ShapeType.Voronoi: 
+                    case ShapeType.Voronoi:
                         //return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS);
-                        return ((VoronoiShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((VoronoiShape*) ptr)->GetSurfaceDistance(positionOS);
                     case ShapeType.Plane:
-                        return ((PlaneShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
-                        break; 
+                        return ((PlaneShape*) ptr)->GetSurfaceDistance(positionOS);
+                        break;
                     case ShapeType.Box:
-                        return ((BoxShapeResolver*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((BoxShape*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
