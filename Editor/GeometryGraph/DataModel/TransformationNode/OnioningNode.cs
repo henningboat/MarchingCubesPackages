@@ -1,12 +1,10 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
+namespace Editor.GeometryGraph.DataModel.TransformationNode
 {
     [UsedImplicitly]
     public class OnioningNode : DistanceModificationNode

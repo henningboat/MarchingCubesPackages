@@ -1,9 +1,8 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.GraphElements;
+﻿using Editor.GeometryGraph.DataModel.MathNodes;
+using Editor.GeometryGraph.GraphElements;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     [GraphElementsExtensionMethodsCache(typeof(ModelInspectorView))]
     public static class ModelInspectorViewFactoryExtensions

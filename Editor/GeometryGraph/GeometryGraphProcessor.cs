@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     internal class GeometryGraphProcessor : IGraphProcessor
     {

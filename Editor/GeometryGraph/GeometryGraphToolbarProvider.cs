@@ -1,6 +1,6 @@
 ﻿using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     internal class GeometryGraphToolbarProvider : IToolbarProvider
     {

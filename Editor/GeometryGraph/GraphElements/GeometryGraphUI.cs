@@ -1,10 +1,6 @@
-﻿
-using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEngine;
-using UnityEngine.UIElements;
-using Debug = System.Diagnostics.Debug;
+﻿using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
+namespace Editor.GeometryGraph.GraphElements
 {
     public class GeometryGraphUI : CollapsibleInOutNode
     {

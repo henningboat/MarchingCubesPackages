@@ -1,7 +1,6 @@
-﻿using henningboat.CubeMarching;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
+﻿using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
+namespace Editor.GeometryGraph.DataModel
 {
     public class GeometryGraphVariableDeclarationModel : VariableDeclarationModel
     {

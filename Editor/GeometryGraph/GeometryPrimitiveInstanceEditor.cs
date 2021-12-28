@@ -11,7 +11,7 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Editor.GeometryGraph
 {
-    [CustomEditor(typeof(NewShapeProxy))]
+    [CustomEditor(typeof(PrimitiveInstance))]
     public class GeometryPrimitiveInstanceEditor : GeometryInstanceEditor
     {
         private SerializedProperty _shapeType;
@@ -19,7 +19,7 @@ namespace Editor.GeometryGraph
         private void OnEnable()
         {
             _shapeType = serializedObject.FindProperty("_shapeType");
-            UpdateShapeInstructions((ShapeType) _shapeType.enumValueIndex, (NewShapeProxy) target);
+            UpdateShapeInstructions((ShapeType) _shapeType.enumValueIndex, (PrimitiveInstance) target);
         }
 
         public override void OnInspectorGUI()
@@ -38,7 +38,7 @@ namespace Editor.GeometryGraph
             {
                 Undo.RecordObject(target, "changed overwrite");
 
-                UpdateShapeInstructions((ShapeType) _shapeType.enumValueIndex, (NewShapeProxy) instance);
+                UpdateShapeInstructions((ShapeType) _shapeType.enumValueIndex, (PrimitiveInstance) instance);
             }
 
             base.OnInspectorGUI();
@@ -49,7 +49,7 @@ namespace Editor.GeometryGraph
             currentOverwrite.Reset(variable);
         }
 
-        private void UpdateShapeInstructions(ShapeType shapeType, NewShapeProxy target)
+        private void UpdateShapeInstructions(ShapeType shapeType, PrimitiveInstance target)
         {
             using (var context = new GeometryInstructionListBuilder())
             {

@@ -1,10 +1,8 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
+namespace Editor.GeometryGraph.GraphElements
 {
     public class PrintResultPart : BaseModelUIPart
     {

@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using Editor.GeometryGraph.Conversion;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using JetBrains.Annotations;
-using Unity.Mathematics;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
+namespace Editor.GeometryGraph.DataModel.TransformationNode
 {
     [UsedImplicitly]
     public class RepetitionNode : PositionModificationNode

@@ -1,10 +1,10 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.GraphElements.Commands;
+﻿using Editor.GeometryGraph.GraphElements.Commands;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.CommandStateObserver;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     public class GeometryGraphState : GraphToolState
     {

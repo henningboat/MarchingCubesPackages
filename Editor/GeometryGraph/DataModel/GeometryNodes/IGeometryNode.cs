@@ -1,7 +1,6 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+﻿using henningboat.CubeMarching.PrimitiveBehaviours;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
+namespace Editor.GeometryGraph.DataModel.GeometryNodes
 {
     public interface IGeometryNode
     {

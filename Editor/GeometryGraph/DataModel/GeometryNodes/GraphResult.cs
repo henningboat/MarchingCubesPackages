@@ -1,8 +1,7 @@
 ﻿using System;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
+namespace Editor.GeometryGraph.DataModel.GeometryNodes
 {
     [Serializable]
     public class GraphResult : GeometryNodeModel

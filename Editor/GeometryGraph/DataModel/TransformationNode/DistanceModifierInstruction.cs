@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using Editor.GeometryGraph.Conversion;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
+namespace Editor.GeometryGraph.DataModel.TransformationNode
 {
     public abstract class DistanceModifierInstruction : GeometryGraphInstruction
     {

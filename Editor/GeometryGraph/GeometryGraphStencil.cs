@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode;
+using Editor.GeometryGraph.DataModel;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.MathNodes;
+using Editor.GeometryGraph.DataModel.ShapeNodes;
+using Editor.GeometryGraph.DataModel.TransformationNode;
 using henningboat.CubeMarching.GeometryComponents;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
@@ -13,9 +13,8 @@ using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEditor.GraphToolsFoundation.Searcher;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
-using Node = UnityEditor.Graphs.Node;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     internal class GeometryGraphStencil : Stencil, ISearcherDatabaseProvider
     {

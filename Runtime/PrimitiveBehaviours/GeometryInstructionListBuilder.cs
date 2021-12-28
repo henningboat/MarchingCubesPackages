@@ -23,8 +23,6 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         private NativeList<GeometryInstruction> _geometryInstructionBuffer;
         private NativeList<MathInstruction> _mathInstructionsBuffer;
 
-        public NativeList<GeometryInstruction> GeometryInstructionBuffer => _geometryInstructionBuffer;
-
         private Stack<CombinerState> _combinerStack = new();
         public readonly GeometryGraphProperty ZeroFloatProperty;
 

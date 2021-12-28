@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Editor.GeometryGraph;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
-using henningboat.CubeMarching.Utils.Containers;
-using Unity.Mathematics;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
+namespace Editor.GeometryGraph.DataModel.ShapeNodes
 {
     [Serializable]
     public class ShapeNode : GeometryNodeModel, IGeometryNode

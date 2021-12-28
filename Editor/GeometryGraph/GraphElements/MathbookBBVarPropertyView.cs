@@ -1,6 +1,6 @@
 ﻿using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
+namespace Editor.GeometryGraph.GraphElements
 {
     public class GeometryGraphBBVarPropertyView : BlackboardVariablePropertyView
     {

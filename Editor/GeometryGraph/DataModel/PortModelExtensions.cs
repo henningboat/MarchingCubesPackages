@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography.X509Certificates;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.MathNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.PrimitiveBehaviours;
-using Unity.Collections;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
+namespace Editor.GeometryGraph.DataModel
 {
     public static class PortModelExtensions
     {

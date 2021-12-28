@@ -1,10 +1,9 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.GraphElements.Commands;
+﻿using Editor.GeometryGraph.DataModel.MathNodes;
+using Editor.GeometryGraph.GraphElements.Commands;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
+namespace Editor.GeometryGraph.GraphElements
 {
     public class VariableInputNode : CollapsibleInOutNode
     {

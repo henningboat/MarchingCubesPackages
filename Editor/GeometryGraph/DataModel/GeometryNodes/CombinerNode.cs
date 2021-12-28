@@ -1,15 +1,11 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
-using Port = UnityEditor.Experimental.GraphView.Port;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
+namespace Editor.GeometryGraph.DataModel.GeometryNodes
 {
     [Serializable]
     public class CombinerNode : GeometryCombinerNode, IMultipleExecutionInputs

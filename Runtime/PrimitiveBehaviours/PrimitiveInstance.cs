@@ -5,7 +5,7 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
-    public class NewShapeProxy : GeometryInstance
+    public class PrimitiveInstance : GeometryInstance
     {
         [SerializeField] private ShapeType _shapeType;
         [SerializeField] private GeometryInstructionList instructionList;

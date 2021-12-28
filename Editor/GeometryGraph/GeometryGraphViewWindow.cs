@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     internal class GeometryGraphViewWindow : GraphViewEditorWindow
     {

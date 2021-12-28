@@ -2,7 +2,7 @@
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
+namespace Editor.GeometryGraph.DataModel.MathNodes
 {
     [Serializable]
     public class PIConstant : MathNode

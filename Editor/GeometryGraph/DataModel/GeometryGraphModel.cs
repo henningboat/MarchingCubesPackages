@@ -3,7 +3,7 @@ using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
+namespace Editor.GeometryGraph.DataModel
 {
     [Serializable]
     public class GeometryGraphModel : GraphModel

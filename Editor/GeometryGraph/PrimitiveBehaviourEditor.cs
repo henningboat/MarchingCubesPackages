@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.PrimitiveBehaviours;

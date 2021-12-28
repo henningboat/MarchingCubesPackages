@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.GraphElements.Commands;
+using Editor.GeometryGraph.DataModel.MathNodes;
+using Editor.GeometryGraph.GraphElements.Commands;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements
+namespace Editor.GeometryGraph.GraphElements
 {
     internal class MathOperatorInspector : FieldsInspector
     {

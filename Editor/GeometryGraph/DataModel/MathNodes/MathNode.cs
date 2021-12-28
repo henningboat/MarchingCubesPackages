@@ -1,7 +1,7 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
+namespace Editor.GeometryGraph.DataModel.MathNodes
 {
     [Serializable]
     public abstract class MathNode : GeometryNodeModel

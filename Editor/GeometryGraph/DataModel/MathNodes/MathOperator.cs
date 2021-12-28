@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
+namespace Editor.GeometryGraph.DataModel.MathNodes
 {
     [Serializable]
     public abstract class MathOperator : MathNode

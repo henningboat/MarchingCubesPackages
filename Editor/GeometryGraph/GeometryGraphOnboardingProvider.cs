@@ -2,7 +2,7 @@
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     public class GeometryGraphOnboardingProvider : OnboardingProvider
     {

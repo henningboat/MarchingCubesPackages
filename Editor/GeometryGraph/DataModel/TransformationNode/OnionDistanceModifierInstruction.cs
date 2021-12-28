@@ -1,10 +1,8 @@
-﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
+namespace Editor.GeometryGraph.DataModel.TransformationNode
 {
     public class OnionDistanceModifierInstruction : DistanceModifierInstruction
     {

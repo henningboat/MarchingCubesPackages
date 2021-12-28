@@ -1,12 +1,10 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
+namespace Editor.GeometryGraph.DataModel.TransformationNode
 {
     public class EulerAngleTransformationNode : TransformationNode, IGeometryNode
     {

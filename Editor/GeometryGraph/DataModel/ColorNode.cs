@@ -1,14 +1,10 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
+namespace Editor.GeometryGraph.DataModel
 {
     public class ColorNode : GeometryNodeModel, IGeometryNode
     {

@@ -1,6 +1,6 @@
 ﻿using henningboat.CubeMarching.TerrainChunkEntitySystem;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.Conversion
+namespace Editor.GeometryGraph.Conversion
 {
     public abstract class GeometryGraphInstruction
     {

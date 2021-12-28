@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
+using Editor.GeometryGraph.DataModel.MathNodes;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine.GraphToolsFoundation.CommandStateObserver;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.GraphElements.Commands
+namespace Editor.GeometryGraph.GraphElements.Commands
 {
     public class SetNumberOfInputPortCommand : ModelCommand<MathOperator, int>
     {

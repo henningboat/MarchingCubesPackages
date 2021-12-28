@@ -1,12 +1,10 @@
-﻿using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
-using Code.CubeMarching.GeometryGraph.Editor.GraphElements;
+﻿using Editor.GeometryGraph.DataModel;
+using Editor.GeometryGraph.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel.MathNodes;
+using Editor.GeometryGraph.GraphElements;
 using UnityEditor.GraphToolsFoundation.Overdrive;
-using UnityEngine;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     [GraphElementsExtensionMethodsCache(typeof(GraphView))]
     public static class GraphViewFactoryExtensions

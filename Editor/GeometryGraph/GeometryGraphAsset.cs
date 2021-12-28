@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using Editor.GeometryGraph.DataModel;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     [Serializable]
     public class GeometryGraphAsset : GraphAssetModel

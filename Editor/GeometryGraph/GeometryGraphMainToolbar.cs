@@ -1,11 +1,10 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Code.CubeMarching.GeometryGraph.Editor
+namespace Editor.GeometryGraph
 {
     public class GeometryGraphMainToolbar : MainToolbar
     {
