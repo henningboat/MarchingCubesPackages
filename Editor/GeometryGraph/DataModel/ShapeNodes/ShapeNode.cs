@@ -97,7 +97,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
         //
         // public abstract List<GeometryGraphProperty> GetProperties(RuntimeGeometryGraphResolverContext context);
 
-        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stack)
+        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stack)
         {
             var resolvedProperties = new List<GeometryGraphProperty>();
             for (var i = 0; i < _properties.Count; i++)

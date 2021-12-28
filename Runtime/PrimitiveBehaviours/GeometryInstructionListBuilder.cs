@@ -15,20 +15,8 @@ using Random = UnityEngine.Random;
 
 namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
-    public class CombinerState
-    {
-        public readonly CombinerOperation Operation;
-        public readonly GeometryGraphProperty BlendValue;
-
-        public CombinerState(CombinerOperation operation, GeometryGraphProperty blendValue)
-        {
-            Operation = operation;
-            BlendValue = blendValue;
-        }
-    }
-
     //should be renamed
-    public class RuntimeGeometryGraphResolverContext : IDisposable
+    public class GeometryInstructionListBuilder : IDisposable
     {
         public int CurrentCombinerDepth => _combinerStack.Count - 1;
         private NativeList<float> _propertyValueBuffer;
@@ -48,7 +36,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
 
         public List<GeometryGraphProperty> _exposedVariables;
 
-        public RuntimeGeometryGraphResolverContext()
+        public GeometryInstructionListBuilder()
         {
             _geometryInstructionBuffer = new NativeList<GeometryInstruction>(Allocator.Temp);
             _mathInstructionsBuffer = new NativeList<MathInstruction>(Allocator.Temp);
@@ -239,13 +227,13 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             _geometryInstructionBuffer.Add(instruction);
         }
 
-        public NewGeometryGraphData GetGeometryGraphData()
+        public GeometryInstructionList GetGeometryGraphData()
         {
             var hash = new Hash128();
             hash.Append(_geometryInstructionBuffer.ToArray());
             hash.Append(_mathInstructionsBuffer.ToArray());
             hash.Append(_propertyValueBuffer.ToArray());
-            return NewGeometryGraphData.InitializeData(_propertyValueBuffer.ToArray(),
+            return GeometryInstructionList.InitializeData(_propertyValueBuffer.ToArray(),
                 _mathInstructionsBuffer.ToArray(), _geometryInstructionBuffer.ToArray(), hash,
                 OriginTransformation, _exposedVariables.ToArray());
         }

@@ -5,18 +5,18 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
-    public class NewShapeProxy : GeometryInstanceBase
+    public class NewShapeProxy : GeometryInstance
     {
         [SerializeField] private ShapeType _shapeType;
-        [SerializeField] private NewGeometryGraphData _graphData;
+        [SerializeField] private GeometryInstructionList instructionList;
 
 #if UNITY_EDITOR
-        public void Initialize(NewGeometryGraphData geometryGraphData)
+        public void Initialize(GeometryInstructionList geometryInstructionList)
         {
-            _graphData = geometryGraphData;
+            instructionList = geometryInstructionList;
         }
         #endif
         
-        public override NewGeometryGraphData GeometryGraphData => _graphData;
+        public override GeometryInstructionList GeometryInstructionList => instructionList;
     }
 }

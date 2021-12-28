@@ -9,17 +9,17 @@ using UnityEngine;
 
 namespace Editor.GeometryGraph
 {
-    [CustomEditor(typeof(GeometryInstanceBase),true)]
+    [CustomEditor(typeof(GeometryInstance),true)]
     public class GeometryInstanceEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
-            var instance = target as GeometryInstanceBase;
-            var data = instance.GeometryGraphData;
+            var instance = target as GeometryInstance;
+            var data = instance.GeometryInstructionList;
 
             GUILayout.Space(10);
 
-            var geometryGraphInstance = (GeometryInstanceBase) target;
+            var geometryGraphInstance = (GeometryInstance) target;
             var currentOverwrites = geometryGraphInstance.GetOverwrites();
 
             foreach (var variableDeclarationModel in data.Variables)

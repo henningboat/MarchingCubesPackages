@@ -23,7 +23,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             _colorIn = this.AddDataInputPort<Color>("", nameof(_colorIn));
         }
 
-        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             throw new NotImplementedException();
             // var colorFloat3Property = _colorIn.ResolvePropertyInput(context, GeometryPropertyType.Float3);

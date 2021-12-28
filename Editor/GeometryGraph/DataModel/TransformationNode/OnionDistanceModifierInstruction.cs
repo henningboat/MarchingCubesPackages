@@ -9,7 +9,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
     public class OnionDistanceModifierInstruction : DistanceModifierInstruction
     {
         public OnionDistanceModifierInstruction(GeometryGraphProperty thickness,
-            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData) :
+            GeometryInstructionListBuilder context, GeometryStackData stackData) :
             base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation, thickness)
         {
         }
@@ -20,7 +20,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
     public class InflationDistanceModificationInstruction : DistanceModifierInstruction
     {
         public InflationDistanceModificationInstruction(GeometryGraphProperty thickness,
-            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData) :
+            GeometryInstructionListBuilder context, GeometryStackData stackData) :
             base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation, thickness)
         {
         }
@@ -30,7 +30,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
     public class InversionDistanceModifierInstruction : DistanceModifierInstruction
     {
-        public InversionDistanceModifierInstruction(RuntimeGeometryGraphResolverContext context,
+        public InversionDistanceModifierInstruction(GeometryInstructionListBuilder context,
             GeometryStackData stackData) :
             base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation)
         {

@@ -28,7 +28,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             return new PositionModificationInstruction(TerrainTransformationType.Repetition,
                 context.CurrentCombinerDepth, context.CurrentCombiner,
@@ -73,7 +73,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOut = AddExecutionOutput(nameof(_geometryOut));
         }
 
-        public virtual void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+        public virtual void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             throw new NotImplementedException();
             // context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
@@ -85,6 +85,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected abstract PositionModificationInstruction GetDistanceModifierInstruction(
-            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData);
+            GeometryInstructionListBuilder context, GeometryStackData stackData);
     }
 }

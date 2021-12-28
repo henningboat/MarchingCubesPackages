@@ -20,7 +20,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
 
-        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             _geometryInput.ResolveGeometryInput(context, stackData);
             throw new NotImplementedException();
@@ -28,6 +28,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected abstract DistanceModifierInstruction GetDistanceModifierInstruction(
-            RuntimeGeometryGraphResolverContext geometryGraphResolverContext, GeometryStackData stackData);
+            GeometryInstructionListBuilder geometryInstructionListBuilder, GeometryStackData stackData);
     }
 }

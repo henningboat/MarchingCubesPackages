@@ -11,7 +11,7 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 namespace henningboat.CubeMarching
 {
     [Serializable]
-    public class NewGeometryGraphData
+    public class GeometryInstructionList
     {
         [SerializeField] private Hash128 _contentHash;
         [SerializeField] private GeometryGraphProperty _mainTransformation;
@@ -26,15 +26,15 @@ namespace henningboat.CubeMarching
         public GeometryGraphProperty MainTransformation => _mainTransformation;
         public GeometryGraphProperty[] Variables => _variables;
 
-        private NewGeometryGraphData()
+        private GeometryInstructionList()
         {
         }
 
-        public static NewGeometryGraphData InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
+        public static GeometryInstructionList InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
             GeometryInstruction[] geometryInstructions, Hash128 contentHash, GeometryGraphProperty mainTransformation,
             GeometryGraphProperty[] variables)
         {
-            var data = new NewGeometryGraphData
+            var data = new GeometryInstructionList
             {
                 _valueBuffer = valueBuffer.ToArray(),
                 _mathInstructions = mathInstructions.ToArray(),
@@ -64,14 +64,14 @@ namespace henningboat.CubeMarching
 
     public class GeometryGraphRuntimeAsset : ScriptableObject
     {
-        [SerializeField] private NewGeometryGraphData _geometryGraphData;
+        [SerializeField] private GeometryInstructionList geometryInstructionList;
 
-        public NewGeometryGraphData GeometryGraphData => _geometryGraphData;
+        public GeometryInstructionList GeometryInstructionList => geometryInstructionList;
 
 #if UNITY_EDITOR
-        public void Initialize(NewGeometryGraphData data)
+        public void Initialize(GeometryInstructionList data)
         {
-            _geometryGraphData = data;
+            geometryInstructionList = data;
         }
 #endif
     }

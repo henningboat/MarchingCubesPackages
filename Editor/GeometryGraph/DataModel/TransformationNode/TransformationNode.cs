@@ -18,10 +18,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOutput = AddExecutionOutput(nameof(_geometryInput));
         }
 
-        protected abstract GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+        protected abstract GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
             GeometryGraphProperty parent);
 
-        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             stackData.Transformation = GetTransformationProperty(context, stackData.Transformation);
             _geometryInput.ResolveGeometryInput(context, stackData);

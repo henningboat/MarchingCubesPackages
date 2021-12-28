@@ -19,7 +19,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         public IPortModel GeometryInputB { get; set; }
         public IPortModel BlendFactor { get; set; }
 
-        public override void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
+        public override void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             var blendFactorProperty = BlendFactor.ResolvePropertyInput(context, GeometryPropertyType.Float);
             context.BeginWriteCombiner(new CombinerState(EvaluateCombinerOperation(), blendFactorProperty));

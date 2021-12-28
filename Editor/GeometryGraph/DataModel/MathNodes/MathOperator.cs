@@ -52,7 +52,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
         }
 
 
-        public GeometryGraphProperty[] GetInputProperties(RuntimeGeometryGraphResolverContext context,
+        public GeometryGraphProperty[] GetInputProperties(GeometryInstructionListBuilder context,
             GeometryPropertyType propertyType)
         {
             var inputProperties = new List<GeometryGraphProperty>();

@@ -9,7 +9,7 @@ using UnityEditor;
 namespace henningboat.CubeMarching
 {
     [ExecuteInEditMode]
-    public class GeometryGraphInstance : GeometryInstanceBase
+    public class GeometryGraphInstance : GeometryInstance
     {
         private static (ScriptableObject, GeometryGraphRuntimeAsset) _debugOverwrite;
         [SerializeField] protected GeometryGraphRuntimeAsset _geometryGraphRuntimeData;
@@ -24,12 +24,12 @@ namespace henningboat.CubeMarching
             _debugOverwrite = default;
         }
 
-        public override NewGeometryGraphData GeometryGraphData
+        public override GeometryInstructionList GeometryInstructionList
         {
             get
             {
                 if (_geometryGraphRuntimeData != null)
-                    return _geometryGraphRuntimeData.GeometryGraphData;
+                    return _geometryGraphRuntimeData.GeometryInstructionList;
                 return null;
             }
         }

@@ -16,7 +16,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
         public Hash128 ContentHash;
 
 
-        public GeometryGraphBuffers(NewGeometryGraphData geometryGraphRuntimeData)
+        public GeometryGraphBuffers(GeometryInstructionList geometryGraphRuntimeData)
         {
             ContentHash = geometryGraphRuntimeData.ContentHash;
             geometryGraphRuntimeData.AllocateNativeArrays(out ValueBuffer, out MathInstructions,

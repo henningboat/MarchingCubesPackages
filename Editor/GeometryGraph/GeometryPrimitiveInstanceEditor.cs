@@ -28,8 +28,8 @@ namespace Editor.GeometryGraph
 
             EditorGUILayout.PropertyField(_shapeType);
 
-            var instance = target as GeometryInstanceBase;
-            var data = instance.GeometryGraphData;
+            var instance = target as GeometryInstance;
+            var data = instance.GeometryInstructionList;
 
             GUILayout.Space(10);
 
@@ -51,7 +51,7 @@ namespace Editor.GeometryGraph
 
         private void UpdateShapeInstructions(ShapeType shapeType, NewShapeProxy target)
         {
-            using (var context = new RuntimeGeometryGraphResolverContext())
+            using (var context = new GeometryInstructionListBuilder())
             {
                 var exposedProperties = new List<GeometryGraphProperty>();
                 foreach (var property in GeometryTypeCache.GetPropertiesForType(shapeType))

@@ -7,11 +7,12 @@ using UnityEngine;
 namespace henningboat.CubeMarching
 {
     [ExecuteInEditMode]
-    public abstract class GeometryInstanceBase : MonoBehaviour
+    public abstract class GeometryInstance : MonoBehaviour
     {
         private GeometryGraphBuffers _graphBuffer;
+        // ReSharper disable once InconsistentNaming
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites = new();
-        public abstract NewGeometryGraphData GeometryGraphData { get; }
+        public abstract GeometryInstructionList GeometryInstructionList { get; }
 
         private void OnDisable()
         {
@@ -23,7 +24,7 @@ namespace henningboat.CubeMarching
         {
             foreach (var overwrite in _overwrites)
             {
-                var variable = GeometryGraphData.GetIndexOfProperty(overwrite.PropertyGUID);
+                var variable = GeometryInstructionList.GetIndexOfProperty(overwrite.PropertyGUID);
 
                 if (variable == null)
                     continue;
@@ -32,7 +33,7 @@ namespace henningboat.CubeMarching
                     _graphBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
             }
 
-            _graphBuffer.ValueBuffer.Write(transform.worldToLocalMatrix, GeometryGraphData.MainTransformation.Index);
+            _graphBuffer.ValueBuffer.Write(transform.worldToLocalMatrix, GeometryInstructionList.MainTransformation.Index);
         }
 
 
@@ -48,17 +49,17 @@ namespace henningboat.CubeMarching
 
         public bool TryInitializeAndGetBuffer(out GeometryGraphBuffers result)
         {
-            if (GeometryGraphData == null)
+            if (GeometryInstructionList == null)
             {
                 TryDisposeGraphBuffers();
                 result = default;
                 return false;
             }
 
-            if (_graphBuffer.ContentHash != GeometryGraphData.ContentHash)
+            if (_graphBuffer.ContentHash != GeometryInstructionList.ContentHash)
             {
                 TryDisposeGraphBuffers();
-                _graphBuffer = new GeometryGraphBuffers(GeometryGraphData);
+                _graphBuffer = new GeometryGraphBuffers(GeometryInstructionList);
             }
 
             result = _graphBuffer;

@@ -17,7 +17,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
     public static class PortModelExtensions
     {
-        public static void ResolveGeometryInput(this IPortModel port, RuntimeGeometryGraphResolverContext context,
+        public static void ResolveGeometryInput(this IPortModel port, GeometryInstructionListBuilder context,
             GeometryStackData stack)
         {
             var connectedPort = port.GetConnectedPorts().FirstOrDefault(model =>
@@ -27,7 +27,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
         }
 
         public static GeometryGraphProperty ResolvePropertyInput(this MathNode self,
-            RuntimeGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+            GeometryInstructionListBuilder context, GeometryPropertyType geometryPropertyType)
         {
             GeometryGraphProperty resultProperty;
 
@@ -50,7 +50,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
         }
 
         public static GeometryGraphProperty ResolvePropertyInput(this IPortModel self,
-            RuntimeGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+            GeometryInstructionListBuilder context, GeometryPropertyType geometryPropertyType)
         {
             if (self == null) throw new ArgumentOutOfRangeException();
 

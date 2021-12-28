@@ -19,7 +19,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             InEulerAngles = this.AddDataInputPort<Vector3>("Rotation", nameof(InEulerAngles));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
             GeometryGraphProperty parent)
         {
             throw new NotImplementedException();

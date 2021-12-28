@@ -5,7 +5,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 {
     public interface IGeometryNode
     {
-        void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData);
+        void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData);
     }
 
     //todo probably rename

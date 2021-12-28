@@ -24,7 +24,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _inTranslation = this.AddDataInputPort<Vector3>("Translation", nameof(_inTranslation));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
             GeometryGraphProperty parent)
         {
             var translationProperty = _inTranslation.ResolvePropertyInput(context, GeometryPropertyType.Float3);

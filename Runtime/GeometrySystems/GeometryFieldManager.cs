@@ -72,7 +72,7 @@ namespace henningboat.CubeMarching.GeometrySystems
                 _initialized = true;
             }
             
-            var allGraphs = Object.FindObjectsOfType<GeometryInstanceBase>();
+            var allGraphs = Object.FindObjectsOfType<GeometryInstance>();
             List<GeometryGraphBuffers> geometryGraphBuffers = new List<GeometryGraphBuffers>();
             foreach (var graph in allGraphs)
             {

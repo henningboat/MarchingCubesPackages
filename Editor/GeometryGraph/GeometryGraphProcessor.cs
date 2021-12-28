@@ -69,9 +69,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor
             return data;
         }
 
-        private static RuntimeGeometryGraphResolverContext Resolve(IGraphModel graphModel, IGeometryNode rootNode)
+        private static GeometryInstructionListBuilder Resolve(IGraphModel graphModel, IGeometryNode rootNode)
         {
-            var context = new RuntimeGeometryGraphResolverContext();
+            var context = new GeometryInstructionListBuilder();
 
             context.BeginWriteCombiner(new CombinerState(CombinerOperation.Min, context.ZeroFloatProperty));
 
