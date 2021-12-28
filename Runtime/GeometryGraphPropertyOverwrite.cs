@@ -1,5 +1,5 @@
 ﻿using System;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.Utils.Containers;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -42,6 +42,7 @@ namespace henningboat.CubeMarching
 
     public abstract class GeometryPropertyValueProvider : MonoBehaviour
     {
-        public abstract float[] GetValue(GeometryGraphInstance graphInstance, GeometryPropertyType geometryPropertyType);
+        public abstract float[] GetValue(GeometryGraphInstance graphInstance,
+            GeometryPropertyType geometryPropertyType);
     }
 }

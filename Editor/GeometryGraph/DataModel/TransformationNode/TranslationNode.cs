@@ -4,6 +4,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
@@ -23,14 +24,16 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _inTranslation = this.AddDataInputPort<Vector3>("Translation", nameof(_inTranslation));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(EditorGeometryGraphResolverContext context, GeometryGraphProperty parent)
+        protected override GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+            GeometryGraphProperty parent)
         {
             var translationProperty = _inTranslation.ResolvePropertyInput(context, GeometryPropertyType.Float3);
-            var transformationProperty = context.GetOrCreateProperty(Guid, Matrix4x4.identity);
+            var transformationProperty = context.CreateProperty(Matrix4x4.identity);
             //var transformationProperty = new GeometryGraphMathOperatorProperty(GeometryPropertyType.Float4X4, MathOperatorType.Translate, parent, translationProperty, "Translation");
 
-            context.WriteMathProperty(MathOperatorType.Translate, parent, translationProperty, transformationProperty);
-            
+            throw new NotImplementedException();
+//            context.WriteMathProperty(MathOperatorType.Translate, parent, translationProperty, transformationProperty);
+
             return transformationProperty;
         }
     }

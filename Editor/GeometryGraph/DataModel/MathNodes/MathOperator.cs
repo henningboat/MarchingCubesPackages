@@ -6,6 +6,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
@@ -36,10 +37,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
 
         protected void AddInputPorts()
         {
-            for (var i = 0; i < InputPortCount; ++i)
-            {
-                this.AddDataInputPort<float>("Term " + (i + 1));
-            }
+            for (var i = 0; i < InputPortCount; ++i) this.AddDataInputPort<float>("Term " + (i + 1));
         }
 
         public IPortModel DataOut { get; private set; }
@@ -54,16 +52,15 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes
         }
 
 
-        public GeometryGraphProperty[] GetInputProperties(EditorGeometryGraphResolverContext context, GeometryPropertyType propertyType)
+        public GeometryGraphProperty[] GetInputProperties(RuntimeGeometryGraphResolverContext context,
+            GeometryPropertyType propertyType)
         {
             var inputProperties = new List<GeometryGraphProperty>();
 
             var inputs = this.GetInputPorts().ToList();
 
             for (var i = 0; i < inputs.Count; i++)
-            {
                 inputProperties.Add(inputs[i].ResolvePropertyInput(context, propertyType));
-            }
 
             return inputProperties.ToArray();
         }

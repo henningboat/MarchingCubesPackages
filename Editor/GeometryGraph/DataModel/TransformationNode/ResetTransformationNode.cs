@@ -1,6 +1,7 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -20,14 +21,14 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             return null;
         }
 
-        public override void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+        public override void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(),Matrix4x4.identity);
+            var zeroMatrixInstruction = context.CreateProperty(Matrix4x4.identity);
             stackData.Transformation = zeroMatrixInstruction;
 
             _geometryIn.ResolveGeometryInput(context, stackData);

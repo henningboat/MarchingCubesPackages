@@ -3,6 +3,7 @@ using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
 using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -18,10 +19,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         public IPortModel GeometryInputB { get; set; }
         public IPortModel BlendFactor { get; set; }
 
-        public override void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+        public override void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             var blendFactorProperty = BlendFactor.ResolvePropertyInput(context, GeometryPropertyType.Float);
-            context.BeginWriteCombiner(new CombinerInstruction(EvaluateCombinerOperation(), blendFactorProperty, context.CurrentCombinerDepth));
+            context.BeginWriteCombiner(new CombinerState(EvaluateCombinerOperation(), blendFactorProperty));
             GeometryInputA.ResolveGeometryInput(context, stackData);
             GeometryInputB.ResolveGeometryInput(context, stackData);
 
@@ -30,7 +31,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
 
         private CombinerOperation EvaluateCombinerOperation()
         {
-            var combinerOperation = (CombinerOperation) ((EnumValueReference) BlendModeInput.EmbeddedValue.ObjectValue).Value;
+            var combinerOperation =
+                (CombinerOperation) ((EnumValueReference) BlendModeInput.EmbeddedValue.ObjectValue).Value;
             return combinerOperation;
         }
 
@@ -45,9 +47,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
             base.OnDefineNode();
             BlendModeInput = this.AddDataInputPort<CombinerOperation>("Blend Mode", nameof(BlendModeInput));
 
-            GeometryInputA = AddExecutionInput( nameof(GeometryInputA));
+            GeometryInputA = AddExecutionInput(nameof(GeometryInputA));
             GeometryInputB = AddExecutionInput(nameof(GeometryInputB));
-            
+
             BlendFactor = this.AddDataInputPort<float>("BlendFactor", nameof(BlendFactor));
         }
     }

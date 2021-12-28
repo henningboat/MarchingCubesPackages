@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEngine;

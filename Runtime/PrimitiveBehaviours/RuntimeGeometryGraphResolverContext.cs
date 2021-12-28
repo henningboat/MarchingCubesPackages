@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.Conversion;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
@@ -29,6 +27,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         }
     }
 
+    //should be renamed
     public class RuntimeGeometryGraphResolverContext : IDisposable
     {
         public int CurrentCombinerDepth => _combinerStack.Count - 1;
@@ -42,7 +41,6 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public readonly GeometryGraphProperty ZeroFloatProperty;
 
         public CombinerState CurrentCombiner => _combinerStack.Peek();
-        public CombinerOperation CurrentCombinerOperation { get; }
 
         public GeometryGraphProperty OriginTransformation { get; }
         public GeometryGraphProperty DefaultColor { get; }
@@ -76,10 +74,13 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             //bit confusing: to write the combiner into it's parent, we need the parents combiner settings
             _combinerStack.Pop();
 
-            _geometryInstructionBuffer.Add(GeometryInstructionUtility.CreateInstruction(
-                GeometryInstructionType.Combiner, (int) CurrentCombiner.Operation, CurrentCombinerDepth,
-                CurrentCombinerOperation, DefaultColor, OriginTransformation, new List<GeometryGraphProperty>(),
-                DefaultColor));
+            var newInstruction =
+                GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Combiner, 0, OriginTransformation,
+                    null);
+            GeometryInstructionUtility.AddAdditionalData(ref newInstruction, CurrentCombinerDepth,
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, DefaultColor);
+
+            WriteInstruction(newInstruction);
         }
 
         public void Dispose()
@@ -108,6 +109,30 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             }
         }
 
+        public GeometryGraphProperty CreateOrGetExposedPropertyFromObject(SerializableGUID serializableGuid,
+            string name,
+            object value)
+        {
+            switch (value)
+            {
+                case float floatValue:
+                    return CreateOrGetExposedProperty(serializableGuid, name, floatValue);
+                case float3 float3Value:
+                    return CreateOrGetExposedProperty(serializableGuid, name, float3Value);
+                case Vector3 float3Value:
+                    return CreateOrGetExposedProperty(serializableGuid, name, (float3) float3Value);
+                case Matrix4x4 matrixValue:
+                    return CreateOrGetExposedProperty(serializableGuid, name, (float4x4) matrixValue);
+                case Color32 color32:
+                    throw new NotImplementedException();
+                // return CreateOrGetExposedPropertyFromObject(serializableGuid,name,color32);
+                case Color _:
+                    return Constant(0);
+                default:
+                    throw new Exception(value.GetType() + " is not supported");
+            }
+        }
+
         private GeometryGraphProperty Constant(float constant)
         {
             var valueContainer = float32.FromFloat(constant);
@@ -131,6 +156,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         {
             var valueContainer = float32.FromFloat(value);
             const GeometryPropertyType type = GeometryPropertyType.Float;
+            if (TryGetExisting(serializableGuid, type, out var existing)) return existing;
             var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
                 $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
@@ -171,8 +197,9 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
         public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID serializableGuid, string name,
             float4x4 value)
         {
-            var valueContainer = float32.FromFloat4x4(value);
             const GeometryPropertyType type = GeometryPropertyType.Float4X4;
+            if (TryGetExisting(serializableGuid, type, out var existing)) return existing;
+            var valueContainer = float32.FromFloat4x4(value);
             var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
                 $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
@@ -205,9 +232,11 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             for (var i = 0; i < property.GetSizeInBuffer(); i++) _propertyValueBuffer.Add(value[i]);
         }
 
-        public void AddShape(GeometryInstructionProxy sphereShapeProxy)
+        public void WriteInstruction(GeometryInstruction instruction)
         {
-            _geometryInstructionBuffer.Add(sphereShapeProxy.GetGeometryInstruction(this));
+            GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, DefaultColor);
+            _geometryInstructionBuffer.Add(instruction);
         }
 
         public NewGeometryGraphData GetGeometryGraphData()
@@ -215,7 +244,7 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             var hash = new Hash128();
             hash.Append(_geometryInstructionBuffer.ToArray());
             hash.Append(_mathInstructionsBuffer.ToArray());
-            hash.Append(_geometryInstructionBuffer.ToArray());
+            hash.Append(_propertyValueBuffer.ToArray());
             return NewGeometryGraphData.InitializeData(_propertyValueBuffer.ToArray(),
                 _mathInstructionsBuffer.ToArray(), _geometryInstructionBuffer.ToArray(), hash,
                 OriginTransformation, _exposedVariables.ToArray());

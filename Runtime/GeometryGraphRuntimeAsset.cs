@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkEntitySystem;
 using Unity.Collections;
 using UnityEngine;
@@ -34,7 +34,7 @@ namespace henningboat.CubeMarching
             GeometryInstruction[] geometryInstructions, Hash128 contentHash, GeometryGraphProperty mainTransformation,
             GeometryGraphProperty[] variables)
         {
-            NewGeometryGraphData data = new NewGeometryGraphData
+            var data = new NewGeometryGraphData
             {
                 _valueBuffer = valueBuffer.ToArray(),
                 _mathInstructions = mathInstructions.ToArray(),

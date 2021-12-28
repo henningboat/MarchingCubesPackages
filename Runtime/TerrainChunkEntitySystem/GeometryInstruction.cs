@@ -1,6 +1,7 @@
 ﻿using System;
 using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.TerrainChunkSystem;
 using henningboat.CubeMarching.Utils.Containers;
 using Unity.Collections.LowLevel.Unsafe;
@@ -73,6 +74,7 @@ namespace henningboat.CubeMarching.TerrainChunkEntitySystem
             Hash128 hash=default;
             hash.Append(ref GeometryInstructionType);
             hash.Append(ref GeometryInstructionSubType);
+            hash.Append(ref CombinerBlendOperation);
             
             hash.Append(CombinerDepth);
 

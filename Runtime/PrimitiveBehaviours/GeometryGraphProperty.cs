@@ -1,9 +1,8 @@
 ﻿using System;
-using henningboat.CubeMarching;
 using henningboat.CubeMarching.Utils.Containers;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
+namespace henningboat.CubeMarching.PrimitiveBehaviours
 {
     [Serializable]
     public sealed class GeometryGraphProperty
@@ -15,7 +14,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
         public float32 DefaultValue;
 
         public bool IsExposed => ID != default;
-        
+
         public int GetSizeInBuffer()
         {
             return Type switch
@@ -27,7 +26,9 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
-        public GeometryGraphProperty(int index, SerializableGUID id, GeometryPropertyType type, float32 value, string name, string debugInformation)
+
+        public GeometryGraphProperty(int index, SerializableGUID id, GeometryPropertyType type, float32 value,
+            string name, string debugInformation)
         {
             ID = id;
             Index = index;

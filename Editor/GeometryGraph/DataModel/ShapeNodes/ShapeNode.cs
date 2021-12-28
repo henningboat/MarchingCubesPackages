@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Editor.GeometryGraph;
@@ -21,6 +22,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
     {
         [SerializeField] private ShapeType _shapeType;
         private List<IPortModel> _properties;
+        private List<GeometryPropertyType> _typePerInputPort = new();
         public IPortModel GeometryOut { get; set; }
 
         public void InitializeShapeType(ShapeType shapeType)
@@ -44,6 +46,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
                     this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1));
                 dataInputPort.EmbeddedValue.ObjectValue = FloatArrayToObject(propertyDefinition.Item3);
                 _properties.Add(dataInputPort);
+                _typePerInputPort.Add(propertyDefinition.Item1);
             }
 
             Color = new Color(0.4f, 0, 0);
@@ -89,15 +92,20 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes
         {
         }
         //
-        // protected abstract ShapeProxy GetShape(EditorGeometryGraphResolverContext context,
+        // protected abstract ShapeProxy GetShape(RuntimeGeometryGraphResolverContext context,
         //     GeometryStackData stackData);
         //
-        // public abstract List<GeometryGraphProperty> GetProperties(EditorGeometryGraphResolverContext context);
+        // public abstract List<GeometryGraphProperty> GetProperties(RuntimeGeometryGraphResolverContext context);
 
-        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stack)
+        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stack)
         {
-            foreach (var portModel in _properties) Debug.Log(portModel.UniqueName);
-            //  context.WriteShape(GetShape(context, stack));
+            var resolvedProperties = new List<GeometryGraphProperty>();
+            for (var i = 0; i < _properties.Count; i++)
+                resolvedProperties.Add(_properties[i].ResolvePropertyInput(context, _typePerInputPort[i]));
+
+            var shapeInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape,
+                (int) _shapeType, stack.Transformation, resolvedProperties);
+            context.WriteInstruction(shapeInstruction);
         }
     }
 }

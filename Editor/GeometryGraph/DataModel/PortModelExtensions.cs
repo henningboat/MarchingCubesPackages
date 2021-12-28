@@ -7,6 +7,7 @@ using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.MathNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
 using henningboat.CubeMarching;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using Unity.Collections;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -16,16 +17,17 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
 {
     public static class PortModelExtensions
     {
-        public static void ResolveGeometryInput(this IPortModel port, EditorGeometryGraphResolverContext context, GeometryStackData stack)
+        public static void ResolveGeometryInput(this IPortModel port, RuntimeGeometryGraphResolverContext context,
+            GeometryStackData stack)
         {
-            var connectedPort = port.GetConnectedPorts().FirstOrDefault(model => model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow  && model.NodeModel != null);
+            var connectedPort = port.GetConnectedPorts().FirstOrDefault(model =>
+                model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow && model.NodeModel != null);
             if (connectedPort != null && connectedPort.NodeModel is IGeometryNode geometryNode)
-            {
                 geometryNode.Resolve(context, stack);
-            }
         }
 
-        public static GeometryGraphProperty ResolvePropertyInput(this MathNode self, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+        public static GeometryGraphProperty ResolvePropertyInput(this MathNode self,
+            RuntimeGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
         {
             GeometryGraphProperty resultProperty;
 
@@ -33,26 +35,24 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
             {
                 case MathOperator mathOperator:
                     throw new NotImplementedException();
-                    // var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
-                    // if (inputs.Length != 2)
-                    // {
-                    //     throw new Exception("inputs.Length != 2");
-                    // }
-                    //
-                    // return context.GetOrCreateProperty(self.Guid,
-                    //     new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
+                // var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
+                // if (inputs.Length != 2)
+                // {
+                //     throw new Exception("inputs.Length != 2");
+                // }
+                //
+                // return context.GetOrCreateProperty(self.Guid,
+                //     new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
                 default:
                     throw new ArgumentOutOfRangeException();
                     break;
             }
         }
 
-        public static GeometryGraphProperty ResolvePropertyInput(this IPortModel self, EditorGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
+        public static GeometryGraphProperty ResolvePropertyInput(this IPortModel self,
+            RuntimeGeometryGraphResolverContext context, GeometryPropertyType geometryPropertyType)
         {
-            if (self == null)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
+            if (self == null) throw new ArgumentOutOfRangeException();
 
             var connectedNode = self.GetConnectedEdges().FirstOrDefault()?.FromPort.NodeModel;
 
@@ -62,15 +62,16 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                     return mathNode.ResolvePropertyInput(context, geometryPropertyType);
 
                 case IVariableNodeModel varNode:
-                    var objectValue = varNode.VariableDeclarationModel.InitializationModel.ObjectValue;
+                    return context.CreateOrGetExposedPropertyFromObject(varNode.Guid,
+                        varNode.VariableDeclarationModel.GetVariableName(),
+                        varNode.VariableDeclarationModel.InitializationModel.ObjectValue);
 
-                    throw new NetworkInformationException();
-                    // return context.GetOrCreateProperty(varNode.VariableDeclarationModel.Guid,
-                    //     new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, objectValue, context, geometryPropertyType,
-                    //         varNode.VariableDeclarationModel.GetVariableName(), "Variable Node " + varNode.Title));
+                // return context.GetOrCreateProperty(varNode.VariableDeclarationModel.Guid,
+                //     new GeometryGraphExposedVariableNode(varNode.VariableDeclarationModel, objectValue, context, geometryPropertyType,
+                //         varNode.VariableDeclarationModel.GetVariableName(), "Variable Node " + varNode.Title));
 
                 case IConstantNodeModel constNode:
-                    return context.GetOrCreateProperty(constNode.Guid, constNode.ObjectValue);
+                    return context.CreateProperty(constNode.ObjectValue);
 
                 case IEdgePortalExitModel portalModel:
                     throw new NotImplementedException("Portals are not supported right now");
@@ -92,8 +93,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel
                         var color = (Color) self.EmbeddedValue.ObjectValue;
                         embeddedValue = new Vector3(color.r, color.g, color.b);
                     }
-                    
-                    return context.GetOrCreateProperty(self.Guid, embeddedValue);
+
+                    return context.CreateProperty(embeddedValue);
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
@@ -27,9 +28,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            return new(TerrainTransformationType.Repetition, context.CurrentCombinerDepth, context.CurrentCombiner,
+            return new PositionModificationInstruction(TerrainTransformationType.Repetition,
+                context.CurrentCombinerDepth, context.CurrentCombiner,
                 stackData.Transformation,
                 _periodInput.ResolvePropertyInput(context, GeometryPropertyType.Float3));
         }
@@ -56,8 +58,7 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         public override GeometryInstruction GetInstruction()
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.PositionModification,
-                (int) _type, Depth, _combiner.Operation,_combiner.BlendValue, _transformation, _properties.ToList(),
-                null);
+                (int) _type, _transformation, _properties.ToList());
         }
     }
 
@@ -72,17 +73,18 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOut = AddExecutionOutput(nameof(_geometryOut));
         }
 
-        public virtual void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+        public virtual void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
-            context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
-
-            var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(), Matrix4x4.identity);
-            stackData.Transformation = zeroMatrixInstruction;
-
-            _geometryIn.ResolveGeometryInput(context, stackData);
+            throw new NotImplementedException();
+            // context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
+            //
+            // var zeroMatrixInstruction = context.GetOrCreateProperty(SerializableGUID.Generate(), Matrix4x4.identity);
+            // stackData.Transformation = zeroMatrixInstruction;
+            //
+            // _geometryIn.ResolveGeometryInput(context, stackData);
         }
 
         protected abstract PositionModificationInstruction GetDistanceModifierInstruction(
-            EditorGeometryGraphResolverContext context, GeometryStackData stackData);
+            RuntimeGeometryGraphResolverContext context, GeometryStackData stackData);
     }
 }

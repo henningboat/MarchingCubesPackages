@@ -1,39 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.GeometryComponents.Shapes;
 using henningboat.CubeMarching.PrimitiveBehaviours;
 using henningboat.CubeMarching.Utils.Containers;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace Editor.GeometryGraph
 {
-    [CustomEditor(typeof(NewShapeProxy))]
-    public class PrimitiveBehaviourEditor : UnityEditor.Editor
+    [CustomEditor(typeof(GeometryInstanceBase),true)]
+    public class GeometryInstanceEditor : UnityEditor.Editor
     {
-        private SerializedProperty _shapeType;
-
-        private List<string> _properties = new();
-
-        private void OnEnable()
-        {
-            _shapeType = serializedObject.FindProperty("_shapeType");
-            UpdateProperties((ShapeType) _shapeType.enumValueIndex, (NewShapeProxy) target);
-        }
-
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.PropertyField(_shapeType);
-
-            foreach (var property in _properties) GUILayout.Label(property);
-
-            serializedObject.ApplyModifiedProperties();
-
-            var instance = target as NewShapeProxy;
+            var instance = target as GeometryInstanceBase;
             var data = instance.GeometryGraphData;
 
             GUILayout.Space(10);
@@ -90,42 +71,18 @@ namespace Editor.GeometryGraph
                 EditorGUILayout.EndHorizontal();
             }
 
-            serializedObject.ApplyModifiedProperties();
             if (GUI.changed)
             {
+                Undo.RecordObject(target, "changed overwrite");
                 geometryGraphInstance.SetOverwrites(currentOverwrites);
-
-                EditorUtility.SetDirty(geometryGraphInstance);
-
-                UpdateProperties((ShapeType) _shapeType.enumValueIndex, instance);
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         private void ResetProperty(GeometryGraphProperty variable, GeometryGraphPropertyOverwrite currentOverwrite)
         {
             currentOverwrite.Reset(variable);
-        }
-
-        private void UpdateProperties(ShapeType shapeType, NewShapeProxy target)
-        {
-            using (var context = new RuntimeGeometryGraphResolverContext())
-            {
-                var exposedProperties = new List<GeometryGraphProperty>();
-                foreach (var property in GeometryTypeCache.GetPropertiesForType(shapeType))
-                {
-                    float32 defaultValue = default;
-                    if (property.Item3.Length != 0) defaultValue = float32.GetFloat32FromFloatArray(property.Item3);
-
-                    exposedProperties.Add(context.CreateOrGetExposedProperty(new SerializableGUID(property.Item2),
-                        property.Item2, property.Item1, defaultValue));
-                }
-
-                var shapeProxy =
-                    new GenericShapeProxy(shapeType, context.OriginTransformation, exposedProperties.ToArray());
-
-                context.AddShape(shapeProxy);
-                target.Initialize(context.GetGeometryGraphData());
-            }
         }
     }
 }

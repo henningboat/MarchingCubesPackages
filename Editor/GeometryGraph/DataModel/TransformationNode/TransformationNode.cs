@@ -1,5 +1,6 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
 using UnityEngine;
@@ -17,9 +18,10 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
             _geometryOutput = AddExecutionOutput(nameof(_geometryInput));
         }
 
-        protected abstract GeometryGraphProperty GetTransformationProperty(EditorGeometryGraphResolverContext context, GeometryGraphProperty parent);
+        protected abstract GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+            GeometryGraphProperty parent);
 
-        public void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData stackData)
+        public void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData stackData)
         {
             stackData.Transformation = GetTransformationProperty(context, stackData.Transformation);
             _geometryInput.ResolveGeometryInput(context, stackData);

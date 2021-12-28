@@ -2,6 +2,7 @@
 using Code.CubeMarching.GeometryGraph.Editor.Conversion;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes;
 using Code.CubeMarching.GeometryGraph.Editor.DataModel.ShapeNodes;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 
@@ -14,11 +15,12 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         protected override void OnDefineNode()
         {
             base.OnDefineNode();
-            
+
             InEulerAngles = this.AddDataInputPort<Vector3>("Rotation", nameof(InEulerAngles));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(EditorGeometryGraphResolverContext context, GeometryGraphProperty parent)
+        protected override GeometryGraphProperty GetTransformationProperty(RuntimeGeometryGraphResolverContext context,
+            GeometryGraphProperty parent)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
 ﻿using Code.CubeMarching.GeometryGraph.Editor.Conversion;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 
 namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
@@ -14,6 +15,6 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.GeometryNodes
             GeometryOut = AddExecutionOutput(nameof(GeometryOut));
         }
 
-        public abstract void Resolve(EditorGeometryGraphResolverContext context, GeometryStackData parent);
+        public abstract void Resolve(RuntimeGeometryGraphResolverContext context, GeometryStackData parent);
     }
 }

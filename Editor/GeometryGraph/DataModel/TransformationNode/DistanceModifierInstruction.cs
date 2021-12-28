@@ -13,7 +13,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
         private CombinerState _combiner;
         protected abstract DistanceModificationType Type { get; }
 
-        protected DistanceModifierInstruction(int depth, CombinerState combiner, GeometryGraphProperty transformation,  params GeometryGraphProperty[] properties) : base(depth)
+        protected DistanceModifierInstruction(int depth, CombinerState combiner, GeometryGraphProperty transformation,
+            params GeometryGraphProperty[] properties) : base(depth)
         {
             _combiner = combiner;
             _transformation = transformation;
@@ -23,8 +24,8 @@ namespace Code.CubeMarching.GeometryGraph.Editor.DataModel.TransformationNode
 
         public override GeometryInstruction GetInstruction()
         {
-            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification, (int) Type, Depth, _combiner.Operation,_combiner.BlendValue, _transformation, _properties.ToList(),
-                null);
+            return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification,
+                (int) Type, default, _properties.ToList());
         }
     }
 }
