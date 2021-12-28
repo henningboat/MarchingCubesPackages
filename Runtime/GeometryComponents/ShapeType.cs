@@ -7,6 +7,7 @@
         Torus,
         Voronoi,
         Plane,
-        Box
+        Box,
+        Ray
     }
 }

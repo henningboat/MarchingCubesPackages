@@ -30,21 +30,18 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shape
                 {
                     case ShapeType.Sphere:
                         return ((SphereShape*) ptr)->GetSurfaceDistance(positionOS);
-                        break;
                     case ShapeType.BoundingBox:
                         return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS);
-                        break;
                     case ShapeType.Torus:
                         return ((TorusShape*) ptr)->GetSurfaceDistance(positionOS);
-                        break;
                     case ShapeType.Voronoi:
-                        //return ((CShapeNoise*) ptr)->GetSurfaceDistance(positionOS);
                         return ((VoronoiShape*) ptr)->GetSurfaceDistance(positionOS);
                     case ShapeType.Plane:
                         return ((PlaneShape*) ptr)->GetSurfaceDistance(positionOS);
-                        break;
                     case ShapeType.Box:
                         return ((BoxShape*) ptr)->GetSurfaceDistance(positionOS);
+                    case ShapeType.Ray:
+                        return ((RayShape*) ptr)->GetSurfaceDistance(positionOS);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
