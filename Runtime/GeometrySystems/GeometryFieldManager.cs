@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
@@ -8,6 +9,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.GeometrySystems
 {
@@ -22,6 +24,11 @@ namespace henningboat.CubeMarching.GeometrySystems
         private PrepareGraphsSystem _prepareGraphsSystem;
         private UpdateDistanceFieldSystem _updateDistanceFieldSystem;
         private UpdateMeshesSystem _updateMeshesSystem;
+
+        private void OnEnable()
+        {
+            _initialized = false;
+        }
 
         public void Update()
         {
@@ -83,12 +90,16 @@ namespace henningboat.CubeMarching.GeometrySystems
             _updateMeshesSystem.Update(jobHandle);
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             if (_initialized)
             {
                 _geometryFieldData.Dispose();
                 _updateMeshesSystem.Dispose();
+                _buildRenderGraphSystem.Dispose();
+
+
+                _initialized = false;
             }
         }
     }

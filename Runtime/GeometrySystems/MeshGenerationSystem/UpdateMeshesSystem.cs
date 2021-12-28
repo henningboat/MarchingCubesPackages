@@ -161,6 +161,8 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
             if (_distanceFieldComputeBuffer != null) _distanceFieldComputeBuffer.Dispose();
             if (_gpuTransferComputeBuffer != null) _gpuTransferComputeBuffer.Dispose();
             if (_gpuTransferIndexMap != null) _gpuTransferIndexMap.Dispose();
+            
+            _gpuTransferBuffer.Dispose();
 
             _triangulationInstructions.Dispose();
             _subChunksWithTrianglesData.Dispose();
