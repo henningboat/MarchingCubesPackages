@@ -29,15 +29,16 @@ namespace Editor.GeometryGraph.DataModel
             switch (self)
             {
                 case MathOperator mathOperator:
-                    throw new NotImplementedException();
-                // var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
-                // if (inputs.Length != 2)
-                // {
-                //     throw new Exception("inputs.Length != 2");
-                // }
-                //
-                // return context.GetOrCreateProperty(self.Guid,
-                //     new GeometryGraphMathOperatorProperty(geometryPropertyType, mathOperator.OperatorType, inputs[0], inputs[1], $"Math Operator {self.Title}"));
+                    var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
+                    if (inputs.Length != 2)
+                    {
+                        throw new Exception("inputs.Length != 2");
+                    }
+
+                    //only float for now
+                    
+                    context.AddMathInstruction(mathOperator.OperatorType, GeometryPropertyType.Float,inputs[0], inputs[1], out GeometryGraphProperty result);
+                    return result;
                 default:
                     throw new ArgumentOutOfRangeException();
                     break;

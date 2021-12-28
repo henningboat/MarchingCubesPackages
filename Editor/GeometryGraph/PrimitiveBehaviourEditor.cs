@@ -72,7 +72,8 @@ namespace Editor.GeometryGraph
 
             if (GUI.changed)
             {
-                Undo.RecordObject(target, "changed overwrite");
+                Debug.Log("change");
+                EditorUtility.SetDirty(target);
                 geometryGraphInstance.SetOverwrites(currentOverwrites);
             }
 

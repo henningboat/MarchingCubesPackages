@@ -1,4 +1,5 @@
 ﻿using System;
+using henningboat.CubeMarching.PrimitiveBehaviours;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -16,6 +17,20 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
         public GeometryPropertyType InputBType;
         public int ResultIndex;
         public GeometryPropertyType ResultType;
+
+        public MathInstruction(MathOperatorType mathOperatorType,
+            GeometryGraphProperty a, GeometryGraphProperty b, GeometryGraphProperty result)
+        {
+            MathOperationType = mathOperatorType;
+            InputAIndex = a.Index;
+            InputAType = a.Type;
+            
+            InputBIndex = b.Index;
+            InputBType = b.Type;
+            
+            ResultIndex = result.Index;
+            ResultType = result.Type;
+        }
 
         public void Execute(NativeArray<float> instancePropertyBuffer)
         {

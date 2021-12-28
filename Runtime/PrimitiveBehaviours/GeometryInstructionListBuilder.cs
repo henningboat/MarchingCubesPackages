@@ -94,6 +94,23 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
                     throw new Exception(typeof(T) + " is not supported");
             }
         }
+        
+        public GeometryGraphProperty CreateEmptyProperty(GeometryPropertyType propertyType, string debugInfo = "")
+        {
+            switch (propertyType)
+            {
+                case GeometryPropertyType.Float:
+                    return Constant(0.0f);
+                case GeometryPropertyType.Float3:
+                    return Constant(float3.zero);
+                case GeometryPropertyType.Float4X4:
+                    return Constant(float4x4.identity);
+                case GeometryPropertyType.Color32:
+                    return Constant(0.0f);
+            }
+
+            throw new InvalidOperationException();
+        }
 
         public GeometryGraphProperty CreateOrGetExposedPropertyFromObject(SerializableGUID serializableGuid,
             string name,
@@ -236,19 +253,6 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
                 OriginTransformation, _exposedVariables.ToArray());
         }
 
-        public void ExportBuffers(out float[] values, out GeometryInstruction[] geometryInstructions,
-            out MathInstruction[] mathInstructions)
-        {
-            values = _propertyValueBuffer.ToArray();
-            geometryInstructions = _geometryInstructionBuffer.ToArray();
-            mathInstructions = _mathInstructionsBuffer.ToArray();
-        }
-
-        public void AddMathInstruction(MathInstruction mathInstruction)
-        {
-            _mathInstructionsBuffer.Add(mathInstruction);
-        }
-
         public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name,
             GeometryPropertyType type)
         {
@@ -271,6 +275,12 @@ namespace henningboat.CubeMarching.PrimitiveBehaviours
             var newProperty = GetGeometryGraphProperty(id, type, valueContainer, name, $"{name} {type.ToString()}");
             _exposedVariables.Add(newProperty);
             return newProperty;
+        }
+
+        public void AddMathInstruction(MathOperatorType mathOperatorType, GeometryPropertyType resultType,GeometryGraphProperty a, GeometryGraphProperty b, out GeometryGraphProperty resultProperty)
+        {
+            resultProperty = CreateEmptyProperty(resultType, "Math Operation Result");
+            _mathInstructionsBuffer.Add(new MathInstruction(mathOperatorType,a,b,resultProperty));
         }
     }
 }
