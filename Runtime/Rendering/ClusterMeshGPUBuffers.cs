@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq;
-using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
+﻿using System.Linq;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
-namespace henningboat.CubeMarching.Rendering
+namespace henningboat.CubeMarching.Runtime.Rendering
 {
     internal struct ClusterMeshGPUBuffers
     {

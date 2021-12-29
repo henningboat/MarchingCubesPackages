@@ -1,8 +1,7 @@
-﻿using henningboat.CubeMarching.Utils;
-using henningboat.CubeMarching.Utils.Containers;
+﻿using henningboat.CubeMarching.Runtime.Utils.Containers;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 {
     public struct CClusterParameters
     {

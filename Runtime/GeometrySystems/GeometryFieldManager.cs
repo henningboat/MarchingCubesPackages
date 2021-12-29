@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
-using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
-using henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace henningboat.CubeMarching.GeometrySystems
+namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [ExecuteInEditMode]
     public class GeometryFieldManager : MonoBehaviour

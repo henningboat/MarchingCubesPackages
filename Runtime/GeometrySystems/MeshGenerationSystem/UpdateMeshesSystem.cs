@@ -1,12 +1,12 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.Rendering;
-using henningboat.CubeMarching.TerrainChunkSystem;
+﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.Rendering;
+using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     internal struct UpdateMeshesSystem
     {
@@ -60,7 +60,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
                     //the whole index map is horrible legacy stuff I should get rid of
                     var totalFieldSizeGS = _geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;
                     var indexInIndexMap =
-                        TerrainChunkEntitySystem.Utils.PositionToIndex(
+                        Runtime.DistanceFieldGeneration.Utils.PositionToIndex(
                             chunk.Parameters.PositionWS / Constants.chunkLengthPerCluster, totalFieldSizeGS);
 
                     indexMap[indexInIndexMap] = clusterIndex * Constants.chunksPerCluster + i;

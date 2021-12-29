@@ -1,5 +1,5 @@
 ﻿using System;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 
 namespace Editor.GeometryGraph.DataModel.MathNodes
 {

@@ -1,9 +1,8 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using Unity.Burst;
 using Unity.Jobs;
-using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration
 {
     [BurstCompile]
     public struct JHashJob : IJobParallelFor

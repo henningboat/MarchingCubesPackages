@@ -1,4 +1,4 @@
-﻿namespace henningboat.CubeMarching
+﻿namespace henningboat.CubeMarching.Runtime
 {
     public static class Constants
     {

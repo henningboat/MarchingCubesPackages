@@ -1,7 +1,7 @@
 ﻿using System;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 

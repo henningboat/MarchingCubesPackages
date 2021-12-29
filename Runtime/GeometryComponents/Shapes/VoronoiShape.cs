@@ -1,9 +1,10 @@
 ﻿using System.Runtime.InteropServices;
-using Code.SIMDMath;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using SIMDMath;
 using Unity.Mathematics;
-using static Code.SIMDMath.SimdMath;
+using static SIMDMath.SimdMath;
 
-namespace henningboat.CubeMarching.GeometryComponents.Shapes
+namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct VoronoiShape : IGeometryShape

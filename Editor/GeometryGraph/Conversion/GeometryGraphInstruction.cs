@@ -1,4 +1,4 @@
-﻿using henningboat.CubeMarching.TerrainChunkEntitySystem;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 
 namespace Editor.GeometryGraph.Conversion
 {

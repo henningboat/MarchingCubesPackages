@@ -1,12 +1,11 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.Rendering;
-using henningboat.CubeMarching.Utils;
+﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.Rendering;
+using henningboat.CubeMarching.Runtime.Utils;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     [BurstCompile]
     public struct JCalculateTriangulationIndicesJob : IJobParallelFor
@@ -50,7 +49,7 @@ namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
 
                     if (chunkParameters.InnerDataMask.GetBit(i))
                     {
-                        var subChunkOffset = TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, 2) * 4;
+                        var subChunkOffset = Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(i, 2) * 4;
 
                         
                         const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;

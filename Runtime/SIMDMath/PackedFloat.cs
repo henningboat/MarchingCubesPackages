@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace Code.SIMDMath
+namespace SIMDMath
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedFloat

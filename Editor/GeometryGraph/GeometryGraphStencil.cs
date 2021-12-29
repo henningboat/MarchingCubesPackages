@@ -6,7 +6,7 @@ using Editor.GeometryGraph.DataModel.GeometryNodes;
 using Editor.GeometryGraph.DataModel.MathNodes;
 using Editor.GeometryGraph.DataModel.ShapeNodes;
 using Editor.GeometryGraph.DataModel.TransformationNode;
-using henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;

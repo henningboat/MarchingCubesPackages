@@ -1,11 +1,11 @@
 ﻿using System;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem
 {
     public struct GeometryGraphBuffers : IDisposable
     {

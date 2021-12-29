@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
-using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     internal class BuildMainGraphSystem
     {

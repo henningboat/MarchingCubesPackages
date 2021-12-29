@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace henningboat.CubeMarching.Utils
+namespace henningboat.CubeMarching.Runtime.Utils
 {
     public static class BitmaskUtil
     {

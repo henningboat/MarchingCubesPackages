@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     public class DistanceValueProvider : GeometryPropertyValueProvider
     {

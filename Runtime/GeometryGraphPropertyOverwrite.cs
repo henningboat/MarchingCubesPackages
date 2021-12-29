@@ -1,10 +1,10 @@
 ﻿using System;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.Utils.Containers;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     [Serializable]
     public class GeometryGraphPropertyOverwrite

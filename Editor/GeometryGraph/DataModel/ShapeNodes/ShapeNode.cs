@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;

@@ -1,10 +1,10 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     [BurstCompile]
     public struct JApplyGPUVertexCountReadBacks : IJobParallelFor

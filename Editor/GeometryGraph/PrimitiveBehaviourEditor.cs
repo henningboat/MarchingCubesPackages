@@ -1,8 +1,7 @@
 ﻿using System.Linq;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents.Shapes;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.Utils.Containers;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEditor;
 using UnityEngine;
 

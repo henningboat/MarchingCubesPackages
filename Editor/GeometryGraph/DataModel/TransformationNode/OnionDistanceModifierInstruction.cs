@@ -1,6 +1,6 @@
 ﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 
 namespace Editor.GeometryGraph.DataModel.TransformationNode
 {

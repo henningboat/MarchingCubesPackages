@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
+using henningboat.CubeMarching.Runtime;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine.UIElements;

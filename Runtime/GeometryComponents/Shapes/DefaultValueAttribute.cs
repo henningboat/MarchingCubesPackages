@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace henningboat.CubeMarching.GeometryComponents.Shapes
+namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 {
     public class DefaultValueAttribute : Attribute
     {

@@ -1,9 +1,8 @@
-﻿using Unity.Collections;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace henningboat.CubeMarching.Rendering
+namespace henningboat.CubeMarching.Runtime.Rendering
 {
     public static class MeshGeneratorBuilder
     {

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     [Serializable]
     public class GeometryInstructionList

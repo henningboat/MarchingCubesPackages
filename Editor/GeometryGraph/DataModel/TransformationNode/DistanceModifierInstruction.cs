@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Editor.GeometryGraph.Conversion;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 
 namespace Editor.GeometryGraph.DataModel.TransformationNode
 {

@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration;
-using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using Unity.Burst;
 using Unity.Jobs;
-using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation
 {
     public class PrepareGraphsSystem
     {

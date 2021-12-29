@@ -1,11 +1,11 @@
-﻿using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
+﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace henningboat.CubeMarching.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     internal class GPUVertexCountReadbackHandler
     {

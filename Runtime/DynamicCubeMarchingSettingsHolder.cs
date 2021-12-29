@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     [CreateAssetMenu]
     public class DynamicCubeMarchingSettingsHolder : ScriptableObject

@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     public enum GeometryPropertyType
     {

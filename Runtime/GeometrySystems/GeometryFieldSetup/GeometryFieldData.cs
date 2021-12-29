@@ -1,11 +1,11 @@
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
-using henningboat.CubeMarching.TerrainChunkSystem;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryFieldData
     {
@@ -108,7 +108,7 @@ namespace henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup
                         var totalIndex = chunkIndex + clusterIndex * Constants.chunksPerCluster;
 
                         var positionWS =
-                            TerrainChunkEntitySystem.Utils.IndexToPositionWS(chunkIndex,
+                            Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(chunkIndex,
                                 Constants.chunkLengthPerCluster) * Constants.chunkLength + clusterParameter.PositionWS;
 
                         var chunkParameters = new GeometryChunkParameters

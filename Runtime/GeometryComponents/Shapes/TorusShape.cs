@@ -1,9 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using Code.SIMDMath;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometryComponents.Shapes;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using SIMDMath;
 
-namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
+namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct TorusShape : IGeometryShape

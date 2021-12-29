@@ -1,11 +1,11 @@
 ﻿using System;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.GeometryGraphPreparation
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation
 {
     [Serializable]
     public struct MathInstruction

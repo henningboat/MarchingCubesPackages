@@ -1,13 +1,9 @@
-﻿using System;
-using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
-using henningboat.CubeMarching.Utils;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration
 {
     public class DistanceFieldPrepassSystem
     {

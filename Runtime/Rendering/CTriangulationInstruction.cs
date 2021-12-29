@@ -1,7 +1,7 @@
 ﻿
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.Rendering
+namespace henningboat.CubeMarching.Runtime.Rendering
 {
     public struct CTriangulationInstruction
     {

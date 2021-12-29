@@ -1,7 +1,7 @@
 ﻿using System;
 using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;

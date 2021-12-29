@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Code.SIMDMath;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometryComponents.Shapes;
-using henningboat.CubeMarching.GeometryComponents.Shapes.henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.Utils.Containers;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes.henningboat.CubeMarching.GeometryComponents;
+using henningboat.CubeMarching.Runtime.Utils.Containers;
+using SIMDMath;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration.Shapes
+namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct CGenericGeometryShape

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.Utils.Containers
+namespace henningboat.CubeMarching.Runtime.Utils.Containers
 {
     [StructLayout(LayoutKind.Sequential)]
     [Serializable]

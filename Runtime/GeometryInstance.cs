@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using henningboat.CubeMarching.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using UnityEngine;
 
-namespace henningboat.CubeMarching
+namespace henningboat.CubeMarching.Runtime
 {
     [ExecuteInEditMode]
     public abstract class GeometryInstance : MonoBehaviour

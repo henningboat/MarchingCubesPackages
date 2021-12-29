@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 
-namespace Code.SIMDMath
+namespace SIMDMath
 {
     public static class SimdMath
     {

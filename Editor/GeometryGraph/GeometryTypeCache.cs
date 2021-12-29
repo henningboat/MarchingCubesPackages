@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.GeometryComponents.Shapes;
-using henningboat.CubeMarching.Utils.Containers;
-using Unity.Mathematics;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using UnityEditor;
 using UnityEngine;
 

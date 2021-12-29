@@ -1,7 +1,7 @@
-﻿using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.PrimitiveBehaviours;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
-using henningboat.CubeMarching.Utils.Containers;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.Utils.Containers;
 
 namespace Editor.GeometryGraph.Conversion
 {

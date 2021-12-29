@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching;
-using henningboat.CubeMarching.GeometryComponents;
-using henningboat.CubeMarching.PrimitiveBehaviours;
+using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace Code.CubeMarching
+namespace SIMDMath
 {
     /// <summary>
     ///     Contains 512 float values, accessible via indexer

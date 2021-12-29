@@ -1,13 +1,13 @@
-﻿using Code.SIMDMath;
-using henningboat.CubeMarching.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.TerrainChunkEntitySystem;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using SIMDMath;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
+namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration
 {
     [BurstCompile]
     public struct JExecuteDistanceFieldPrepass : IJobParallelFor
@@ -34,7 +34,7 @@ namespace henningboat.CubeMarching.GeometrySystems.DistanceFieldGeneration
             for (var i = 0; i < Constants.chunksPerCluster / Constants.PackedCapacity; i++)
             {
                 var position =
-                    new PackedFloat3(TerrainChunkEntitySystem.Utils.IndexToPositionWS(i, new int3(2, 8, 8)));
+                    new PackedFloat3(Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(i, new int3(2, 8, 8)));
                 position *= 8;
                 if (i % 2 == 0)
                     position.x = new PackedFloat(0, 8, 16, 24);

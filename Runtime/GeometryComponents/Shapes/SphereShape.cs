@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Code.SIMDMath;
-using static Code.SIMDMath.SimdMath;
+using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using SIMDMath;
+using static SIMDMath.SimdMath;
 
-namespace henningboat.CubeMarching.GeometryComponents.Shapes
+namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 {
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     [Serializable]

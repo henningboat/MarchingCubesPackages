@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.TerrainChunkSystem
+namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
 {
     /// <summary>
     ///     Always make sure to keep the content of this struct in sync with TerrainMaterial.hlsl
