@@ -18,7 +18,7 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
         public override void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
             var blendFactorProperty = BlendFactor.ResolvePropertyInput(context, GeometryPropertyType.Float);
-            context.BeginWriteCombiner(new CombinerState(EvaluateCombinerOperation(), blendFactorProperty));
+            context.BeginWriteCombiner(EvaluateCombinerOperation(), blendFactorProperty);
             GeometryInputA.ResolveGeometryInput(context, stackData);
             GeometryInputB.ResolveGeometryInput(context, stackData);
 

@@ -43,12 +43,12 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             ZeroFloatProperty = Constant(0);
             DefaultColorFloat3 = Constant(float3.zero);
 
-            _combinerStack.Push(new CombinerState(CombinerOperation.Min, ZeroFloatProperty));
+            _combinerStack.Push(new CombinerState(CombinerOperation.Min, ZeroFloatProperty, OriginTransformation));
         }
 
-        public void BeginWriteCombiner(CombinerState combiner)
+        public void BeginWriteCombiner(CombinerOperation combinerOperation,GeometryGraphProperty blendValue)
         {
-            _combinerStack.Push(combiner);
+            _combinerStack.Push(new CombinerState(combinerOperation, blendValue, _combinerStack.Peek().Transformation));
         }
 
         public void FinishWritingCombiner()
@@ -57,10 +57,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             _combinerStack.Pop();
 
             var newInstruction =
-                GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Combiner, 0, OriginTransformation,
-                    null);
+                GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Combiner, 0, null);
             GeometryInstructionUtility.AddAdditionalData(ref newInstruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, DefaultColor);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, OriginTransformation,DefaultColor);
 
             WriteInstruction(newInstruction);
         }
@@ -234,7 +233,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public void WriteInstruction(GeometryInstruction instruction)
         {
             GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, DefaultColor);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentCombiner.Transformation,DefaultColor);
             _geometryInstructionBuffer.Add(instruction);
         }
 
@@ -277,6 +276,16 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         {
             resultProperty = CreateEmptyProperty(resultType, "Math Operation Result");
             _mathInstructionsBuffer.Add(new MathInstruction(mathOperatorType,a,b,resultProperty));
+        }
+
+        public void SetTransformation(GeometryGraphProperty transformation, bool relativeToParent)
+        {
+            if (relativeToParent == true)
+            {
+                throw new NotImplementedException();
+            }
+
+            CurrentCombiner.Transformation = transformation;
         }
     }
 }

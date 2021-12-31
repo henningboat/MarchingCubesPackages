@@ -16,7 +16,7 @@ namespace Editor.GeometryGraph
         public static void ResolveGraphAndWriteToRuntimeData(IGeometryNode rootNode, GeometryGraphRuntimeAsset data,
             IGraphModel graphModel)
         {
-            var result = Resolve(graphModel, rootNode);
+            var result = Resolve(rootNode);
 
             var contentHash = new Hash128();
 
@@ -65,11 +65,11 @@ namespace Editor.GeometryGraph
             return data;
         }
 
-        private static GeometryInstructionListBuilder Resolve(IGraphModel graphModel, IGeometryNode rootNode)
+        private static GeometryInstructionListBuilder Resolve(IGeometryNode rootNode)
         {
             var context = new GeometryInstructionListBuilder();
 
-            context.BeginWriteCombiner(new CombinerState(CombinerOperation.Min, context.ZeroFloatProperty));
+            context.BeginWriteCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
 
             rootNode.Resolve(context,
                 new GeometryStackData() {Color = default, Transformation = context.OriginTransformation});

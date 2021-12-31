@@ -20,7 +20,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
 
         public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
         {
-            stackData.Transformation = GetTransformationProperty(context, stackData.Transformation);
+            context.SetTransformation( GetTransformationProperty(context, stackData.Transformation), false);
             _geometryInput.ResolveGeometryInput(context, stackData);
         }
     }

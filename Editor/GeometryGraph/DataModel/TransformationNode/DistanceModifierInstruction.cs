@@ -24,7 +24,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         public override GeometryInstruction GetInstruction()
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.DistanceModification,
-                (int) Type, default, _properties.ToList());
+                (int) Type, _properties.ToList());
         }
     }
 }

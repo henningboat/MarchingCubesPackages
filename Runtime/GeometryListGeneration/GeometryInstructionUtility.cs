@@ -9,7 +9,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
     public static class GeometryInstructionUtility
     {
         public static GeometryInstruction CreateInstruction(GeometryInstructionType geometryInstructionType,
-            int subType, GeometryGraphProperty transformation, List<GeometryGraphProperty> shapeProperties)
+            int subType, List<GeometryGraphProperty> shapeProperties)
         {
             var propertyIndexes = new int32();
 
@@ -25,8 +25,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             if (propertyOffset >= 14) throw new ArgumentOutOfRangeException();
 
 
-            for (var i = 0; i < 16; i++) propertyIndexes[16 + i] = transformation.Index + i;
-
             return new GeometryInstruction()
             {
                 GeometryInstructionType = geometryInstructionType,
@@ -37,12 +35,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 
         public static void AddAdditionalData(ref GeometryInstruction instruction, int depth,
             CombinerOperation combinerOperation,
-            GeometryGraphProperty combinerBlendValue, GeometryGraphProperty color)
+            GeometryGraphProperty combinerBlendValue, GeometryGraphProperty transformation, GeometryGraphProperty color)
         {
             var propertyIndexes = instruction.PropertyIndexes;
 
             propertyIndexes[14] = color?.Index ?? 0;
             propertyIndexes[15] = combinerBlendValue.Index;
+            
+            
+            for (var i = 0; i < 16; i++) propertyIndexes[16 + i] = transformation.Index + i;
 
             instruction.PropertyIndexes = propertyIndexes;
 

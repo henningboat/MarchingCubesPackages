@@ -63,7 +63,7 @@ namespace Editor.GeometryGraph
                 }
 
                 var shapeInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape,
-                    _shapeType.enumValueIndex, context.OriginTransformation, exposedProperties);
+                    _shapeType.enumValueIndex, exposedProperties);
                 context.WriteInstruction(shapeInstruction);
                 target.Initialize(context.GetGeometryGraphData());
             }

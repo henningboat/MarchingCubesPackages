@@ -28,7 +28,6 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         {
             return new PositionModificationInstruction(TerrainTransformationType.Repetition,
                 context.CurrentCombinerDepth, context.CurrentCombiner,
-                stackData.Transformation,
                 _periodInput.ResolvePropertyInput(context, GeometryPropertyType.Float3));
         }
     }
@@ -41,12 +40,10 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         private CombinerState _combiner;
         private TerrainTransformationType _type;
 
-        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerState combiner,
-            GeometryGraphProperty transformation, params GeometryGraphProperty[] properties) : base(depth)
+        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerState combiner, params GeometryGraphProperty[] properties) : base(depth)
         {
             _type = type;
             _combiner = combiner;
-            _transformation = transformation;
             _properties = properties;
         }
 
@@ -54,7 +51,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         public override GeometryInstruction GetInstruction()
         {
             return GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.PositionModification,
-                (int) _type, _transformation, _properties.ToList());
+                (int) _type, _properties.ToList());
         }
     }
 

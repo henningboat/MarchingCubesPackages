@@ -37,8 +37,13 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
             foreach (var propertyDefinition in GeometryTypeCache.GetPropertiesForType(_shapeType))
             {
                 var dataInputPort =
-                    this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1));
-                dataInputPort.EmbeddedValue.ObjectValue = FloatArrayToObject(propertyDefinition.Item3);
+                    this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1), null,
+                        PortOrientation.Horizontal, PortModelOptions.Default,
+                        constant =>
+                        {
+                            FloatArrayToObject(propertyDefinition.Item3);
+                        });
+                
                 _properties.Add(dataInputPort);
                 _typePerInputPort.Add(propertyDefinition.Item1);
             }
@@ -98,7 +103,7 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
                 resolvedProperties.Add(_properties[i].ResolvePropertyInput(context, _typePerInputPort[i]));
 
             var shapeInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape,
-                (int) _shapeType, stack.Transformation, resolvedProperties);
+                (int) _shapeType, resolvedProperties);
             context.WriteInstruction(shapeInstruction);
         }
     }

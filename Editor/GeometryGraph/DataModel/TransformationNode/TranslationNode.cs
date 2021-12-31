@@ -2,6 +2,7 @@
 using Editor.GeometryGraph.DataModel.GeometryNodes;
 using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -24,12 +25,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
             GeometryGraphProperty parent)
         {
             var translationProperty = _inTranslation.ResolvePropertyInput(context, GeometryPropertyType.Float3);
-            var transformationProperty = context.CreateProperty(Matrix4x4.identity);
-            //var transformationProperty = new GeometryGraphMathOperatorProperty(GeometryPropertyType.Float4X4, MathOperatorType.Translate, parent, translationProperty, "Translation");
-
-            throw new NotImplementedException();
-//            context.WriteMathProperty(MathOperatorType.Translate, parent, translationProperty, transformationProperty);
-
+            context.AddMathInstruction(MathOperatorType.Translate, GeometryPropertyType.Float4X4, parent, translationProperty, out GeometryGraphProperty transformationProperty);
             return transformationProperty;
         }
     }
