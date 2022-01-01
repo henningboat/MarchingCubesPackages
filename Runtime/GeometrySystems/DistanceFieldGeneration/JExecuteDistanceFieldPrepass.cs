@@ -55,20 +55,19 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             {
                 iterator.ProcessTerrainData(i);
                 var currentGeometryInstruction = _geometryInstructions[i];
-                if (currentGeometryInstruction.WritesToDistanceField)
-                    for (var j = 0; j < iterator.CurrentInstructionSurfaceDistanceReadback.Length; j++)
-                    {
-                        var distance = iterator.CurrentInstructionSurfaceDistanceReadback[j].PackedValues;
-                        var isWriting = (distance < 10) & (distance > -10);
-                        for (var k = 0; k < 4; k++)
-                            if (isWriting[k])
-                            {
-                                var hash128 = hashPerChunk[k + 4 * j];
-                                var hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-                                hash128.Append(ref hashOfInstruction);
-                                hashPerChunk[k + j * 4] = hash128;
-                            }
-                    }
+                for (var j = 0; j < iterator.CurrentInstructionSurfaceDistanceReadback.Length; j++)
+                {
+                    var distance = iterator.CurrentInstructionSurfaceDistanceReadback[j].PackedValues;
+                    var isWriting = (distance < 10) & (distance > -10);
+                    for (var k = 0; k < 4; k++)
+                        if (isWriting[k])
+                        {
+                            var hash128 = hashPerChunk[k + 4 * j];
+                            var hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
+                            hash128.Append(ref hashOfInstruction);
+                            hashPerChunk[k + j * 4] = hash128;
+                        }
+                }
             }
 
             var clusterParameters = cluster.Parameters;

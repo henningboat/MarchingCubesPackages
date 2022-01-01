@@ -178,6 +178,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                         break;
                     case GeometryInstructionType.PositionModification:
                     {
+                        
                         var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out float _);
                         _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction
                             .GetTerrainTransformation().TransformPosition(positionOS);
