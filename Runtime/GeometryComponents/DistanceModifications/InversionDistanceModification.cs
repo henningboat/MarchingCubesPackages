@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using SIMDMath;
+using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications
 {
@@ -20,7 +22,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModificati
     [Serializable]
     public struct InflationDistanceModification : IDistanceModification
     {
-        [FieldOffset(0)] private float _inflationAmount;
+        [SerializeField] [FieldOffset(0)] [DefaultValue(3f)]
+        private float _inflationAmount;
 
         public PackedFloat GetSurfaceDistance(PackedFloat currentDistance)
         {

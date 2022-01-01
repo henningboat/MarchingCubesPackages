@@ -10,22 +10,23 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
     public struct CGenericTerrainTransformation
     {
         public float32 Data;
-        public TransformationType TransformationType;
+        public PositionModificationType PositionModificationType;
 
         public PackedFloat3 TransformPosition(PackedFloat3 positionOS)
         {
             unsafe
             {
                 var ptr = UnsafeUtility.AddressOf(ref Data);
-                switch (TransformationType)
+                switch (PositionModificationType)
                 {
                     //todo reimplement
                     // case TerrainTransformationType.Mirror:
                     //     return ((CTerrainTransformationMirror*) ptr)->TransformPosition(positionOS);
                     //     break;
-                    case TransformationType.Repetition:
+                    case PositionModificationType.Repetition:
                         return UnsafeCastHelper.Cast<float32, RepetitionPositionModification>(ref Data)
                             .TransformPosition(positionOS);
+                    
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

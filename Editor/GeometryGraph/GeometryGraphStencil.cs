@@ -8,6 +8,7 @@ using Editor.GeometryGraph.DataModel.ShapeNodes;
 using Editor.GeometryGraph.DataModel.TransformationNode;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEditor.GraphToolsFoundation.Overdrive.BasicModel;
@@ -37,22 +38,27 @@ namespace Editor.GeometryGraph
                 return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(ShapeNode), null,
                     model => { ((ShapeNode) model).InitializeType(shapeType); }), shapeType.ToString());
             }
-            
+
             SearcherItem MakeDistanceModificationSearcherItem(DistanceModificationType distanceModification)
             {
-                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(DistanceModificationNode), null,
-                    model => { ((DistanceModificationNode) model).InitializeType(distanceModification); }), distanceModification.ToString());
+                return new GraphNodeModelSearcherItem(GraphModel, null, data =>
+                        data.CreateNode(typeof(DistanceModificationNode), null,
+                            model => { ((DistanceModificationNode) model).InitializeType(distanceModification); }),
+                    distanceModification.ToString());
+            }
+
+            SearcherItem MakePositionModificationSearcherItem(PositionModificationType positionModificationType)
+            {
+                return new GraphNodeModelSearcherItem(GraphModel, null, data =>
+                        data.CreateNode(typeof(PositionModificationNode), null,
+                            model => { ((PositionModificationNode) model).InitializeType(positionModificationType); }),
+                    positionModificationType.ToString());
             }
 
 
             var combiners = TypeCache.GetTypesDerivedFrom(typeof(GeometryCombinerNode)).Where(type => !type.IsAbstract)
                 .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             var combinerItems = new SearcherItem("Combiners", "", combiners.ToList());
-
-            var transformations = TypeCache.GetTypesDerivedFrom(typeof(TransformationNode))
-                .Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name)))
-                .ToList();
-            var transformationItems = new SearcherItem("Transformations", "", transformations.ToList());
 
             // var positionModifications = TypeCache.GetTypesDerivedFrom(typeof(PositionModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             // var positionModificationItems = new SearcherItem("Distortion", "", positionModifications.ToList());
@@ -62,16 +68,27 @@ namespace Editor.GeometryGraph
             mathNodes.Add(MakeSearcherItem((typeof(GraphResult), "Result")));
             mathNodes.Add(MakeSearcherItem((typeof(ColorNode), "Color")));
 
+            //shape iteams
             List<SearcherItem> shapes = new();
             foreach (var shapeType in Enum.GetValues(typeof(ShapeType)))
                 shapes.Add(MakeShapeSearcherItem((ShapeType) shapeType));
             var shapeItems = new SearcherItem("Shapes", "", shapes.ToList());
-            
-            
+
+            //distance modifications
             List<SearcherItem> distanceModifications = new();
             foreach (var distanceModificationType in Enum.GetValues(typeof(DistanceModificationType)))
-                distanceModifications.Add(MakeDistanceModificationSearcherItem((DistanceModificationType) distanceModificationType));
-            var distanceModificationItems = new SearcherItem("DistanceModifications", "", distanceModifications.ToList());
+                distanceModifications.Add(
+                    MakeDistanceModificationSearcherItem((DistanceModificationType) distanceModificationType));
+            var distanceModificationItems =
+                new SearcherItem("DistanceModifications", "", distanceModifications.ToList());
+
+            //position modifications
+            List<SearcherItem> positionModifications = new();
+            foreach (var distanceModificationType in Enum.GetValues(typeof(PositionModificationType)))
+                positionModifications.Add(
+                    MakePositionModificationSearcherItem((PositionModificationType) distanceModificationType));
+            var positionModificationItems =
+                new SearcherItem("PositionModifications", "", positionModifications.ToList());
 
 
             var mathNodeItems = new SearcherItem("MathNodes", "", mathNodes.ToList());
@@ -88,7 +105,10 @@ namespace Editor.GeometryGraph
 
 
             var items = new List<SearcherItem>
-                {combinerItems, shapeItems, mathNodeItems, constantsItem, transformationItems, distanceModificationItems};
+            {
+                combinerItems, shapeItems, mathNodeItems, constantsItem, positionModificationItems,
+                distanceModificationItems
+            };
 
             var searcherDatabase = new SearcherDatabase(items);
             m_Databases.Add(searcherDatabase);

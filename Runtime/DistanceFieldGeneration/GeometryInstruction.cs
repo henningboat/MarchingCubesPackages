@@ -42,7 +42,10 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public CGenericTerrainTransformation GetTerrainTransformation()
         {
             return new CGenericTerrainTransformation
-                {Data = ResolvedPropertyValues, TransformationType = (TransformationType) GeometryInstructionSubType};
+            {
+                Data = ResolvedPropertyValues,
+                PositionModificationType = (PositionModificationType) GeometryInstructionSubType
+            };
         }
 
         public CGenericGeometryShape GetShapeInstruction()

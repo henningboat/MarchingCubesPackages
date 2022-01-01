@@ -29,6 +29,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public GeometryGraphProperty DefaultColor { get; }
         public GeometryGraphProperty DefaultColorFloat3 { get; }
         public GeometryGraphProperty CurrentTransformation => _transformationStack.Peek();
+        public GeometryGraphProperty ZeroTransformation { get; }
 
         public List<GeometryGraphProperty> _exposedVariables;
         private Stack<GeometryGraphProperty> _transformationStack;
@@ -42,6 +43,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             _exposedVariables = new List<GeometryGraphProperty>();
 
             OriginTransformation = Constant(Matrix4x4.identity);
+            ZeroTransformation = Constant(Matrix4x4.identity);
             DefaultColor = Constant(0);
             ZeroFloatProperty = Constant(0);
             DefaultColorFloat3 = Constant(float3.zero);
@@ -298,15 +300,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             if (relativeToParent == true)
             {
                 AddMathInstruction(MathOperatorType.Multiplication, GeometryPropertyType.Float4X4,
-                    CurrentTransformation, newTransformation, out GeometryGraphProperty transformationRelativeToParent);
+                    CurrentTransformation, newTransformation, out var transformationRelativeToParent);
                 _transformationStack.Push(transformationRelativeToParent);
             }
             else
             {
-                
                 _transformationStack.Push(newTransformation);
             }
-
         }
 
         public void PopTransformation()

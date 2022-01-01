@@ -5,7 +5,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModificati
 {
     public interface IPositionModification
     {
-        public TransformationType Type { get; }
+        public PositionModificationType Type { get; }
         public PackedFloat3 TransformPosition(PackedFloat3 positionWS);
     }
 }

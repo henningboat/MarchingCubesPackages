@@ -71,7 +71,7 @@ namespace Editor.GeometryGraph
             {
                 case ShapeType shapeType:
                     return ShapeTypeInfo.GetPropertiesOfType((int) shapeType);
-                case TransformationType transformationType:
+                case PositionModificationType transformationType:
                     return PositionModificationInfo.GetPropertiesOfType((int) transformationType);
                 case DistanceModificationType distanceModificationType:
                     return DistanceModificationInfo.GetPropertiesOfType((int) distanceModificationType);
