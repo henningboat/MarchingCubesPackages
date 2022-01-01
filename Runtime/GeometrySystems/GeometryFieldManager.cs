@@ -75,6 +75,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             List<GeometryGraphBuffers> geometryGraphBuffers = new List<GeometryGraphBuffers>();
             foreach (var graph in allGraphs)
             {
+                if (graph.enabled == false)
+                {
+                    continue;
+                }
                 if (graph.TryInitializeAndGetBuffer(out GeometryGraphBuffers buffers))
                 {
                     geometryGraphBuffers.Add(buffers);
