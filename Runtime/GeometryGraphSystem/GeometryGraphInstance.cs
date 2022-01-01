@@ -1,6 +1,7 @@
+using henningboat.CubeMarching.Runtime.GeometrySystems;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.Runtime
+namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
 {
     [ExecuteInEditMode]
     public class GeometryGraphInstance : GeometryInstance

@@ -1,7 +1,9 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using Unity.Mathematics;
 
-namespace henningboat.CubeMarching.Runtime
+namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     public class DistanceValueProvider : GeometryPropertyValueProvider
     {

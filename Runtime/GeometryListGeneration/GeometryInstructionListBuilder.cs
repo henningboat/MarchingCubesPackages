@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using Unity.Collections;

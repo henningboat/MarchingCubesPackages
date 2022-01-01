@@ -1,5 +1,6 @@
 ﻿using System;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Collections;
 using Unity.Jobs;

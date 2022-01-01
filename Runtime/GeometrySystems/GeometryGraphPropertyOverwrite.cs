@@ -1,10 +1,12 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace henningboat.CubeMarching.Runtime
+namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [Serializable]
     public class GeometryGraphPropertyOverwrite

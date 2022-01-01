@@ -1,4 +1,5 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;

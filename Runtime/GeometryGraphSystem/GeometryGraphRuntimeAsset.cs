@@ -7,7 +7,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace henningboat.CubeMarching.Runtime
+namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
 {
     [Serializable]
     public class GeometryInstructionList

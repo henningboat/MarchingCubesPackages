@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace henningboat.CubeMarching.Runtime
+namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     public enum GeometryPropertyType
     {

@@ -1,4 +1,6 @@
 ﻿using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometryListGeneration

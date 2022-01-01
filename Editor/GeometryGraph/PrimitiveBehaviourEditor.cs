@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEditor;
 using UnityEngine;

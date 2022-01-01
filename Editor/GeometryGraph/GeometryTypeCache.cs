@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using UnityEditor;

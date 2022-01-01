@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using UnityEditor.GraphToolsFoundation.Overdrive;

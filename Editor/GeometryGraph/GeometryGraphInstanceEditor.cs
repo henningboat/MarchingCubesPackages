@@ -1,4 +1,5 @@
 ﻿using henningboat.CubeMarching.Runtime;
+using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using UnityEditor;
 
 namespace Editor.GeometryGraph
