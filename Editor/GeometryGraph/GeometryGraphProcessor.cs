@@ -70,11 +70,11 @@ namespace Editor.GeometryGraph
         {
             var context = new GeometryInstructionListBuilder();
 
-            context.BeginWriteCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
+            context.PushCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
 
             rootNode.Resolve(context);
 
-            context.FinishWritingCombiner();
+            context.PopCombiner();
 
             return context;
         }

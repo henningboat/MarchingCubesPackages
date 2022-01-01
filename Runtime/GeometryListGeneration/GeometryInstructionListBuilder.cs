@@ -53,12 +53,12 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             _transformationStack.Push(OriginTransformation);
         }
 
-        public void BeginWriteCombiner(CombinerOperation combinerOperation, GeometryGraphProperty blendValue)
+        public void PushCombiner(CombinerOperation combinerOperation, GeometryGraphProperty blendValue)
         {
             _combinerStack.Push(new CombinerState(combinerOperation, blendValue));
         }
 
-        public void FinishWritingCombiner()
+        public void PopCombiner()
         {
             //bit confusing: to write the combiner into it's parent, we need the parents combiner settings
             _combinerStack.Pop();

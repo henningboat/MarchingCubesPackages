@@ -19,11 +19,11 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
         public override void Resolve(GeometryInstructionListBuilder context)
         {
             var blendFactorProperty = BlendFactor.ResolvePropertyInput(context, GeometryPropertyType.Float);
-            context.BeginWriteCombiner(EvaluateCombinerOperation(), blendFactorProperty);
+            context.PushCombiner(EvaluateCombinerOperation(), blendFactorProperty);
             GeometryInputA.ResolveGeometryInput(context);
             GeometryInputB.ResolveGeometryInput(context);
 
-            context.FinishWritingCombiner();
+            context.PopCombiner();
         }
 
         private CombinerOperation EvaluateCombinerOperation()
