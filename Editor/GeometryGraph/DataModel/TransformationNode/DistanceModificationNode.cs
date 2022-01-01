@@ -17,14 +17,14 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
 
-        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context)
         {
-            _geometryInput.ResolveGeometryInput(context, stackData);
+            _geometryInput.ResolveGeometryInput(context);
             throw new NotImplementedException();
 //            context.WriteDistanceModifier(GetDistanceModifierInstruction(context, stackData));
         }
 
         protected abstract DistanceModifierInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder geometryInstructionListBuilder, GeometryStackData stackData);
+            GeometryInstructionListBuilder geometryInstructionListBuilder);
     }
 }

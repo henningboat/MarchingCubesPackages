@@ -39,11 +39,8 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
                 var dataInputPort =
                     this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1), null,
                         PortOrientation.Horizontal, PortModelOptions.Default,
-                        constant =>
-                        {
-                            FloatArrayToObject(propertyDefinition.Item3);
-                        });
-                
+                        constant => { FloatArrayToObject(propertyDefinition.Item3); });
+
                 _properties.Add(dataInputPort);
                 _typePerInputPort.Add(propertyDefinition.Item1);
             }
@@ -96,7 +93,7 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
         //
         // public abstract List<GeometryGraphProperty> GetProperties(RuntimeGeometryGraphResolverContext context);
 
-        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stack)
+        public void Resolve(GeometryInstructionListBuilder context)
         {
             var resolvedProperties = new List<GeometryGraphProperty>();
             for (var i = 0; i < _properties.Count; i++)

@@ -71,8 +71,7 @@ namespace Editor.GeometryGraph
 
             context.BeginWriteCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
 
-            rootNode.Resolve(context,
-                new GeometryStackData() {Color = default, Transformation = context.OriginTransformation});
+            rootNode.Resolve(context);
 
             context.FinishWritingCombiner();
 

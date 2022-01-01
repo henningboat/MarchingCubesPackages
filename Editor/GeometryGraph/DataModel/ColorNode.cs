@@ -19,7 +19,7 @@ namespace Editor.GeometryGraph.DataModel
             _colorIn = this.AddDataInputPort<Color>("", nameof(_colorIn));
         }
 
-        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context)
         {
             throw new NotImplementedException();
             // var colorFloat3Property = _colorIn.ResolvePropertyInput(context, GeometryPropertyType.Float3);

@@ -15,13 +15,13 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
             _geometryOutput = AddExecutionOutput(nameof(_geometryInput));
         }
 
-        protected abstract GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
-            GeometryGraphProperty parent);
+        protected abstract GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context);
 
-        public void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public void Resolve(GeometryInstructionListBuilder context)
         {
-            context.SetTransformation( GetTransformationProperty(context, stackData.Transformation), false);
-            _geometryInput.ResolveGeometryInput(context, stackData);
+            context.PushTransformation(GetTransformationProperty(context), true);
+            _geometryInput.ResolveGeometryInput(context);
+            context.PopTransformation();
         }
     }
 }

@@ -21,11 +21,12 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
             _inTranslation = this.AddDataInputPort<Vector3>("Translation", nameof(_inTranslation));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
-            GeometryGraphProperty parent)
+        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context)
         {
             var translationProperty = _inTranslation.ResolvePropertyInput(context, GeometryPropertyType.Float3);
-            context.AddMathInstruction(MathOperatorType.Translate, GeometryPropertyType.Float4X4, parent, translationProperty, out GeometryGraphProperty transformationProperty);
+            context.AddMathInstruction(MathOperatorType.Translate, GeometryPropertyType.Float4X4,
+                context.OriginTransformation,
+                translationProperty, out var transformationProperty);
             return transformationProperty;
         }
     }

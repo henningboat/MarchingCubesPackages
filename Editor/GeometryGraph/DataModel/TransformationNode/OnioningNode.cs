@@ -1,5 +1,4 @@
-﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching.Runtime;
+﻿using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
@@ -18,10 +17,10 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
         protected override DistanceModifierInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context)
         {
             return new OnionDistanceModifierInstruction(
-                _thicknessInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
+                _thicknessInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context);
         }
     }
 
@@ -38,10 +37,10 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
         protected override DistanceModifierInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context)
         {
             return new InflationDistanceModificationInstruction(
-                _amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context, stackData);
+                _amountInput.ResolvePropertyInput(context, GeometryPropertyType.Float), context);
         }
     }
 
@@ -50,9 +49,9 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
     public class InversionNode : DistanceModificationNode
     {
         protected override DistanceModifierInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context)
         {
-            return new InversionDistanceModifierInstruction(context, stackData);
+            return new InversionDistanceModifierInstruction(context);
         }
     }
 }

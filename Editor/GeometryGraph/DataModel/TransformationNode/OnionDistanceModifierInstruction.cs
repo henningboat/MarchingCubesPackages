@@ -1,5 +1,4 @@
-﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 
 namespace Editor.GeometryGraph.DataModel.TransformationNode
@@ -7,8 +6,8 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
     public class OnionDistanceModifierInstruction : DistanceModifierInstruction
     {
         public OnionDistanceModifierInstruction(GeometryGraphProperty thickness,
-            GeometryInstructionListBuilder context, GeometryStackData stackData) :
-            base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation, thickness)
+            GeometryInstructionListBuilder context) :
+            base(context.CurrentCombinerDepth, context.CurrentCombiner, thickness)
         {
         }
 
@@ -18,8 +17,8 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
     public class InflationDistanceModificationInstruction : DistanceModifierInstruction
     {
         public InflationDistanceModificationInstruction(GeometryGraphProperty thickness,
-            GeometryInstructionListBuilder context, GeometryStackData stackData) :
-            base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation, thickness)
+            GeometryInstructionListBuilder context) :
+            base(context.CurrentCombinerDepth, context.CurrentCombiner, thickness)
         {
         }
 
@@ -28,9 +27,8 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
 
     public class InversionDistanceModifierInstruction : DistanceModifierInstruction
     {
-        public InversionDistanceModifierInstruction(GeometryInstructionListBuilder context,
-            GeometryStackData stackData) :
-            base(context.CurrentCombinerDepth, context.CurrentCombiner, stackData.Transformation)
+        public InversionDistanceModifierInstruction(GeometryInstructionListBuilder context) :
+            base(context.CurrentCombinerDepth, context.CurrentCombiner)
         {
         }
 

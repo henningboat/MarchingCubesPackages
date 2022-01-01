@@ -4,13 +4,8 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
 {
     public interface IGeometryNode
     {
-        void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData);
+        void Resolve(GeometryInstructionListBuilder context);
     }
 
     //todo probably rename
-    public struct GeometryStackData
-    {
-        public GeometryGraphProperty Transformation;
-        public GeometryGraphProperty Color;
-    }
 }

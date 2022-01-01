@@ -12,13 +12,12 @@ namespace Editor.GeometryGraph.DataModel
 {
     public static class PortModelExtensions
     {
-        public static void ResolveGeometryInput(this IPortModel port, GeometryInstructionListBuilder context,
-            GeometryStackData stack)
+        public static void ResolveGeometryInput(this IPortModel port, GeometryInstructionListBuilder context)
         {
             var connectedPort = port.GetConnectedPorts().FirstOrDefault(model =>
                 model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow && model.NodeModel != null);
             if (connectedPort != null && connectedPort.NodeModel is IGeometryNode geometryNode)
-                geometryNode.Resolve(context, stack);
+                geometryNode.Resolve(context);
         }
 
         public static GeometryGraphProperty ResolvePropertyInput(this MathNode self,
@@ -30,14 +29,12 @@ namespace Editor.GeometryGraph.DataModel
             {
                 case MathOperator mathOperator:
                     var inputs = mathOperator.GetInputProperties(context, geometryPropertyType);
-                    if (inputs.Length != 2)
-                    {
-                        throw new Exception("inputs.Length != 2");
-                    }
+                    if (inputs.Length != 2) throw new Exception("inputs.Length != 2");
 
                     //only float for now
-                    
-                    context.AddMathInstruction(mathOperator.OperatorType, GeometryPropertyType.Float,inputs[0], inputs[1], out GeometryGraphProperty result);
+
+                    context.AddMathInstruction(mathOperator.OperatorType, GeometryPropertyType.Float, inputs[0],
+                        inputs[1], out var result);
                     return result;
                 default:
                     throw new ArgumentOutOfRangeException();

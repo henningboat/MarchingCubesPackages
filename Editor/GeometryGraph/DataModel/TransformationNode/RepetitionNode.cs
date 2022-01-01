@@ -24,7 +24,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context)
         {
             return new PositionModificationInstruction(TerrainTransformationType.Repetition,
                 context.CurrentCombinerDepth, context.CurrentCombiner,
@@ -40,7 +40,8 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         private CombinerState _combiner;
         private TerrainTransformationType _type;
 
-        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerState combiner, params GeometryGraphProperty[] properties) : base(depth)
+        public PositionModificationInstruction(TerrainTransformationType type, int depth, CombinerState combiner,
+            params GeometryGraphProperty[] properties) : base(depth)
         {
             _type = type;
             _combiner = combiner;
@@ -66,7 +67,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
             _geometryOut = AddExecutionOutput(nameof(_geometryOut));
         }
 
-        public virtual void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public virtual void Resolve(GeometryInstructionListBuilder context)
         {
             throw new NotImplementedException();
             // context.WritePositionModificationModifier(GetDistanceModifierInstruction(context, stackData));
@@ -78,6 +79,6 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
         protected abstract PositionModificationInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData);
+            GeometryInstructionListBuilder context);
     }
 }

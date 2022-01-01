@@ -14,6 +14,6 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
             GeometryOut = AddExecutionOutput(nameof(GeometryOut));
         }
 
-        public abstract void Resolve(GeometryInstructionListBuilder context, GeometryStackData parent);
+        public abstract void Resolve(GeometryInstructionListBuilder context);
     }
 }

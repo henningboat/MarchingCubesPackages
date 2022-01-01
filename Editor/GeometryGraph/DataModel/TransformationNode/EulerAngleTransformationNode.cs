@@ -17,8 +17,7 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
             InEulerAngles = this.AddDataInputPort<Vector3>("Rotation", nameof(InEulerAngles));
         }
 
-        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context,
-            GeometryGraphProperty parent)
+        protected override GeometryGraphProperty GetTransformationProperty(GeometryInstructionListBuilder context)
         {
             throw new NotImplementedException();
         }

@@ -44,5 +44,11 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         {
             return DebugInformation;
         }
+
+        public void AssertType(GeometryPropertyType expectedType)
+        {
+            if (Type != expectedType)
+                throw new ArgumentException($"Property must be of type {expectedType} to be valid at this point");
+        }
     }
 }

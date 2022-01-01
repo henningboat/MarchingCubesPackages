@@ -15,12 +15,12 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
         public IPortModel GeometryInputB { get; set; }
         public IPortModel BlendFactor { get; set; }
 
-        public override void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public override void Resolve(GeometryInstructionListBuilder context)
         {
             var blendFactorProperty = BlendFactor.ResolvePropertyInput(context, GeometryPropertyType.Float);
             context.BeginWriteCombiner(EvaluateCombinerOperation(), blendFactorProperty);
-            GeometryInputA.ResolveGeometryInput(context, stackData);
-            GeometryInputB.ResolveGeometryInput(context, stackData);
+            GeometryInputA.ResolveGeometryInput(context);
+            GeometryInputB.ResolveGeometryInput(context);
 
             context.FinishWritingCombiner();
         }

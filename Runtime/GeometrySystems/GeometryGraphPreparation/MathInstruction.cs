@@ -24,10 +24,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
             MathOperationType = mathOperatorType;
             InputAIndex = a.Index;
             InputAType = a.Type;
-            
+
             InputBIndex = b.Index;
             InputBType = b.Type;
-            
+
             ResultIndex = result.Index;
             ResultType = result.Type;
         }
@@ -47,11 +47,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
                         instancePropertyBuffer.Write(float3Result, ResultIndex);
                         break;
                     case GeometryPropertyType.Float4X4:
-                        float4x4 float4X4Result = CalculateFloat4X4(instancePropertyBuffer);
+                        var float4X4Result = CalculateFloat4X4(instancePropertyBuffer);
                         instancePropertyBuffer.Write(float4X4Result, ResultIndex);
                         break;
                     case GeometryPropertyType.Color32:
-                        float color32AsFloat = CalculateColor32(instancePropertyBuffer);
+                        var color32AsFloat = CalculateColor32(instancePropertyBuffer);
                         instancePropertyBuffer.Write(color32AsFloat, ResultIndex);
                         break;
                     default:
@@ -64,13 +64,13 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
         {
             unsafe
             {
-                float3 colorValue = instancePropertyBuffer.Read<float3>(InputAIndex);
+                var colorValue = instancePropertyBuffer.Read<float3>(InputAIndex);
                 colorValue *= 255;
-                byte r = (byte) colorValue.x;
-                byte g = (byte) colorValue.y;
-                byte b = (byte) colorValue.z;
+                var r = (byte) colorValue.x;
+                var g = (byte) colorValue.y;
+                var b = (byte) colorValue.z;
 
-                Color32 result = new Color32(r, g, b, 0);
+                var result = new Color32(r, g, b, 0);
                 return UnsafeUtility.ReadArrayElement<float>(UnsafeUtility.AddressOf(ref result), 0);
             }
         }
@@ -85,14 +85,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
             switch (MathOperationType)
             {
                 case MathOperatorType.Translate:
-                    float4x4 transformation = instancePropertyBuffer.Read<float4x4>(InputAIndex);
-                    float3 offset = instancePropertyBuffer.Read<float3>(InputBIndex);
-                    
+                    var transformation = instancePropertyBuffer.Read<float4x4>(InputAIndex);
+                    var offset = instancePropertyBuffer.Read<float3>(InputBIndex);
+
                     //kind of unintuitive, but the transformation we are calculating is actually worldToObject, 
                     //so we need to invert the offset
-                    var worldToLocal = math.inverse(float4x4.Translate(offset));
-                    
-                    return math.mul(worldToLocal, transformation);
+                    return math.inverse(float4x4.Translate(offset));
+
+                case MathOperatorType.Multiplication:
+                    var transformationA = instancePropertyBuffer.Read<float4x4>(InputAIndex);
+                    var transformationB = instancePropertyBuffer.Read<float4x4>(InputBIndex);
+                    return math.mul(transformationA, transformationB);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

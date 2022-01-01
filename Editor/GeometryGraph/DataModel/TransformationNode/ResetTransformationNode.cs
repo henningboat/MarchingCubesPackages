@@ -1,5 +1,4 @@
-﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
-using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+﻿using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using JetBrains.Annotations;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -18,17 +17,19 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
         }
 
         protected override PositionModificationInstruction GetDistanceModifierInstruction(
-            GeometryInstructionListBuilder context, GeometryStackData stackData)
+            GeometryInstructionListBuilder context)
         {
             return null;
         }
 
-        public override void Resolve(GeometryInstructionListBuilder context, GeometryStackData stackData)
+        public override void Resolve(GeometryInstructionListBuilder context)
         {
             var zeroMatrixInstruction = context.CreateProperty(Matrix4x4.identity);
-            stackData.Transformation = zeroMatrixInstruction;
+            context.PushTransformation(zeroMatrixInstruction, false);
 
-            _geometryIn.ResolveGeometryInput(context, stackData);
+            _geometryIn.ResolveGeometryInput(context);
+
+            context.PopTransformation();
         }
     }
 }

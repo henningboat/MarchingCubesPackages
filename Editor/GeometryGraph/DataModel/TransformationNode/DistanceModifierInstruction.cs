@@ -8,15 +8,13 @@ namespace Editor.GeometryGraph.DataModel.TransformationNode
     public abstract class DistanceModifierInstruction : GeometryGraphInstruction
     {
         private GeometryGraphProperty[] _properties;
-        private GeometryGraphProperty _transformation;
         private CombinerState _combiner;
         protected abstract DistanceModificationType Type { get; }
 
-        protected DistanceModifierInstruction(int depth, CombinerState combiner, GeometryGraphProperty transformation,
+        protected DistanceModifierInstruction(int depth, CombinerState combiner,
             params GeometryGraphProperty[] properties) : base(depth)
         {
             _combiner = combiner;
-            _transformation = transformation;
             _properties = properties;
         }
 

@@ -6,14 +6,11 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
     {
         public readonly CombinerOperation Operation;
         public readonly GeometryGraphProperty BlendValue;
-        public GeometryGraphProperty Transformation;
 
-        public CombinerState(CombinerOperation operation, GeometryGraphProperty blendValue,
-            GeometryGraphProperty transformation)
+        public CombinerState(CombinerOperation operation, GeometryGraphProperty blendValue)
         {
             Operation = operation;
             BlendValue = blendValue;
-            this.Transformation = transformation;
         }
     }
 }
