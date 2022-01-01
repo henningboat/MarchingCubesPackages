@@ -23,6 +23,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return sdTorus(positionOS, radius, thickness);
         }
 
-        public ShapeType ShapeType => ShapeType.Torus;
+        public ShapeType Type => ShapeType.Torus;
     }
 }

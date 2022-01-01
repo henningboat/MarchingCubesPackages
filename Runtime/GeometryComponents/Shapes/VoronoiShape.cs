@@ -9,8 +9,10 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct VoronoiShape : IGeometryShape
     {
-        [FieldOffset(0),DefaultValue(0.3f)] public float valueOffset;
-        [FieldOffset(4),DefaultValue(0.1f,0.1f,0.1f)] public float3 scale;
+        [FieldOffset(0)] [DefaultValue(0.3f)] public float valueOffset;
+
+        [FieldOffset(4)] [DefaultValue(0.1f, 0.1f, 0.1f)]
+        public float3 scale;
 
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
@@ -18,7 +20,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return (Voronoi(positionOS) + new PackedFloat(valueOffset)) * scale.x;
         }
 
-        public ShapeType ShapeType => ShapeType.Voronoi;
+        public ShapeType Type => ShapeType.Voronoi;
 
 
         public PackedFloat3 Hash(PackedFloat3 x)

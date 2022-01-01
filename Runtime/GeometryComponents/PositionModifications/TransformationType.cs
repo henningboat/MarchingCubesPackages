@@ -1,6 +1,6 @@
 ﻿namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications
 {
-    public enum TerrainTransformationType
+    public enum TransformationType
     {
         Mirror = 0,
         Wave = 1,

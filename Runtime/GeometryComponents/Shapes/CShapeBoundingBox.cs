@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
                 return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
             }
 
-            public ShapeType ShapeType => ShapeType.BoundingBox;
+            public ShapeType Type => ShapeType.BoundingBox;
 
             #endregion
         }

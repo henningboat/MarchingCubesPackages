@@ -18,9 +18,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public int CombinerDepth;
         public GeometryInstructionType GeometryInstructionType;
-        
+
         public int GeometryInstructionSubType;
-        
+
         public int32 PropertyIndexes;
         public float32 ResolvedPropertyValues;
 
@@ -31,7 +31,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public float CombinerBlendFactor => ResolvedPropertyValues[15];
 
         public Hash128 GeometryInstructionHash;
-        
+
         #endregion
 
         public void AddValueBufferOffset(int valueBufferOffset)
@@ -41,17 +41,20 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public CGenericTerrainTransformation GetTerrainTransformation()
         {
-            return new() {Data = ResolvedPropertyValues,TerrainTransformationType = (TerrainTransformationType) GeometryInstructionSubType};
+            return new CGenericTerrainTransformation
+                {Data = ResolvedPropertyValues, TransformationType = (TransformationType) GeometryInstructionSubType};
         }
 
         public CGenericGeometryShape GetShapeInstruction()
         {
-            return new() {Data = ResolvedPropertyValues, ShapeType = (ShapeType) GeometryInstructionSubType};
+            return new CGenericGeometryShape
+                {Data = ResolvedPropertyValues, ShapeType = (ShapeType) GeometryInstructionSubType};
         }
 
         public CGenericDistanceModification GetDistanceModificationInstruction()
         {
-            return new() {Data = ResolvedPropertyValues, Type = (DistanceModificationType) GeometryInstructionSubType};
+            return new CGenericDistanceModification
+                {Data = ResolvedPropertyValues, Type = (DistanceModificationType) GeometryInstructionSubType};
         }
 
         public unsafe float4x4 GetTransformation()
@@ -72,19 +75,19 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         /// <returns></returns>
         public void UpdateHash()
         {
-            Hash128 hash=default;
+            Hash128 hash = default;
             hash.Append(ref GeometryInstructionType);
             hash.Append(ref GeometryInstructionSubType);
             hash.Append(ref CombinerBlendOperation);
-            
+
             hash.Append(CombinerDepth);
 
-            bool ignoreTransformation = GeometryInstructionType == GeometryInstructionType.Combiner ||
-                                        GeometryInstructionType == GeometryInstructionType.DistanceModification;
+            var ignoreTransformation = GeometryInstructionType == GeometryInstructionType.Combiner ||
+                                       GeometryInstructionType == GeometryInstructionType.DistanceModification;
 
             if (ignoreTransformation)
             {
-                float4x4 propertyData = UnsafeCastHelper.Cast<float32, float4x4>(ref ResolvedPropertyValues);
+                var propertyData = UnsafeCastHelper.Cast<float32, float4x4>(ref ResolvedPropertyValues);
                 hash.Append(ref propertyData);
             }
             else

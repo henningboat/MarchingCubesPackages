@@ -22,6 +22,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return SimdMath.length(positionOS - (PackedFloat3) direction * h) - radius;
         }
 
-        public ShapeType ShapeType => ShapeType.Ray;
+        public ShapeType Type => ShapeType.Ray;
     }
 }

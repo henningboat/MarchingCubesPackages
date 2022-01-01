@@ -19,6 +19,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return length(max(q, 0.0f)) + min(max(q.x, max(q.y, q.z)), 0.0f);
         }
 
-        public ShapeType ShapeType => ShapeType.Box;
+        public ShapeType Type => ShapeType.Box;
     }
 }

@@ -9,6 +9,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [UsedImplicitly]
         PackedFloat GetSurfaceDistance(PackedFloat3 positionOS);
 
-        ShapeType ShapeType { get; }
+        ShapeType Type { get; }
     }
 }

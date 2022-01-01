@@ -12,13 +12,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
     {
         [FieldOffset(0)] public float3 Period;
 
-        public TerrainTransformationType TerrainTransformationType => TerrainTransformationType.Repetition;
+        public TransformationType Type => TransformationType.Repetition;
 
         public PackedFloat3 TransformPosition(PackedFloat3 positionWS)
         {
             positionWS += 1000 * Period;
-           positionWS= SimdMath.mod(positionWS + 0.5f * Period, Period) - 0.5f * Period;
-           return positionWS;
+            positionWS = SimdMath.mod(positionWS + 0.5f * Period, Period) - 0.5f * Period;
+            return positionWS;
         }
     }
 }

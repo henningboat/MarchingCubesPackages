@@ -2,36 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor.GeometryGraph
 {
-    public static class GeometryTypeCache
+    internal class GeometryTypeCacheCollection<TInterface>
     {
-        private static readonly Dictionary<ShapeType, Type> ShapeTypes;
+        private readonly Dictionary<int, Type> ShapeTypes = new();
+        private readonly Dictionary<int, List<(GeometryPropertyType, string, float[])>> PropertiesOfShapeType = new();
 
-        private static readonly Dictionary<ShapeType, List<(GeometryPropertyType, string, float[])>>
-            PropertiesOfShapeType;
-
-        static GeometryTypeCache()
+        public GeometryTypeCacheCollection()
         {
             try
             {
-                ShapeTypes = new Dictionary<ShapeType, Type>();
-                PropertiesOfShapeType = new Dictionary<ShapeType, List<(GeometryPropertyType, string, float[])>>();
+                var getTypePropertyInfo = typeof(TInterface).GetProperty("Type");
 
-                foreach (var type in TypeCache.GetTypesDerivedFrom<IGeometryShape>().ToArray())
+
+                ShapeTypes = new Dictionary<int, Type>();
+                PropertiesOfShapeType = new Dictionary<int, List<(GeometryPropertyType, string, float[])>>();
+
+                foreach (var type in TypeCache.GetTypesDerivedFrom<TInterface>().ToArray())
                 {
-                    var instance = (IGeometryShape) Activator.CreateInstance(type);
-                    ShapeTypes.Add(instance.ShapeType, type);
+                    var instance = (TInterface) Activator.CreateInstance(type);
+                    var value = getTypePropertyInfo.GetValue(instance);
+                    var enumTypeValue = Convert.ToInt32(value);
+                    ShapeTypes.Add(enumTypeValue, type);
 
                     //var typeInstance = Activator.CreateInstance(type) as ShapeProxy;
-                    PropertiesOfShapeType.Add(instance.ShapeType, type
+                    PropertiesOfShapeType.Add(enumTypeValue, type
                         .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                         .Select(info =>
                         {
@@ -50,9 +53,31 @@ namespace Editor.GeometryGraph
             }
         }
 
-        public static List<(GeometryPropertyType, string, float[])> GetPropertiesForType(ShapeType shapeType)
+        public List<(GeometryPropertyType, string, float[])> GetPropertiesOfType(int enumTypeValue)
         {
-            return PropertiesOfShapeType[shapeType];
+            return PropertiesOfShapeType[enumTypeValue];
+        }
+    }
+
+    public static class GeometryTypeCache
+    {
+        private static GeometryTypeCacheCollection<IGeometryShape> ShapeTypeInfo = new();
+        private static GeometryTypeCacheCollection<IPositionModification> PositionModificationInfo = new();
+        private static GeometryTypeCacheCollection<IDistanceModification> DistanceModificationInfo = new();
+
+        public static List<(GeometryPropertyType, string, float[])> GetPropertiesForType(Enum enumValue)
+        {
+            switch (enumValue)
+            {
+                case ShapeType shapeType:
+                    return ShapeTypeInfo.GetPropertiesOfType((int) shapeType);
+                case TransformationType transformationType:
+                    return PositionModificationInfo.GetPropertiesOfType((int) transformationType);
+                case DistanceModificationType distanceModificationType:
+                    return DistanceModificationInfo.GetPropertiesOfType((int) distanceModificationType);
+            }
+
+            throw new ArgumentException();
         }
     }
 }

@@ -6,6 +6,7 @@ using Editor.GeometryGraph.DataModel.GeometryNodes;
 using Editor.GeometryGraph.DataModel.MathNodes;
 using Editor.GeometryGraph.DataModel.ShapeNodes;
 using Editor.GeometryGraph.DataModel.TransformationNode;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
@@ -33,38 +34,46 @@ namespace Editor.GeometryGraph
 
             SearcherItem MakeShapeSearcherItem(ShapeType shapeType)
             {
-                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(ShapeNode),null,
-                    model =>
-                    {
-                        ((ShapeNode)model).InitializeShapeType(shapeType);
-                    }), shapeType.ToString());
+                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(ShapeNode), null,
+                    model => { ((ShapeNode) model).InitializeType(shapeType); }), shapeType.ToString());
             }
             
+            SearcherItem MakeDistanceModificationSearcherItem(DistanceModificationType distanceModification)
+            {
+                return new GraphNodeModelSearcherItem(GraphModel, null, data => data.CreateNode(typeof(DistanceModificationNode), null,
+                    model => { ((DistanceModificationNode) model).InitializeType(distanceModification); }), distanceModification.ToString());
+            }
 
-            var combiners = TypeCache.GetTypesDerivedFrom(typeof(GeometryCombinerNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
+
+            var combiners = TypeCache.GetTypesDerivedFrom(typeof(GeometryCombinerNode)).Where(type => !type.IsAbstract)
+                .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             var combinerItems = new SearcherItem("Combiners", "", combiners.ToList());
 
-            var transformations = TypeCache.GetTypesDerivedFrom(typeof(TransformationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
+            var transformations = TypeCache.GetTypesDerivedFrom(typeof(TransformationNode))
+                .Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name)))
+                .ToList();
             var transformationItems = new SearcherItem("Transformations", "", transformations.ToList());
-            
-            var distortions = TypeCache.GetTypesDerivedFrom(typeof(DistanceModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            var distortionItems = new SearcherItem("Distortion", "", distortions.ToList());
-            
-            var positionModifications = TypeCache.GetTypesDerivedFrom(typeof(PositionModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            var positionModificationItems = new SearcherItem("Distortion", "", positionModifications.ToList());
 
-            var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            mathNodes.Add( MakeSearcherItem((typeof(GraphResult), "Result")));
-            mathNodes.Add( MakeSearcherItem((typeof(ColorNode), "Color")));
+            // var positionModifications = TypeCache.GetTypesDerivedFrom(typeof(PositionModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
+            // var positionModificationItems = new SearcherItem("Distortion", "", positionModifications.ToList());
+
+            var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract)
+                .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
+            mathNodes.Add(MakeSearcherItem((typeof(GraphResult), "Result")));
+            mathNodes.Add(MakeSearcherItem((typeof(ColorNode), "Color")));
 
             List<SearcherItem> shapes = new();
             foreach (var shapeType in Enum.GetValues(typeof(ShapeType)))
-            {
                 shapes.Add(MakeShapeSearcherItem((ShapeType) shapeType));
-            }
             var shapeItems = new SearcherItem("Shapes", "", shapes.ToList());
             
             
+            List<SearcherItem> distanceModifications = new();
+            foreach (var distanceModificationType in Enum.GetValues(typeof(DistanceModificationType)))
+                distanceModifications.Add(MakeDistanceModificationSearcherItem((DistanceModificationType) distanceModificationType));
+            var distanceModificationItems = new SearcherItem("DistanceModifications", "", distanceModifications.ToList());
+
+
             var mathNodeItems = new SearcherItem("MathNodes", "", mathNodes.ToList());
 
 
@@ -78,7 +87,8 @@ namespace Editor.GeometryGraph
             var constantsItem = new SearcherItem("Values", "", others);
 
 
-            var items = new List<SearcherItem> {combinerItems, shapeItems, mathNodeItems, constantsItem, transformationItems, distortionItems, positionModificationItems};
+            var items = new List<SearcherItem>
+                {combinerItems, shapeItems, mathNodeItems, constantsItem, transformationItems, distanceModificationItems};
 
             var searcherDatabase = new SearcherDatabase(items);
             m_Databases.Add(searcherDatabase);
@@ -147,17 +157,20 @@ namespace Editor.GeometryGraph
             return new BlackboardGraphModel(graphAssetModel);
         }
 
-        public override void PopulateBlackboardCreateMenu(string sectionName, GenericMenu menu, CommandDispatcher commandDispatcher)
+        public override void PopulateBlackboardCreateMenu(string sectionName, GenericMenu menu,
+            CommandDispatcher commandDispatcher)
         {
             menu.AddItem(new GUIContent("Create Variable"), false, () =>
             {
                 const string newItemName = "variable";
                 var finalName = newItemName;
                 var i = 0;
-                while (commandDispatcher.State.WindowState.GraphModel.VariableDeclarations.Any(v => v.Title == finalName))
+                while (commandDispatcher.State.WindowState.GraphModel.VariableDeclarations.Any(
+                           v => v.Title == finalName))
                     finalName = newItemName + i++;
 
-                commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true, TypeHandle.Float, typeof(GeometryGraphVariableDeclarationModel)));
+                commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true, TypeHandle.Float,
+                    typeof(GeometryGraphVariableDeclarationModel)));
             });
 
             menu.AddItem(new GUIContent("Create Vector3"), false, () =>
@@ -165,23 +178,23 @@ namespace Editor.GeometryGraph
                 const string newItemName = "variable";
                 var finalName = newItemName;
                 var i = 0;
-                while (commandDispatcher.State.WindowState.GraphModel.VariableDeclarations.Any(v => v.Title == finalName))
+                while (commandDispatcher.State.WindowState.GraphModel.VariableDeclarations.Any(
+                           v => v.Title == finalName))
                     finalName = newItemName + i++;
 
-                commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true, TypeHandle.Vector3, typeof(GeometryGraphVariableDeclarationModel)));
+                commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true,
+                    TypeHandle.Vector3, typeof(GeometryGraphVariableDeclarationModel)));
             });
         }
 
         public override bool GetPortCapacity(IPortModel portModel, out PortCapacity capacity)
         {
             if (portModel.DataTypeHandle == TypeHandle.ExecutionFlow)
-            {
                 if ((portModel.Direction & PortDirection.Input) != 0)
                 {
                     capacity = PortCapacity.Single;
                     return true;
                 }
-            }
 
             capacity = default;
             return false;
@@ -192,7 +205,7 @@ namespace Editor.GeometryGraph
     {
         protected override void OnDefineNode()
         {
-             this.AddExecutionOutputPort("","InTest", PortOrientation.Vertical);
+            this.AddExecutionOutputPort("", "InTest", PortOrientation.Vertical);
         }
     }
 }

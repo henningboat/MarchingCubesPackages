@@ -10,21 +10,22 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
     public struct CGenericTerrainTransformation
     {
         public float32 Data;
-        public TerrainTransformationType TerrainTransformationType;
+        public TransformationType TransformationType;
 
         public PackedFloat3 TransformPosition(PackedFloat3 positionOS)
         {
             unsafe
             {
                 var ptr = UnsafeUtility.AddressOf(ref Data);
-                switch (TerrainTransformationType)
+                switch (TransformationType)
                 {
                     //todo reimplement
                     // case TerrainTransformationType.Mirror:
                     //     return ((CTerrainTransformationMirror*) ptr)->TransformPosition(positionOS);
                     //     break;
-                    case TerrainTransformationType.Repetition:
-                        return UnsafeCastHelper.Cast<float32,RepetitionPositionModification>(ref Data).TransformPosition(positionOS);
+                    case TransformationType.Repetition:
+                        return UnsafeCastHelper.Cast<float32, RepetitionPositionModification>(ref Data)
+                            .TransformPosition(positionOS);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -34,7 +35,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
 
     public static class UnsafeCastHelper
     {
-        public unsafe static TOut Cast<TIn,TOut>(ref TIn data) where TIn : unmanaged where TOut:unmanaged
+        public static unsafe TOut Cast<TIn, TOut>(ref TIn data) where TIn : unmanaged where TOut : unmanaged
         {
             var ptr = UnsafeUtility.AddressOf(ref data);
             return *(TOut*) ptr;

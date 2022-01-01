@@ -12,6 +12,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return positionWS.y;
         }
 
-        public ShapeType ShapeType => ShapeType.Plane;
+        public ShapeType Type => ShapeType.Plane;
     }
 }

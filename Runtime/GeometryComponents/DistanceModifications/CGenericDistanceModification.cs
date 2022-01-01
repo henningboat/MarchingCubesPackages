@@ -7,12 +7,12 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications
 {
-    [StructLayout(LayoutKind.Sequential,Size = 16)]
-    public struct CGenericDistanceModification: IDistanceModification
+    [StructLayout(LayoutKind.Sequential, Size = 16)]
+    public struct CGenericDistanceModification
     {
         public float32 Data;
         public DistanceModificationType Type;
-        
+
         public PackedFloat GetSurfaceDistance(PackedFloat surfaceDistance)
         {
             unsafe

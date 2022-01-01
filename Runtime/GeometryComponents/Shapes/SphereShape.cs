@@ -17,6 +17,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return length(positionOS) - radius;
         }
 
-        public ShapeType ShapeType => ShapeType.Sphere;
+        public ShapeType Type => ShapeType.Sphere;
     }
 }
