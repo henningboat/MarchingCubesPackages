@@ -19,8 +19,6 @@ namespace Editor.GeometryGraph
         {
             var result = Resolve(rootNode);
 
-            var contentHash = new Hash128();
-
             data.Initialize(result.GetGeometryGraphData());
 
             result.Dispose();
@@ -32,13 +30,11 @@ namespace Editor.GeometryGraph
 
             try
             {
-                var resultNode = graphModel.NodeModels.FirstOrDefault(model => model is GraphResult) as GraphResult;
-
-                var rootNode = resultNode.DataIn.GetConnectedPorts().FirstOrDefault().NodeModel as IGeometryNode;
+                var resultNode = graphModel.NodeModels.FirstOrDefault(model => model is ResultNode) as ResultNode;
 
                 var data = GetRuntimeData(graphModel);
 
-                ResolveGraphAndWriteToRuntimeData(rootNode, data, graphModel);
+                ResolveGraphAndWriteToRuntimeData(resultNode, data, graphModel);
 
                 EditorUtility.SetDirty(data);
                 return new GraphProcessingResult() {Errors = { }};

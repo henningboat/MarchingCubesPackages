@@ -10,7 +10,7 @@ namespace Editor.GeometryGraph.GraphElements
 
         public static PrintResultPart Create(string name, IGraphElementModel model, IModelUI modelUI, string parentClassName)
         {
-            if (model is GraphResult)
+            if (model is ResultNode)
             {
                 return new PrintResultPart(name, model, modelUI, parentClassName);
             }

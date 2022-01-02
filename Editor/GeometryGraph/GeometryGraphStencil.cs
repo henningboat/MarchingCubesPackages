@@ -65,7 +65,7 @@ namespace Editor.GeometryGraph
 
             var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract)
                 .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            mathNodes.Add(MakeSearcherItem((typeof(GraphResult), "Result")));
+            mathNodes.Add(MakeSearcherItem((typeof(ResultNode), "Result")));
             mathNodes.Add(MakeSearcherItem((typeof(ColorNode), "Color")));
 
             //shape iteams
@@ -212,7 +212,7 @@ namespace Editor.GeometryGraph
             if (portModel.DataTypeHandle == TypeHandle.ExecutionFlow)
                 if ((portModel.Direction & PortDirection.Input) != 0)
                 {
-                    capacity = PortCapacity.Single;
+                    capacity = PortCapacity.Multi;
                     return true;
                 }
 

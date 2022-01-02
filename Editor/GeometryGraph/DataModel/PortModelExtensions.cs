@@ -4,6 +4,7 @@ using Editor.GeometryGraph.DataModel.GeometryNodes;
 using Editor.GeometryGraph.DataModel.MathNodes;
 using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -15,10 +16,29 @@ namespace Editor.GeometryGraph.DataModel
     {
         public static void ResolveGeometryInput(this IPortModel port, GeometryInstructionListBuilder context)
         {
-            var connectedPort = port.GetConnectedPorts().FirstOrDefault(model =>
-                model != null && model.DataTypeHandle == TypeHandle.ExecutionFlow && model.NodeModel != null);
-            if (connectedPort != null && connectedPort.NodeModel is IGeometryNode geometryNode)
-                geometryNode.Resolve(context);
+            var childNodes = port.GetConnectedPorts().Where(portModel =>
+                portModel != null && portModel.DataTypeHandle == TypeHandle.ExecutionFlow && portModel.NodeModel != null&& portModel.NodeModel is IGeometryNode).Select(portModel => (IGeometryNode)portModel.NodeModel).ToList();
+
+            switch (childNodes.Count)
+            {
+                case 0:
+                    return;
+                case 1:
+                    childNodes[0].Resolve(context);
+                    break;
+                default:
+                {
+                    context.PushCombiner(CombinerOperation.Min,context.ZeroFloatProperty);
+
+                    foreach (var childNode in childNodes)
+                    {
+                        childNode.Resolve(context);
+                    }
+                
+                    context.PopCombiner();
+                    break;
+                }
+            }
         }
 
         public static GeometryGraphProperty ResolvePropertyInput(this MathNode self,
