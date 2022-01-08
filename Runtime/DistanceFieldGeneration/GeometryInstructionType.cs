@@ -6,6 +6,6 @@
         PositionModification,
         DistanceModification,
         Combiner,
-        CopyOriginal,
+        CopyLayer
     }
 }

@@ -9,8 +9,9 @@ namespace Editor.GeometryGraph
     {
         private SerializedProperty _geometryGraphRuntimeData;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             _geometryGraphRuntimeData = serializedObject.FindProperty("_geometryGraphRuntimeData");
         }
 

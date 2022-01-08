@@ -16,8 +16,9 @@ namespace Editor.GeometryGraph
     {
         private SerializedProperty _shapeType;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             _shapeType = serializedObject.FindProperty("_shapeType");
             UpdateShapeInstructions((ShapeType) _shapeType.enumValueIndex, (PrimitiveInstance) target);
         }

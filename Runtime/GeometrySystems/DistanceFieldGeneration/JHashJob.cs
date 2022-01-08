@@ -7,18 +7,18 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
     [BurstCompile]
     public struct JHashJob : IJobParallelFor
     {
-        private GeometryGraphBuffers _graph;
+        private GeometryInstructionListBuffers _instructionList;
 
-        public JHashJob(GeometryGraphBuffers graph)
+        public JHashJob(GeometryInstructionListBuffers instructionList)
         {
-            _graph = graph;
+            _instructionList = instructionList;
         }
 
         public void Execute(int index)
         {
-            var instruction = _graph.GeometryInstructions[index];
+            var instruction = _instructionList.GeometryInstructions[index];
             instruction.UpdateHash();
-            _graph.GeometryInstructions[index] = instruction;
+            _instructionList.GeometryInstructions[index] = instruction;
         }
     }
 }

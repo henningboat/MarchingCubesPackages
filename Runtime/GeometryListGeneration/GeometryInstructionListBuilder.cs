@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
@@ -26,13 +27,16 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public CombinerState CurrentCombiner => _combinerStack.Peek();
 
         public GeometryGraphProperty OriginTransformation { get; }
-        public GeometryGraphProperty DefaultColor { get; }
+
+        public GeometryGraphProperty CurrentColor => _colorStack.Count == 0 ? null : _colorStack.Peek();
+
         public GeometryGraphProperty DefaultColorFloat3 { get; }
         public GeometryGraphProperty CurrentTransformation => _transformationStack.Peek();
         public GeometryGraphProperty ZeroTransformation { get; }
 
         public List<GeometryGraphProperty> _exposedVariables;
         private Stack<GeometryGraphProperty> _transformationStack;
+        private Stack<GeometryGraphProperty> _colorStack;
 
         public GeometryInstructionListBuilder()
         {
@@ -44,13 +48,14 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 
             OriginTransformation = Constant(Matrix4x4.identity);
             ZeroTransformation = Constant(Matrix4x4.identity);
-            DefaultColor = Constant(0);
             ZeroFloatProperty = Constant(0);
             DefaultColorFloat3 = Constant(float3.zero);
 
             _combinerStack.Push(new CombinerState(CombinerOperation.Min, ZeroFloatProperty));
             _transformationStack = new Stack<GeometryGraphProperty>();
             _transformationStack.Push(OriginTransformation);
+
+            _colorStack = new Stack<GeometryGraphProperty>();
         }
 
         public void PushCombiner(CombinerOperation combinerOperation, GeometryGraphProperty blendValue)
@@ -66,7 +71,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             var newInstruction =
                 GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Combiner, 0, null);
             GeometryInstructionUtility.AddAdditionalData(ref newInstruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, OriginTransformation, DefaultColor);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, OriginTransformation, CurrentColor);
 
             WriteInstruction(newInstruction);
         }
@@ -108,7 +113,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
                 case GeometryPropertyType.Float4X4:
                     return Constant(float4x4.identity);
                 case GeometryPropertyType.Color32:
-                    return Constant(0.0f);
+                    return ConstantColor32();
             }
 
             throw new InvalidOperationException();
@@ -146,6 +151,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
                 $"Constant {type.ToString()} {constant}");
         }
 
+        private GeometryGraphProperty ConstantColor32()
+        {
+            var valueContainer = float32.FromFloat(0);
+            const GeometryPropertyType type = GeometryPropertyType.Color32;
+            return GetGeometryGraphProperty(default, type, valueContainer, "",
+                $"Constant {type.ToString()}");
+        }
 
         private GeometryGraphProperty Constant(float3 constant)
         {
@@ -240,7 +252,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public void WriteInstruction(GeometryInstruction instruction)
         {
             GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, DefaultColor);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor);
             _geometryInstructionBuffer.Add(instruction);
         }
 
@@ -312,6 +324,16 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public void PopTransformation()
         {
             _transformationStack.Pop();
+        }
+
+        public void PushColor(GeometryGraphProperty resultProperty)
+        {
+            _colorStack.Push(resultProperty);
+        }
+
+        public void PopColor()
+        {
+            _colorStack.Pop();
         }
     }
 }

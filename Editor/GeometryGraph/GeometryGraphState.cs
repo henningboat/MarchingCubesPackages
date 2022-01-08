@@ -1,4 +1,5 @@
-﻿using Editor.GeometryGraph.GraphElements.Commands;
+﻿using Editor.GeometryGraph.DataModel.GeometryNodes;
+using Editor.GeometryGraph.GraphElements.Commands;
 using UnityEditor;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
@@ -18,18 +19,14 @@ namespace Editor.GeometryGraph
         {
             base.RegisterCommandHandlers(dispatcher);
 
-            if (!(dispatcher is CommandDispatcher commandDispatcher))
-            {
-                return;
-            }
+            if (!(dispatcher is CommandDispatcher commandDispatcher)) return;
 
-            commandDispatcher.RegisterCommandHandler<SetNumberOfInputPortCommand>(SetNumberOfInputPortCommand.DefaultCommandHandler);
+            commandDispatcher.RegisterCommandHandler<SetNumberOfInputPortCommand>(SetNumberOfInputPortCommand
+                .DefaultCommandHandler);
+            commandDispatcher.RegisterCommandHandler<SetGeometryLayerCommand>(SetGeometryLayerCommand.DefaultHandler);
             commandDispatcher.RegisterCommandPreDispatchCallback(command =>
             {
-                if (command is not MoveElementsCommand)
-                {
-                    ScheduleSaveAsset();
-                }
+                if (command is not MoveElementsCommand) ScheduleSaveAsset();
             });
         }
 
@@ -40,10 +37,7 @@ namespace Editor.GeometryGraph
             sNeedsSaveAsset = true;
             EditorApplication.delayCall += () =>
             {
-                if (sNeedsSaveAsset)
-                {
-                    sNeedsSaveAsset = false;
-                }
+                if (sNeedsSaveAsset) sNeedsSaveAsset = false;
             };
         }
     }

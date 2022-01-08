@@ -100,8 +100,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             if (geometryInstruction.CombinerDepth > _lastCombinerDepth)
                 for (var combinerDepthToInitialize = max(0, _lastCombinerDepth + 1);
-                    combinerDepthToInitialize <= geometryInstruction.CombinerDepth;
-                    combinerDepthToInitialize++)
+                     combinerDepthToInitialize <= geometryInstruction.CombinerDepth;
+                     combinerDepthToInitialize++)
                 {
                     _hasWrittenToCurrentCombiner[combinerDepthToInitialize] = false;
 
@@ -149,20 +149,21 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 PackedDistanceFieldData terrainData = default;
                 switch (geometryInstruction.GeometryInstructionType)
                 {
-                    case GeometryInstructionType.CopyOriginal:
-                        throw new NotImplementedException();
+                    case GeometryInstructionType.CopyLayer:
+                        //these are handeled in BuildMainGraphSystem
                         break;
                     case GeometryInstructionType.Shape:
                     {
                         var shape = geometryInstruction.GetShapeInstruction();
 
-                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out float inverseUniformScale);
+                        var positionOS =
+                            CalculatePositionWSFromInstruction(geometryInstruction, i, out var inverseUniformScale);
 
                         var materialData = geometryInstruction.GetMaterialData();
                         var packedMaterialData = new PackedTerrainMaterial(materialData);
 
                         var surfaceDistance = shape.GetSurfaceDistance(positionOS);
-                        
+
                         //this did not really work
                         //surfaceDistance /= inverseUniformScale;
 
@@ -178,8 +179,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                         break;
                     case GeometryInstructionType.PositionModification:
                     {
-                        
-                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out float _);
+                        var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out var _);
                         _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] = geometryInstruction
                             .GetTerrainTransformation().TransformPosition(positionOS);
                     }
@@ -191,7 +191,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 if (geometryInstruction.WritesToDistanceField)
                 {
                     var existingData = _terrainDataBuffer[stackBaseOffset + i];
-                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
+                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
+                        geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
                         terrainData, existingData);
                     _terrainDataBuffer[stackBaseOffset + i] = combinedResult;
                 }
@@ -200,7 +201,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _lastCombinerDepth = geometryInstruction.CombinerDepth;
         }
 
-        private PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i, out float inverseUniformScale)
+        private PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i,
+            out float inverseUniformScale)
         {
             var transformation = geometryInstruction.GetTransformation();
 

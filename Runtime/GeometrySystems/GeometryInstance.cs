@@ -2,13 +2,16 @@
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using UnityEngine;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [ExecuteInEditMode]
     public abstract class GeometryInstance : MonoBehaviour
     {
-        private GeometryGraphBuffers _graphBuffer;
+        [SerializeField] private GeometryLayer _geometryLayer;
+        private GeometryInstructionListBuffers _instructionListBuffer;
+
         // ReSharper disable once InconsistentNaming
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites = new();
         public abstract GeometryInstructionList GeometryInstructionList { get; }
@@ -17,7 +20,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         {
             TryDisposeGraphBuffers();
         }
-
 
         private void UpdateOverwritesInValueBuffer()
         {
@@ -29,10 +31,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                     continue;
 
                 for (var i = 0; i < variable.GetSizeInBuffer(); i++)
-                    _graphBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
+                    _instructionListBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
             }
 
-            _graphBuffer.ValueBuffer.Write(transform.worldToLocalMatrix, GeometryInstructionList.MainTransformation.Index);
+            _instructionListBuffer.ValueBuffer.Write(transform.worldToLocalMatrix,
+                GeometryInstructionList.MainTransformation.Index);
         }
 
 
@@ -46,7 +49,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             _overwrites = newOverwrites;
         }
 
-        public bool TryInitializeAndGetBuffer(out GeometryGraphBuffers result)
+        public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result)
         {
             if (GeometryInstructionList == null)
             {
@@ -55,25 +58,35 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 return false;
             }
 
-            if (_graphBuffer.ContentHash != GeometryInstructionList.ContentHash)
+            if (_instructionListBuffer.ContentHash != GeometryInstructionList.ContentHash || _instructionListBuffer.TargetLayerID != TargetLayerID)
             {
                 TryDisposeGraphBuffers();
-                _graphBuffer = new GeometryGraphBuffers(GeometryInstructionList);
+                _instructionListBuffer = new GeometryInstructionListBuffers(GeometryInstructionList, TargetLayerID);
             }
 
-            result = _graphBuffer;
+            result = _instructionListBuffer;
 
             UpdateOverwritesInValueBuffer();
 
             return true;
         }
 
+        public SerializableGUID TargetLayerID
+        {
+            get
+            {
+                if (_geometryLayer != null) return _geometryLayer.GeometryLayerID;
+
+                return default;
+            }
+        }
+
         private void TryDisposeGraphBuffers()
         {
-            if (_graphBuffer.IsValid)
+            if (_instructionListBuffer.IsValid)
             {
-                _graphBuffer.Dispose();
-                _graphBuffer = default;
+                _instructionListBuffer.Dispose();
+                _instructionListBuffer = default;
             }
         }
     }

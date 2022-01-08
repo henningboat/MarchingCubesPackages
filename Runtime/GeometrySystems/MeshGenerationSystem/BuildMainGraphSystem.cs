@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Codice.CM.Common.Serialization.Replication;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
@@ -11,6 +15,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     {
         private GeometryFieldData _geometryFieldData;
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
+        private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
 
         public void Initialize(GeometryFieldData geometryFieldData)
         {
@@ -19,23 +24,60 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
-        public JobHandle Update(JobHandle jobHandle, List<GeometryGraphBuffers> geometryGraphBuffersList)
+        public JobHandle Update(JobHandle jobHandle, List<GeometryInstructionListBuffers> geometryGraphBuffersList)
         {
             //todo placeholder
             jobHandle.Complete();
 
             _allGeometryInstructionsList.Clear();
 
-            int offset = 0;
-            //could be turned into a job, but doesnt cost much right now
-            foreach (var graphInstance in geometryGraphBuffersList)
+            SerializableGUID outputLayerID = default;
+
+            _geometryPerLayer = new();
+            foreach (var geometryInstructionList in geometryGraphBuffersList)
             {
-                _allGeometryInstructionsList.AddRange(graphInstance.GeometryInstructions);
+                if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayerID))
+                    _geometryPerLayer.Add(geometryInstructionList.TargetLayerID,
+                        new List<GeometryInstructionListBuffers>());
+
+                _geometryPerLayer[geometryInstructionList.TargetLayerID].Add(geometryInstructionList);
             }
 
-            MainRenderGraph = _allGeometryInstructionsList.AsArray();
+            var outputLayerInstructionLists = _geometryPerLayer[outputLayerID];
+            foreach (GeometryInstructionListBuffers outputLayerInstructionList in outputLayerInstructionLists)
+            {
+                AddInstructionListToMainGraph(outputLayerInstructionList, 0);
+            }
+
+                MainRenderGraph = _allGeometryInstructionsList.AsArray();
 
             return jobHandle;
+        }
+
+        private void AddInstructionListToMainGraph(GeometryInstructionListBuffers outputLayerInstructionList, int combinerDepthOffset)
+        {
+            if (combinerDepthOffset > 50)
+            {
+                throw new Exception("cyclic dependency detected while building main graph");
+            }
+            
+            for (var i = 0; i < outputLayerInstructionList.GeometryInstructions.Length; i++)
+            {
+                var instruction = outputLayerInstructionList.GeometryInstructions[i];
+                if (instruction.GeometryInstructionType != GeometryInstructionType.CopyLayer)
+                {
+                    instruction.CombinerDepth += combinerDepthOffset;
+                    _allGeometryInstructionsList.Add(instruction);
+                }
+                else
+                {
+                    var childLayerContent = _geometryPerLayer[instruction.SourceLayer];
+                    foreach (var childInstructionList in childLayerContent)
+                    {
+                        AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
+                    }
+                }
+            }
         }
 
         public void Dispose()

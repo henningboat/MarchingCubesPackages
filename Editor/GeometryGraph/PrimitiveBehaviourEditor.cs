@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
@@ -9,11 +10,20 @@ using UnityEngine;
 
 namespace Editor.GeometryGraph
 {
-    [CustomEditor(typeof(GeometryInstance),true)]
+    [CustomEditor(typeof(GeometryInstance), true)]
     public class GeometryInstanceEditor : UnityEditor.Editor
     {
+        private SerializedProperty _geometryLayer;
+
+        protected virtual void OnEnable()
+        {
+            _geometryLayer = serializedObject.FindProperty("_geometryLayer");
+        }
+
         public override void OnInspectorGUI()
         {
+            EditorGUILayout.ObjectField(_geometryLayer);
+
             var instance = target as GeometryInstance;
             var data = instance.GeometryInstructionList;
 

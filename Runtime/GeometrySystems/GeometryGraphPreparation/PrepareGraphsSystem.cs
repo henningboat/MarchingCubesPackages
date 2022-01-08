@@ -12,7 +12,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
         {
         }
 
-        public JobHandle Update(JobHandle jobHandle, List<GeometryGraphBuffers> allGraphs)
+        public JobHandle Update(JobHandle jobHandle, List<GeometryInstructionListBuffers> allGraphs)
         {
             foreach (var graphBuffers in allGraphs)
             {
@@ -26,7 +26,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
                 var updateHashesJob = new JHashJob(graphBuffers);
                 graphInstanceJobHandle = updateHashesJob.Schedule(graphBuffers.GeometryInstructions.Length, 32,
                     graphInstanceJobHandle);
-                
+
                 jobHandle = JobHandle.CombineDependencies(jobHandle, graphInstanceJobHandle);
             }
 
@@ -37,48 +37,48 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
     [BurstCompile]
     public struct JUpdateGraphMath : IJob
     {
-        private GeometryGraphBuffers _graph;
+        private GeometryInstructionListBuffers _instructionList;
 
-        public JUpdateGraphMath(GeometryGraphBuffers graph)
+        public JUpdateGraphMath(GeometryInstructionListBuffers instructionList)
         {
-            _graph = graph;
+            _instructionList = instructionList;
         }
 
         public void Execute()
         {
-            for (var i = 0; i < _graph.MathInstructions.Length; i++)
+            for (var i = 0; i < _instructionList.MathInstructions.Length; i++)
             {
-                var instruction = _graph.MathInstructions[i];
-                instruction.Execute(_graph.ValueBuffer);
+                var instruction = _instructionList.MathInstructions[i];
+                instruction.Execute(_instructionList.ValueBuffer);
             }
         }
     }
-    
+
     [BurstCompile]
     public struct JWriteValueBufferToInstruction : IJobParallelFor
     {
         public const int InnerGroupSize = 64;
-        private GeometryGraphBuffers _graph;
+        private GeometryInstructionListBuffers _instructionList;
 
-        public JWriteValueBufferToInstruction(GeometryGraphBuffers graph)
+        public JWriteValueBufferToInstruction(GeometryInstructionListBuffers instructionList)
         {
-            _graph = graph;
+            _instructionList = instructionList;
         }
 
         public void Execute(int index)
         {
-            for (var instructionIndex = 0; instructionIndex < _graph.GeometryInstructions.Length; instructionIndex++)
+            for (var instructionIndex = 0;
+                 instructionIndex < _instructionList.GeometryInstructions.Length;
+                 instructionIndex++)
             {
-                var instruction = _graph.GeometryInstructions[instructionIndex];
-                
-                for (int i = 0; i < 32; i++)
-                {
-                    instruction.ResolvedPropertyValues[i] = _graph.ValueBuffer[instruction.PropertyIndexes[i]];
-                }
+                var instruction = _instructionList.GeometryInstructions[instructionIndex];
 
-                _graph.GeometryInstructions[instructionIndex] = instruction;
+                for (var i = 0; i < 32; i++)
+                    instruction.ResolvedPropertyValues[i] =
+                        _instructionList.ValueBuffer[instruction.PropertyIndexes[i]];
+
+                _instructionList.GeometryInstructions[instructionIndex] = instruction;
             }
         }
     }
-    
 }

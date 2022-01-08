@@ -31,12 +31,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public void Update()
         {
-            #if UNITY_EDITOR
-            if (BuildPipeline.isBuildingPlayer)
-            {
-                return;
-            }
-            #endif
+#if UNITY_EDITOR
+            if (BuildPipeline.isBuildingPlayer) return;
+#endif
 
             var targetClusterCount = _clusterCounts;
 
@@ -49,12 +46,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 {
                     _geometryFieldData.Dispose();
                     _updateMeshesSystem.Dispose();
-                    if (_buildRenderGraphSystem != null)
-                    {
-                        _buildRenderGraphSystem.Dispose();
-                    }
+                    if (_buildRenderGraphSystem != null) _buildRenderGraphSystem.Dispose();
                 }
-                
+
                 _geometryFieldData = new GeometryFieldData();
                 _updateMeshesSystem = new UpdateMeshesSystem();
                 _prepareGraphsSystem = new PrepareGraphsSystem();
@@ -70,24 +64,18 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 _updateMeshesSystem.Initialize(_geometryFieldData);
                 _initialized = true;
             }
-            
-            var allGraphs = Object.FindObjectsOfType<GeometryInstance>();
-            List<GeometryGraphBuffers> geometryGraphBuffers = new List<GeometryGraphBuffers>();
+
+            var allGraphs = FindObjectsOfType<GeometryInstance>();
+            var geometryGraphBuffers = new List<GeometryInstructionListBuffers>();
             foreach (var graph in allGraphs)
             {
-                if (graph.enabled == false)
-                {
-                    continue;
-                }
-                if (graph.TryInitializeAndGetBuffer(out GeometryGraphBuffers buffers))
-                {
-                    geometryGraphBuffers.Add(buffers);
-                }
+                if (graph.enabled == false) continue;
+                if (graph.TryInitializeAndGetBuffer(out var buffers)) geometryGraphBuffers.Add(buffers);
             }
 
             var jobHandle = new JobHandle();
-            jobHandle = _prepareGraphsSystem.Update(jobHandle,geometryGraphBuffers);
-            jobHandle = _buildRenderGraphSystem.Update(jobHandle,geometryGraphBuffers);
+            jobHandle = _prepareGraphsSystem.Update(jobHandle, geometryGraphBuffers);
+            jobHandle = _buildRenderGraphSystem.Update(jobHandle, geometryGraphBuffers);
             jobHandle = _distanceFieldPrepass.Update(_buildRenderGraphSystem.MainRenderGraph, jobHandle);
             jobHandle = _updateDistanceFieldSystem.Update(jobHandle, _buildRenderGraphSystem.MainRenderGraph);
             _updateMeshesSystem.Update(jobHandle);

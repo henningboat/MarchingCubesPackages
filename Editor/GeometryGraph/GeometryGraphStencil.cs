@@ -98,7 +98,8 @@ namespace Editor.GeometryGraph
             {
                 new GraphNodeModelSearcherItem(GraphModel, null,
                     t => t.GraphModel.CreateConstantNode(TypeHandle.Float, "", t.Position, t.Guid, null, t.SpawnFlags),
-                    "Constant")
+                    "Constant"),
+                MakeSearcherItem((typeof(CopyGeometryLayerNodeModel), "GeometryLayer"))
             };
 
             var constantsItem = new SearcherItem("Values", "", others);

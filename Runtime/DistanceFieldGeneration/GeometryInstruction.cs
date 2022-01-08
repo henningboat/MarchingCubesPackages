@@ -8,6 +8,7 @@ using henningboat.CubeMarching.Runtime.Utils.Containers;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -31,6 +32,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public float CombinerBlendFactor => ResolvedPropertyValues[15];
 
         public Hash128 GeometryInstructionHash;
+
+        public SerializableGUID SourceLayer;
 
         #endregion
 

@@ -81,7 +81,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             var chhunksToUploadToGPU =
                 new NativeList<int>(_geometryFieldData.TotalChunkCount, Allocator.TempJob);
-
+            jobHandle.Complete();
+            
+            Debug.Log(_geometryFieldData.GeometryBuffer[0].TerrainMaterial.a.GetColor);
+            
             var extractModifiedChunksJob = new JExtractModifiedChunks
             {
                 GeometryField = _geometryFieldData,
