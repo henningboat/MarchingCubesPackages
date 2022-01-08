@@ -61,9 +61,8 @@ namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
         {
             var bIsBigger = a.SurfaceDistance.PackedValues < b.SurfaceDistance.PackedValues;
             var surfaceDistance = math.select(a.SurfaceDistance.PackedValues, b.SurfaceDistance.PackedValues, bIsBigger);
-            var combinedMaterial = PackedTerrainMaterial.Select(a.TerrainMaterial, b.TerrainMaterial, !bIsBigger);
-
-            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), combinedMaterial);
+            
+            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), a.TerrainMaterial);
         }
 
         public static PackedDistanceFieldData CombineTerrainAdd(PackedDistanceFieldData a, PackedDistanceFieldData b)
@@ -91,8 +90,7 @@ namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
             var h = clamp(0.5f - 0.5f * (b + a) / blendFactor, 0.0f, 1.0f);
             var blendedSurfaceDistance = lerp(b, -a, h) + blendFactor * h * (1.0f - h);
 
-            var bIsSmaller = terrainDataA.SurfaceDistance.PackedValues > terrainDataB.SurfaceDistance.PackedValues;
-            var combinedMaterial = PackedTerrainMaterial.Select(terrainDataA.TerrainMaterial, terrainDataB.TerrainMaterial, bIsSmaller);
+            var combinedMaterial = terrainDataA.TerrainMaterial;
 
             return new PackedDistanceFieldData(blendedSurfaceDistance, combinedMaterial);
         }
