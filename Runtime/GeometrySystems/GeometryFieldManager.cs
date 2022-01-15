@@ -58,7 +58,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
                 _geometryFieldData.Initialize(targetClusterCount);
                 _prepareGraphsSystem.Initialize();
-                _buildRenderGraphSystem.Initialize(_geometryFieldData);
+                _buildRenderGraphSystem.Initialize();
                 _distanceFieldPrepass.Initialize(_geometryFieldData);
                 _updateDistanceFieldSystem.Initialize(_geometryFieldData);
                 _updateMeshesSystem.Initialize(_geometryFieldData);

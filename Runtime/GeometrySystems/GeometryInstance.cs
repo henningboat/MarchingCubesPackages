@@ -9,9 +9,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [ExecuteInEditMode]
     public abstract class GeometryInstance : MonoBehaviour
-    {
-        [FormerlySerializedAs("_geometryLayer")] [SerializeField]
-        private GeometryLayerAsset geometryLayerAsset;
+    { 
+        [SerializeField] private GeometryLayerAsset _geometryLayer;
 
         private GeometryInstructionListBuffers _instructionListBuffer;
 
@@ -79,7 +78,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         {
             get
             {
-                if (geometryLayerAsset != null) return geometryLayerAsset.GeometryLayer;
+                if (_geometryLayer != null) return _geometryLayer.GeometryLayer;
 
                 return default;
             }

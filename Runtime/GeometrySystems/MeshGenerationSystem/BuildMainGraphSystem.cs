@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -11,14 +10,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     internal class BuildMainGraphSystem
     {
-        private GeometryFieldData _geometryFieldData;
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
 
-        public void Initialize(GeometryFieldData geometryFieldData)
+        public void Initialize()
         {
-            _geometryFieldData = geometryFieldData;
-
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
@@ -31,7 +27,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             SerializableGUID outputLayerID = default;
 
-            _geometryPerLayer = new();
+            _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
             foreach (var geometryInstructionList in geometryGraphBuffersList)
             {
                 if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayer.ID))
@@ -65,9 +61,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 }
                 else
                 {
-                    var childLayerContent = _geometryPerLayer[instruction.SourceLayerID];
-                    foreach (var childInstructionList in childLayerContent)
-                        AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
+                    if (_geometryPerLayer.TryGetValue(instruction.SourceLayerID, out var childLayerContent))
+                        foreach (var childInstructionList in childLayerContent)
+                            AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
                 }
             }
         }
