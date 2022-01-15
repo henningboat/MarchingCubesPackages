@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using UnityEngine.Serialization;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -33,7 +34,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public Hash128 GeometryInstructionHash;
 
-        public SerializableGUID SourceLayer;
+        [FormerlySerializedAs("SourceLayer")] public SerializableGUID SourceLayerID;
 
         #endregion
 

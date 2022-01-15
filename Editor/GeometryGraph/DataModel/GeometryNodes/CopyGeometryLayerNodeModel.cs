@@ -7,18 +7,20 @@ using henningboat.CubeMarching.Runtime.GeometrySystems;
 using UnityEditor.GraphToolsFoundation.Overdrive;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.CommandStateObserver;
+using UnityEngine.Serialization;
 
 namespace Editor.GeometryGraph.DataModel.GeometryNodes
 {
     [Serializable]
     public class CopyGeometryLayerNodeModel : GeometryNodeModel, IGeometryNode
     {
-        [SerializeField] private GeometryLayer _sourceLayer;
+        [FormerlySerializedAs("_sourceLayer")] [SerializeField]
+        private GeometryLayerAsset sourceLayerAsset;
 
-        public GeometryLayer SourceLayer
+        public GeometryLayerAsset SourceLayerAsset
         {
-            get => _sourceLayer;
-            set => _sourceLayer = value;
+            get => sourceLayerAsset;
+            set => sourceLayerAsset = value;
         }
 
         protected override void OnDefineNode()
@@ -30,7 +32,7 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
         {
             var geometryInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.CopyLayer, 0,
                 new List<GeometryGraphProperty>());
-            geometryInstruction.SourceLayer = _sourceLayer.GeometryLayerID;
+            geometryInstruction.SourceLayerID = sourceLayerAsset.GeometryLayer.ID;
             context.WriteInstruction(geometryInstruction);
         }
     }
@@ -62,12 +64,12 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
     }
 
 
-    public class SetGeometryLayerCommand : ModelCommand<CopyGeometryLayerNodeModel, GeometryLayer>
+    public class SetGeometryLayerCommand : ModelCommand<CopyGeometryLayerNodeModel, GeometryLayerAsset>
     {
         private const string k_UndoStringSingular = "Set GeometryLayer";
         private const string k_UndoStringPlural = "Set GeometryLayers";
 
-        public SetGeometryLayerCommand(CopyGeometryLayerNodeModel[] nodes, GeometryLayer value)
+        public SetGeometryLayerCommand(CopyGeometryLayerNodeModel[] nodes, GeometryLayerAsset value)
             : base(k_UndoStringSingular, k_UndoStringPlural, value, nodes)
         {
         }
@@ -80,7 +82,7 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
             {
                 foreach (var nodeModel in command.Models)
                 {
-                    nodeModel.SourceLayer = command.Value;
+                    nodeModel.SourceLayerAsset = command.Value;
                     graphUpdater.MarkChanged(command.Models);
                 }
             }

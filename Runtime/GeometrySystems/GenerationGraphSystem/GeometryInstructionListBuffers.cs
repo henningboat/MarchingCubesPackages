@@ -16,16 +16,16 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem
         [NativeDisableParallelForRestriction] public NativeArray<GeometryInstruction> GeometryInstructions;
 
         public Hash128 ContentHash;
-        public SerializableGUID TargetLayerID;
+        public GeometryLayer TargetLayer;
 
         public GeometryInstructionListBuffers(GeometryInstructionList geometryGraphRuntimeData,
-            SerializableGUID targetLayerID)
+            GeometryLayer targetLayer)
         {
             ContentHash = geometryGraphRuntimeData.ContentHash;
             geometryGraphRuntimeData.AllocateNativeArrays(out ValueBuffer, out MathInstructions,
                 out GeometryInstructions);
             IsValid = true;
-            TargetLayerID = targetLayerID;
+            TargetLayer = targetLayer;
         }
 
         public bool IsValid { get; }

@@ -117,7 +117,7 @@ namespace Editor.GeometryGraph.GraphElements
                 m_ParentClassName.WithUssElement(PartName));
 
             TemperatureLabel = new ObjectField("GeometryLayer")
-                {name = temperatureLabelName, objectType = typeof(GeometryLayer)};
+                {name = temperatureLabelName, objectType = typeof(GeometryLayerAsset)};
             TemperatureLabel.RegisterCallback<ChangeEvent<Object>>(OnLayerChange);
             TemperatureAndTimeContainer.Add(TemperatureLabel);
 
@@ -140,7 +140,7 @@ namespace Editor.GeometryGraph.GraphElements
                 return;
 
             m_OwnerElement.CommandDispatcher.Dispatch(
-                new SetGeometryLayerCommand(new[] {geometryLayerNode}, evt.newValue as GeometryLayer));
+                new SetGeometryLayerCommand(new[] {geometryLayerNode}, evt.newValue as GeometryLayerAsset));
         }
 
         protected override void UpdatePartFromModel()
@@ -148,7 +148,7 @@ namespace Editor.GeometryGraph.GraphElements
             if (!(m_Model is CopyGeometryLayerNodeModel geometryLayerNode))
                 return;
 
-            TemperatureLabel.SetValueWithoutNotify(geometryLayerNode.SourceLayer);
+            TemperatureLabel.SetValueWithoutNotify(geometryLayerNode.SourceLayerAsset);
         }
     }
 }

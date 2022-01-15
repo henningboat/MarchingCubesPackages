@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Codice.CM.Common.Serialization.Replication;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
@@ -36,31 +34,27 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             _geometryPerLayer = new();
             foreach (var geometryInstructionList in geometryGraphBuffersList)
             {
-                if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayerID))
-                    _geometryPerLayer.Add(geometryInstructionList.TargetLayerID,
+                if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayer.ID))
+                    _geometryPerLayer.Add(geometryInstructionList.TargetLayer.ID,
                         new List<GeometryInstructionListBuffers>());
 
-                _geometryPerLayer[geometryInstructionList.TargetLayerID].Add(geometryInstructionList);
+                _geometryPerLayer[geometryInstructionList.TargetLayer.ID].Add(geometryInstructionList);
             }
 
             var outputLayerInstructionLists = _geometryPerLayer[outputLayerID];
-            foreach (GeometryInstructionListBuffers outputLayerInstructionList in outputLayerInstructionLists)
-            {
+            foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
-            }
 
-                MainRenderGraph = _allGeometryInstructionsList.AsArray();
+            MainRenderGraph = _allGeometryInstructionsList.AsArray();
 
             return jobHandle;
         }
 
-        private void AddInstructionListToMainGraph(GeometryInstructionListBuffers outputLayerInstructionList, int combinerDepthOffset)
+        private void AddInstructionListToMainGraph(GeometryInstructionListBuffers outputLayerInstructionList,
+            int combinerDepthOffset)
         {
-            if (combinerDepthOffset > 50)
-            {
-                throw new Exception("cyclic dependency detected while building main graph");
-            }
-            
+            if (combinerDepthOffset > 50) throw new Exception("cyclic dependency detected while building main graph");
+
             for (var i = 0; i < outputLayerInstructionList.GeometryInstructions.Length; i++)
             {
                 var instruction = outputLayerInstructionList.GeometryInstructions[i];
@@ -71,11 +65,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 }
                 else
                 {
-                    var childLayerContent = _geometryPerLayer[instruction.SourceLayer];
+                    var childLayerContent = _geometryPerLayer[instruction.SourceLayerID];
                     foreach (var childInstructionList in childLayerContent)
-                    {
                         AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
-                    }
                 }
             }
         }

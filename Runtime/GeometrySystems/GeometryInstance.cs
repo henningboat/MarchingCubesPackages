@@ -3,13 +3,16 @@ using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using UnityEngine.Serialization;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [ExecuteInEditMode]
     public abstract class GeometryInstance : MonoBehaviour
     {
-        [SerializeField] private GeometryLayer _geometryLayer;
+        [FormerlySerializedAs("_geometryLayer")] [SerializeField]
+        private GeometryLayerAsset geometryLayerAsset;
+
         private GeometryInstructionListBuffers _instructionListBuffer;
 
         // ReSharper disable once InconsistentNaming
@@ -58,10 +61,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 return false;
             }
 
-            if (_instructionListBuffer.ContentHash != GeometryInstructionList.ContentHash || _instructionListBuffer.TargetLayerID != TargetLayerID)
+            if (_instructionListBuffer.ContentHash != GeometryInstructionList.ContentHash ||
+                _instructionListBuffer.TargetLayer != TargetLayer)
             {
                 TryDisposeGraphBuffers();
-                _instructionListBuffer = new GeometryInstructionListBuffers(GeometryInstructionList, TargetLayerID);
+                _instructionListBuffer = new GeometryInstructionListBuffers(GeometryInstructionList, TargetLayer);
             }
 
             result = _instructionListBuffer;
@@ -71,11 +75,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             return true;
         }
 
-        public SerializableGUID TargetLayerID
+        public GeometryLayer TargetLayer
         {
             get
             {
-                if (_geometryLayer != null) return _geometryLayer.GeometryLayerID;
+                if (geometryLayerAsset != null) return geometryLayerAsset.GeometryLayer;
 
                 return default;
             }
