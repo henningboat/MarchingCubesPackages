@@ -4,6 +4,7 @@ using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
@@ -27,8 +28,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         private GPUVertexCountReadbackHandler _gpuReadbackHandler;
 
+        private GeometryLayer _geometryLayer;
 
-        public void Initialize(GeometryFieldData geometryFieldData)
+        private void Initialize(GeometryFieldData geometryFieldData)
         {
             _geometryFieldData = geometryFieldData;
             _triangulationInstructions =
@@ -75,8 +77,19 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 _gpuDataPerCluster[i] = ClusterMeshGPUBuffers.CreateGPUData(geometryFieldData);
         }
 
-        public void Update(JobHandle jobHandle)
+        public void Update(JobHandle jobHandle, GeometryFieldData newGeometryFieldData)
         {
+            if (!Equals(_geometryFieldData, newGeometryFieldData))
+            {
+                if (math.any(_geometryFieldData.ClusterCounts > 0))
+                {
+                    Dispose();
+                }
+
+                jobHandle.Complete();
+                Initialize(newGeometryFieldData);
+            }
+
             _frameCount++;
 
             var chhunksToUploadToGPU =

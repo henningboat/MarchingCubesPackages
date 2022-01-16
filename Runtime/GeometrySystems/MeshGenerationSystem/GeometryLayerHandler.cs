@@ -1,47 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
-    internal class BuildMainGraphSystem
+    internal class GeometryLayerHandler:IDisposable
     {
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
 
-        public void Initialize()
+        public GeometryFieldData GeometryFieldData { get; }
+
+        public GeometryLayerHandler(int3 clusterCounts, GeometryLayer geometryLayer)
         {
+            GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer);
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
-        public JobHandle Update(JobHandle jobHandle, List<GeometryInstructionListBuffers> geometryGraphBuffersList)
+        public JobHandle Update(JobHandle jobHandle,   Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer)
         {
             //todo placeholder
             jobHandle.Complete();
 
+            _geometryPerLayer = geometryPerLayer;
+            
             _allGeometryInstructionsList.Clear();
 
-            SerializableGUID outputLayerID = default;
-
-            _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
-            foreach (var geometryInstructionList in geometryGraphBuffersList)
-            {
-                if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayer.ID))
-                    _geometryPerLayer.Add(geometryInstructionList.TargetLayer.ID,
-                        new List<GeometryInstructionListBuffers>());
-
-                _geometryPerLayer[geometryInstructionList.TargetLayer.ID].Add(geometryInstructionList);
-            }
-
-            var outputLayerInstructionLists = _geometryPerLayer[outputLayerID];
+            var outputLayerInstructionLists = _geometryPerLayer[GeometryFieldData.GeometryLayer.ID];
+            
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 
-            MainRenderGraph = _allGeometryInstructionsList.AsArray();
+            var geometryInstructions = _allGeometryInstructionsList.AsArray();
+            
+            
+            var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
+            jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
+            
+            
+            var calculateDistanceFieldJob = new JCalculateDistanceField(GeometryFieldData, geometryInstructions);
+            jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
 
             return jobHandle;
         }
@@ -71,9 +76,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         public void Dispose()
         {
             _allGeometryInstructionsList.Dispose();
+            GeometryFieldData.Dispose();
         }
-
-        public NativeArray<GeometryInstruction> MainRenderGraph { get; private set; } = default;
+        
+        public int3 ClusterCounts => GeometryFieldData.ClusterCounts;
+        public GeometryLayer GeometryLayer => GeometryFieldData.GeometryLayer;
+        
     }
 
     public static class NativeArrayExtensions

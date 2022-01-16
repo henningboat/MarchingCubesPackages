@@ -14,7 +14,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public bool StoreResults => _storeResults;
 
-        public GeometryLayer GeometryLayer => new(name, _geometryLayerID);
+        public GeometryLayer GeometryLayer => new(name, _geometryLayerID, StoreResults);
 
         private void Awake()
         {

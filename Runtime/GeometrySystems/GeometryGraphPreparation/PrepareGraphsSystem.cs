@@ -8,10 +8,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
 {
     public class PrepareGraphsSystem
     {
-        public void Initialize()
-        {
-        }
-
         public JobHandle Update(JobHandle jobHandle, List<GeometryInstructionListBuffers> allGraphs)
         {
             foreach (var graphBuffers in allGraphs)

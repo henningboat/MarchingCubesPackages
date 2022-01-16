@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
+using JetBrains.Annotations;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
@@ -16,17 +15,20 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     public class GeometryFieldManager : MonoBehaviour
     {
         [SerializeField] private int3 _clusterCounts = new(1, 1, 1);
-        private BuildMainGraphSystem _buildRenderGraphSystem;
-        private DistanceFieldPrepassSystem _distanceFieldPrepass;
-        private GeometryFieldData _geometryFieldData;
+        [SerializeField] private List<GeometryLayerAsset> _additionalGeometryLayers = new();
+
+        private GeometryLayerHandler _buildRenderGraphSystem;
         private bool _initialized;
         private PrepareGraphsSystem _prepareGraphsSystem;
-        private UpdateDistanceFieldSystem _updateDistanceFieldSystem;
         private UpdateMeshesSystem _updateMeshesSystem;
+        private GeometryFieldCollection _geometryFieldCollection;
 
         private void OnEnable()
         {
             _initialized = false;
+            _geometryFieldCollection = new GeometryFieldCollection();
+            _prepareGraphsSystem = new PrepareGraphsSystem();
+            _updateMeshesSystem = new UpdateMeshesSystem();
         }
 
         public void Update()
@@ -35,35 +37,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             if (BuildPipeline.isBuildingPlayer) return;
 #endif
 
-            var targetClusterCount = _clusterCounts;
+            var allGeometryLayers = new List<GeometryLayer>();
+            foreach (var additionalGeometryLayer in _additionalGeometryLayers)
+                allGeometryLayers.Add(additionalGeometryLayer.GeometryLayer);
+            allGeometryLayers.Add(GeometryLayer.OutputLayer);
 
-            targetClusterCount = math.clamp(targetClusterCount, 1, 5);
-
-            if (!_initialized || _buildRenderGraphSystem == null ||
-                math.any(targetClusterCount != _geometryFieldData.ClusterCounts))
-            {
-                if (_initialized)
-                {
-                    _geometryFieldData.Dispose();
-                    _updateMeshesSystem.Dispose();
-                    if (_buildRenderGraphSystem != null) _buildRenderGraphSystem.Dispose();
-                }
-
-                _geometryFieldData = new GeometryFieldData();
-                _updateMeshesSystem = new UpdateMeshesSystem();
-                _prepareGraphsSystem = new PrepareGraphsSystem();
-                _buildRenderGraphSystem = new BuildMainGraphSystem();
-                _updateDistanceFieldSystem = new UpdateDistanceFieldSystem();
-                _distanceFieldPrepass = new DistanceFieldPrepassSystem();
-
-                _geometryFieldData.Initialize(targetClusterCount);
-                _prepareGraphsSystem.Initialize();
-                _buildRenderGraphSystem.Initialize();
-                _distanceFieldPrepass.Initialize(_geometryFieldData);
-                _updateDistanceFieldSystem.Initialize(_geometryFieldData);
-                _updateMeshesSystem.Initialize(_geometryFieldData);
-                _initialized = true;
-            }
+            _geometryFieldCollection.InitializeIfDirty(allGeometryLayers, _clusterCounts);
 
             var allGraphs = FindObjectsOfType<GeometryInstance>();
             var geometryGraphBuffers = new List<GeometryInstructionListBuffers>();
@@ -75,19 +54,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             var jobHandle = new JobHandle();
             jobHandle = _prepareGraphsSystem.Update(jobHandle, geometryGraphBuffers);
-            jobHandle = _buildRenderGraphSystem.Update(jobHandle, geometryGraphBuffers);
-            jobHandle = _distanceFieldPrepass.Update(_buildRenderGraphSystem.MainRenderGraph, jobHandle);
-            jobHandle = _updateDistanceFieldSystem.Update(jobHandle, _buildRenderGraphSystem.MainRenderGraph);
-            _updateMeshesSystem.Update(jobHandle);
+
+            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers);
+
+            _updateMeshesSystem.Update(jobHandle,_geometryFieldCollection.GetOutputFieldData);
         }
 
         private void OnDisable()
         {
             if (_initialized)
             {
-                _geometryFieldData.Dispose();
                 _updateMeshesSystem.Dispose();
-                _buildRenderGraphSystem.Dispose();
 
 
                 _initialized = false;

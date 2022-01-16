@@ -1,45 +1,45 @@
+using System;
+using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryFieldData
     {
+        public GeometryLayer GeometryLayer { get; private set; }
         public int TotalVoxelCount { get; private set; }
         public int TotalChunkCount { get; private set; }
         public int TotalSubChunkCount { get; private set; }
 
         [NativeDisableParallelForRestriction] public NativeArray<PackedDistanceFieldData> GeometryBuffer;
         [NativeDisableParallelForRestriction] public NativeArray<GeometryChunkParameters> DistanceFieldChunkDatas;
-        [NativeDisableParallelForRestriction]  public NativeArray<CClusterParameters> ClusterParameters;
+        [NativeDisableParallelForRestriction] public NativeArray<CClusterParameters> ClusterParameters;
         public int3 GeometryClusterChunkCounts;
-        public int ClusterCount { get; private set; } 
-
+        public int ClusterCount { get; private set; }
 
         public void Dispose()
         {
-            if (GeometryBuffer.IsCreated)
-            {
-                GeometryBuffer.Dispose();
-            }
+            if (GeometryBuffer.IsCreated) GeometryBuffer.Dispose();
 
-            if (ClusterParameters.IsCreated)
-            {
-                ClusterParameters.Dispose();
-            }
+            if (ClusterParameters.IsCreated) ClusterParameters.Dispose();
 
-            if (DistanceFieldChunkDatas.IsCreated)
-            {
-                DistanceFieldChunkDatas.Dispose();
-            }
+            if (DistanceFieldChunkDatas.IsCreated) DistanceFieldChunkDatas.Dispose();
         }
 
-        public void Initialize(int3 clusterCounts)
+        public GeometryFieldData(int3 clusterCounts, GeometryLayer layer)
         {
+            if (layer.Stored == false) throw new Exception("Only stored layers can have GeometryFieldData instances");
+
+            GeometryLayer = layer;
+
             ClusterCounts = clusterCounts;
             GeometryClusterChunkCounts = clusterCounts;
             ClusterCount = clusterCounts.Volume();
@@ -58,16 +58,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             var clusterIndex = 0;
 
             for (var x = 0; x < clusterCounts.x; x++)
+            for (var y = 0; y < clusterCounts.y; y++)
+            for (var z = 0; z < clusterCounts.z; z++)
             {
-                for (var y = 0; y < clusterCounts.y; y++)
-                {
-                    for (var z = 0; z < clusterCounts.z; z++)
-                    {
-                        ClusterParameters[clusterIndex] = new CClusterParameters
-                            {ClusterIndex = clusterIndex, PositionWS = new int3(x, y, z) * Constants.clusterLength};
-                        clusterIndex++;
-                    }
-                }
+                ClusterParameters[clusterIndex] = new CClusterParameters
+                    {ClusterIndex = clusterIndex, PositionWS = new int3(x, y, z) * Constants.clusterLength};
+                clusterIndex++;
             }
 
             var initializeChunkData = new JInitializeChunkParameters
@@ -88,7 +84,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 
             public void Execute()
             {
-                for (var i = 0; i < geometryBuffer.Length; i++) geometryBuffer[i] = new PackedDistanceFieldData {SurfaceDistance = 10};
+                for (var i = 0; i < geometryBuffer.Length; i++)
+                    geometryBuffer[i] = new PackedDistanceFieldData {SurfaceDistance = 10};
             }
         }
 
@@ -124,10 +121,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 
         public GeometryCluster GetCluster(int clusterIndex)
         {
-            var distanceField = GeometryBuffer.Slice((Constants.clusterVolume / Constants.PackedCapacity) * clusterIndex, (Constants.clusterVolume / Constants.PackedCapacity));
-            var clusterParameters = ClusterParameters.Slice(clusterIndex,1);
-            var chunkParameters = DistanceFieldChunkDatas.Slice(clusterIndex * Constants.chunksPerCluster, Constants.chunksPerCluster);
-            
+            var distanceField = GeometryBuffer.Slice(Constants.clusterVolume / Constants.PackedCapacity * clusterIndex,
+                Constants.clusterVolume / Constants.PackedCapacity);
+            var clusterParameters = ClusterParameters.Slice(clusterIndex, 1);
+            var chunkParameters =
+                DistanceFieldChunkDatas.Slice(clusterIndex * Constants.chunksPerCluster, Constants.chunksPerCluster);
+
             return new GeometryCluster(distanceField, clusterParameters, chunkParameters);
         }
 
