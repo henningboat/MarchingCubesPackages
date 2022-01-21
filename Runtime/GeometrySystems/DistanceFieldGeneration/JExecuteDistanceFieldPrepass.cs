@@ -49,7 +49,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             }
 
             var iterator =
-                new TerrainInstructionIterator(positions, _geometryInstructions, true);
+                new GeometryInstructionIterator(positions, _geometryInstructions, _geometryFieldData.GeometryLayer.ClearEveryFrame, true);
 
             for (var i = 0; i < _geometryInstructions.Length; i++)
             {
@@ -83,6 +83,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                     newInstructionHash != chunkParameters.CurrentGeometryInstructionsHash;
                 chunkParameters.CurrentGeometryInstructionsHash = newInstructionHash;
 
+                
+                //todo placeholder 
+                clusterParameters.WriteMask[i] = true;
+                chunkParameters.InstructionsChangedSinceLastFrame = true;
+                
+                
                 chunk.Parameters = chunkParameters;
             }
 

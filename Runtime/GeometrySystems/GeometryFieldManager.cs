@@ -2,12 +2,10 @@
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
-using JetBrains.Annotations;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
@@ -22,6 +20,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         private PrepareGraphsSystem _prepareGraphsSystem;
         private UpdateMeshesSystem _updateMeshesSystem;
         private GeometryFieldCollection _geometryFieldCollection;
+
+        [SerializeField] private bool _outputOtherLayer;
+        
 
         private void OnEnable()
         {
@@ -57,7 +58,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers);
 
-            _updateMeshesSystem.Update(jobHandle,_geometryFieldCollection.GetOutputFieldData);
+            if (_outputOtherLayer)
+            {
+                _updateMeshesSystem.Update(jobHandle, _geometryFieldCollection.LayerByIndex(0));
+            }
+            else
+            {
+                _updateMeshesSystem.Update(jobHandle, _geometryFieldCollection.GetOutputFieldData);
+            }
         }
 
         private void OnDisable()

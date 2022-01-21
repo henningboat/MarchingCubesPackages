@@ -14,7 +14,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 {
     public struct GeometryFieldData
     {
-        public GeometryLayer GeometryLayer { get; private set; }
+        public GeometryLayer GeometryLayer { get;  set; }
         public int TotalVoxelCount { get; private set; }
         public int TotalChunkCount { get; private set; }
         public int TotalSubChunkCount { get; private set; }

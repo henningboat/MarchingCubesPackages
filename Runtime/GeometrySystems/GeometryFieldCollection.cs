@@ -24,7 +24,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             _geometryLayerHandlers = new GeometryLayerHandler[geometryLayers.Count];
             
             for (var i = 0; i < geometryLayers.Count; i++)
-                _geometryLayerHandlers[i] = new GeometryLayerHandler(size, GeometryLayer.OutputLayer);
+                _geometryLayerHandlers[i] = new GeometryLayerHandler(size, geometryLayers[i]);
         }
 
         public void Dispose()
@@ -67,6 +67,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             }
 
             return jobHandle;
+        }
+
+        public GeometryFieldData LayerByIndex(int i)
+        {
+            return _geometryLayerHandlers[i].GeometryFieldData;
         }
     }
 }

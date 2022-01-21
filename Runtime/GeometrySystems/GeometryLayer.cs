@@ -8,7 +8,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     [Serializable]
     public struct GeometryLayer
     {
-        public static readonly GeometryLayer OutputLayer = new("OutputLayer", default, true);
+        public static readonly GeometryLayer OutputLayer = new("OutputLayer", default, true, true);
 
         public bool Equals(GeometryLayer other)
         {
@@ -28,12 +28,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         [SerializeField] private FixedString32Bytes _name;
         [SerializeField] private SerializableGUID _id;
         [SerializeField] private bool _stored;
+        [SerializeField] private bool _clearEveryFrame;
 
-        public GeometryLayer(FixedString32Bytes name, SerializableGUID id, bool stored)
+        public GeometryLayer(FixedString32Bytes name, SerializableGUID id, bool storeResults, bool clearEveryFrame)
         {
             _name = name;
             _id = id;
-            _stored = stored;
+            _stored = storeResults;
+            _clearEveryFrame = clearEveryFrame;
         }
 
         public FixedString32Bytes Name => _name;
@@ -41,6 +43,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public SerializableGUID ID => _id;
 
         public bool Stored => _stored;
+
+        public bool ClearEveryFrame => _clearEveryFrame;
 
         public static bool operator ==(GeometryLayer a, GeometryLayer b)
         {

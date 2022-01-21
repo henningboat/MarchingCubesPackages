@@ -72,7 +72,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                 {
-                    Debug.Log("queue update");
                     EditorApplication.QueuePlayerLoopUpdate();
                     UnityEditor.SceneView.RepaintAll();
                 }

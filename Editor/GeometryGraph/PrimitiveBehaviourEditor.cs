@@ -83,7 +83,6 @@ namespace Editor.GeometryGraph
 
             if (GUI.changed)
             {
-                Debug.Log("change");
                 EditorUtility.SetDirty(target);
                 geometryGraphInstance.SetOverwrites(currentOverwrites);
             }

@@ -26,7 +26,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             var cluster = _geometryFieldData.GetCluster(clusterIndex);
             var chunk = cluster.GetChunk(chunkIndexInCluster);
 
-            DistanceFieldResolver.CalculateDistanceFieldForChunk(cluster, chunk, _geometryInstructions);
+            DistanceFieldResolver.CalculateDistanceFieldForChunk(cluster, chunk, _geometryInstructions, _geometryFieldData.GeometryLayer.ClearEveryFrame);
         }
     }
 }

@@ -96,8 +96,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 new NativeList<int>(_geometryFieldData.TotalChunkCount, Allocator.TempJob);
             jobHandle.Complete();
             
-            Debug.Log(_geometryFieldData.GeometryBuffer[0].TerrainMaterial.a.GetColor);
-            
             var extractModifiedChunksJob = new JExtractModifiedChunks
             {
                 GeometryField = _geometryFieldData,
@@ -158,8 +156,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 var subChunksWithTriangles =
                     _subChunksWithTrianglesData.Slice(subChunkIndex, clusterParameters.subChunksWithTrianglesCount);
                 var gpuBuffers = _gpuDataPerCluster[clusterIndex];
-
-                Debug.Log(triangulationInstructions.Length);
 
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,

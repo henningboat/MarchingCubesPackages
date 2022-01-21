@@ -7,6 +7,7 @@ using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
@@ -33,7 +34,16 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             
             _allGeometryInstructionsList.Clear();
 
-            var outputLayerInstructionLists = _geometryPerLayer[GeometryFieldData.GeometryLayer.ID];
+            //todo inline this again please
+            var geometryFieldData = GeometryFieldData;
+            
+            var outputLayerInstructionLists = _geometryPerLayer[geometryFieldData.GeometryLayer.ID];
+
+
+            if (outputLayerInstructionLists == null)
+            {
+                return jobHandle;
+            }
             
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
@@ -41,12 +51,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
             
             
-            var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
-            jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
+            var prepassJob = new JExecuteDistanceFieldPrepass(geometryFieldData, geometryInstructions);
+            jobHandle = prepassJob.Schedule(geometryFieldData.ClusterCount, 1, jobHandle);
+
+            geometryFieldData.GeometryLayer =
+                new GeometryLayer("output", default, true, Input.GetKeyDown(KeyCode.Space));
             
-            
-            var calculateDistanceFieldJob = new JCalculateDistanceField(GeometryFieldData, geometryInstructions);
-            jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
+            var calculateDistanceFieldJob = new JCalculateDistanceField(geometryFieldData, geometryInstructions);
+            jobHandle = calculateDistanceFieldJob.Schedule(geometryFieldData.TotalChunkCount, 1, jobHandle);
 
             return jobHandle;
         }

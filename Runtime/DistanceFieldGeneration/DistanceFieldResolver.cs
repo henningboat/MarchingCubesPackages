@@ -1,41 +1,73 @@
 using System;
 using System.Runtime.CompilerServices;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, NativeArray<GeometryInstruction> geometryInstructions)
+        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, NativeArray<GeometryInstruction> geometryInstructions, bool clearEveryFrame)
         {
             var clusterParameters = cluster.Parameters;
             var chunkParameters = chunk.Parameters;
-            
+
             //todo
             if (clusterParameters.WriteMask[chunkParameters.IndexInCluster]&& chunkParameters.InstructionsChangedSinceLastFrame)
             {
-                var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
-                for (var i = 0; i < 2; i++)
-                {
-                    var offsetInChunk = new PackedFloat3(new float4(2, 6, 2, 6), new float4(2, 2, 6, 6), new float4(i) * 4 + 2);
-                    positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + offsetInChunk;
-                }
+                // var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
+                // var currentDistanceValue = new NativeArray<PackedDistanceFieldData>(2, Allocator.Temp);
+                //
+                // for (var i = 0; i < 2; i++)
+                // {
+                //     int4 offsetX = new int4(2, 6, 2, 6);
+                //     int4 offsetY = new int4(2, 2, 6, 6);
+                //     int4 offsetZ = new int4(i) * 4 + 2;
+                //
+                //
+                //     var packedOffsetInChunk = new PackedFloat3(offsetX, offsetY, offsetZ);
+                //     positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + packedOffsetInChunk;
+                //
+                //     var packedReadBackValue = new PackedDistanceFieldData();
+                //
+                //     //super ugly and probably costs a bunch of performance
+                //     for (int j = 0; j < 4; j++)
+                //     {
+                //         int3 offsetInChunk = new int3(offsetX[j], offsetY[j], offsetZ[j]);
+                //         offsetInChunk = 3;
+                //
+                //         int subChunkIndex = Utils.PositionToIndex(offsetInChunk / 4, 2);
+                //         int indexInSubChunk = Utils.PositionToIndex(offsetInChunk%4, 4);
+                //
+                //         int indexInChunk = subChunkIndex * Constants.chunkVolume / Constants.subChunksPerChunk + indexInSubChunk;
+                //
+                //         packedReadBackValue.SurfaceDistance.PackedValues[j] =
+                //             chunk[indexInChunk / 4].SurfaceDistance.PackedValues[indexInChunk % 4];
+                //     }
+                //
+                //     currentDistanceValue[i] = packedReadBackValue;
+                // }
+                //
+                // var iterator = new GeometryInstructionIterator(positionsToCheck, geometryInstructions, clearEveryFrame, false,currentDistanceValue);
+                //
+                // iterator.CalculateAllTerrainData();
+                //
+                // GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
+                //
+                // chunkParameters.InnerDataMask = mask;
+                // chunkParameters.ChunkInsideTerrain = insideTerrainMask;
+                //
+                // positionsToCheck.Dispose();
+                // currentDistanceValue.Dispose();
 
-                var iterator = new TerrainInstructionIterator(positionsToCheck, geometryInstructions);
-
-                iterator.CalculateAllTerrainData();
-
-                GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
-
-                chunkParameters.InnerDataMask = mask;
-                chunkParameters.ChunkInsideTerrain = insideTerrainMask;
-
-                positionsToCheck.Dispose();
+                chunkParameters.InnerDataMask = 255;
+                chunkParameters.ChunkInsideTerrain = 255;
             }
             else
             {
@@ -44,15 +76,19 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             }
 
             chunk.Parameters = chunkParameters;
-
-            TerrainInstructionIterator detailIterator=default;
+            
+            
+            GeometryInstructionIterator detailIterator=default;
             var containsDetails = chunkParameters.InnerDataMask != 0;
             if (containsDetails)
             {
-                CreatePositionsArray(chunk, out var positions);
+                CreatePositionsArray(chunk, out var positions, out var readbackValues);
 
-                detailIterator = new TerrainInstructionIterator(positions, geometryInstructions);
+                detailIterator =
+                    new GeometryInstructionIterator(positions, geometryInstructions, clearEveryFrame, false, readbackValues);
                 detailIterator.CalculateAllTerrainData();
+
+                readbackValues.Dispose();
             }
             
             
@@ -65,7 +101,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         }
 
-        private static void CopyResultsBackToBuffer(GeometryChunk chunk, TerrainInstructionIterator iterator)
+        private static void CopyResultsBackToBuffer(GeometryChunk chunk, GeometryInstructionIterator iterator)
         {
             var readDataOffset = 0;
             for (var subChunkIndex = 0; subChunkIndex < 8; subChunkIndex++)
@@ -122,12 +158,13 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         }
 
         // Returns a temp array of the positions that actually need to be computed
-        private static void CreatePositionsArray(GeometryChunk chunk, out NativeArray<PackedFloat3> positions)
+        private static void CreatePositionsArray(GeometryChunk chunk, out NativeArray<PackedFloat3> positions,
+            out NativeArray<PackedDistanceFieldData> distanceFieldReadback)
         {
             var countBits = math.countbits((int) chunk.Parameters.InnerDataMask);
 
             positions = new NativeArray<PackedFloat3>(16 * countBits, Allocator.Temp);
-            new NativeArray<int>(16 * countBits, Allocator.Temp);
+            distanceFieldReadback = new NativeArray<PackedDistanceFieldData>(16 * countBits, Allocator.Temp);
 
             var writtenPositionCount = 0;
             for (var subChunkIndex = 0; subChunkIndex < 8; subChunkIndex++)
@@ -139,7 +176,11 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                         var positionWS = IndexToPositionWSPacked(subChunkIndex, indexInSubChunk,
                             chunk.Parameters.PositionWS);
                         positions[writtenPositionCount + indexInSubChunk] = positionWS;
+
+                        distanceFieldReadback[writtenPositionCount + indexInSubChunk] = chunk[
+                            subChunkIndex * ((Constants.chunkVolume / Constants.subChunksPerChunk) / Constants.PackedCapacity) + indexInSubChunk];
                     }
+                    
 
                     writtenPositionCount += 16;
                 }
