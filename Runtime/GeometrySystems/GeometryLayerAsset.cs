@@ -12,9 +12,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         [FormerlySerializedAs("m_GeometryLayerID")] [SerializeField]
         private SerializableGUID _geometryLayerID;
 
+        [SerializeField] private bool _clearOnUpdate = true;
+
         public bool StoreResults => _storeResults;
 
-        public GeometryLayer GeometryLayer => new(name, _geometryLayerID, StoreResults, true);
+        public GeometryLayer GeometryLayer => new(name, _geometryLayerID, StoreResults, _clearOnUpdate);
 
         private void Awake()
         {

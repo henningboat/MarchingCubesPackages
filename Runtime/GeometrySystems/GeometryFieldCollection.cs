@@ -3,6 +3,8 @@ using System.Linq;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -13,6 +15,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     {
         private GeometryLayerHandler[] _geometryLayerHandlers;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
+        private List<GeometryLayer> _geometryLayers;
         public GeometryFieldData GetOutputFieldData => _geometryLayerHandlers.Last().GeometryFieldData;
 
         public void InitializeIfDirty(List<GeometryLayer> geometryLayers, int3 size)
@@ -21,6 +24,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             Dispose();
 
+            _geometryLayers = geometryLayers;
             _geometryLayerHandlers = new GeometryLayerHandler[geometryLayers.Count];
             
             for (var i = 0; i < geometryLayers.Count; i++)
@@ -51,6 +55,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             List<GeometryInstructionListBuffers> geometryInstructionListBuffersList)
         {
             _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
+
             foreach (var geometryInstructionList in geometryInstructionListBuffersList)
             {
                 if (!_geometryPerLayer.ContainsKey(geometryInstructionList.TargetLayer.ID))
@@ -63,7 +68,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
             {
-               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer);
+               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _geometryLayers);
             }
 
             return jobHandle;
