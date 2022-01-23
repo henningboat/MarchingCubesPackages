@@ -48,27 +48,27 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                 positions[i] = position;
             }
 
-            var iterator =
-                new GeometryInstructionIterator(positions, _geometryInstructions, _geometryFieldData.GeometryLayer.ClearEveryFrame, true);
-
-            for (var i = 0; i < _geometryInstructions.Length; i++)
-            {
-                iterator.ProcessTerrainData(i);
-                var currentGeometryInstruction = _geometryInstructions[i];
-                for (var j = 0; j < iterator.CurrentInstructionSurfaceDistanceReadback.Length; j++)
-                {
-                    var distance = iterator.CurrentInstructionSurfaceDistanceReadback[j].PackedValues;
-                    var isWriting = (distance < 10) & (distance > -10);
-                    for (var k = 0; k < 4; k++)
-                        if (isWriting[k])
-                        {
-                            var hash128 = hashPerChunk[k + 4 * j];
-                            var hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-                            hash128.Append(ref hashOfInstruction);
-                            hashPerChunk[k + j * 4] = hash128;
-                        }
-                }
-            }
+            // var iterator =
+            //     new GeometryInstructionIterator(positions, _geometryInstructions, _geometryFieldData.GeometryLayer.ClearEveryFrame, true);
+            //
+            // for (var i = 0; i < _geometryInstructions.Length; i++)
+            // {
+            //     iterator.ProcessTerrainData(i);
+            //     var currentGeometryInstruction = _geometryInstructions[i];
+            //     for (var j = 0; j < iterator.CurrentInstructionSurfaceDistanceReadback.Length; j++)
+            //     {
+            //         var distance = iterator.CurrentInstructionSurfaceDistanceReadback[j].PackedValues;
+            //         var isWriting = (distance < 10) & (distance > -10);
+            //         for (var k = 0; k < 4; k++)
+            //             if (isWriting[k])
+            //             {
+            //                 var hash128 = hashPerChunk[k + 4 * j];
+            //                 var hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
+            //                 hash128.Append(ref hashOfInstruction);
+            //                 hashPerChunk[k + j * 4] = hash128;
+            //             }
+            //     }
+            // }
 
             var clusterParameters = cluster.Parameters;
 

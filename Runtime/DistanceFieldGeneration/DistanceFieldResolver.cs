@@ -13,7 +13,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, NativeArray<GeometryInstruction> geometryInstructions, bool clearEveryFrame)
+        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, NativeArray<GeometryInstruction> geometryInstructions)
         {
             var clusterParameters = cluster.Parameters;
             var chunkParameters = chunk.Parameters;
@@ -82,13 +82,18 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             var containsDetails = chunkParameters.InnerDataMask != 0;
             if (containsDetails)
             {
-                CreatePositionsArray(chunk, out var positions, out var readbackValues);
+                // CreatePositionsArray(chunk, out var positions, out var readbackValues);
 
+                NativeArray<int> positions = new NativeArray<int>(512, Allocator.Temp);
+
+                for (int i = 0; i < 512; i++)
+                {
+                    positions[i] = i + chunk.Parameters.IndexInCluster * Constants.chunkVolume;
+                }
+                
                 detailIterator =
-                    new GeometryInstructionIterator(positions, geometryInstructions, clearEveryFrame, false, readbackValues);
+                    new GeometryInstructionIterator(cluster, positions, geometryInstructions, false);
                 detailIterator.CalculateAllTerrainData();
-
-                readbackValues.Dispose();
             }
             
             

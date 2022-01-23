@@ -26,7 +26,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
-        public JobHandle Update(JobHandle jobHandle,   Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer, List<GeometryLayer> allLayers)
+        public JobHandle Update(JobHandle jobHandle,
+            Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
+            List<GeometryLayer> allLayers)
         {
             _allLayers = allLayers;
             //todo placeholder
@@ -44,12 +46,13 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 return jobHandle;
             }
             
+            _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
+            
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
-            
-            
+
             var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
             jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
 

@@ -4,6 +4,7 @@ using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
@@ -23,25 +24,28 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         #region Private Fields
 
         private readonly NativeArray<GeometryInstruction>.ReadOnly _combinerInstructions;
-        private readonly NativeArray<PackedFloat3>.ReadOnly _postionsWS;
+        private NativeArray<PackedFloat3> _postionsWS;
         private readonly int _combinerStackSize;
         private NativeArray<PackedFloat3> _postionStack;
         private NativeArray<bool> _hasWrittenToCurrentCombiner;
         private int _lastCombinerDepth;
 
+        private NativeArray<UnsafeList<PackedDistanceFieldData>> _readbackLayers;
+        private NativeArray<int> _inicesInCluster;
+
         public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
         private readonly bool _allowPerInstructionReadback;
-        private GeometryFieldReadbackCollection _readbackCollection;
 
         #endregion
 
         #region Constructors
 
-        public GeometryInstructionIterator(NativeArray<PackedFloat3> positions,
-            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback,
-            GeometryFieldReadbackCollection readbackCollection)
+        public GeometryInstructionIterator(GeometryCluster cluster, NativeArray<int> indicesInCluster,
+            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback)
         {
-            _readbackCollection = readbackCollection;
+            _inicesInCluster = indicesInCluster;
+            _readbackLayers = default;
+            
             _allowPerInstructionReadback = allowPerInstructionReadback;
             _combinerInstructions = combinerInstructions.AsReadOnly();
             //todo cache this between pre-pass and actual pass
@@ -52,7 +56,33 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             //todo workaround. Remove this and see the exceptions
             _combinerStackSize++;
 
-            _postionsWS = positions.AsReadOnly();
+            _postionsWS = new NativeArray<PackedFloat3>(indicesInCluster.Length / 4, Allocator.Temp);
+
+            for (int i = 0; i < _postionsWS.Length; i++)
+            {
+                PackedFloat3 positions=default;
+                for (int j = 0; j < 4; j++)
+                {
+                    int index = _inicesInCluster[i * 4 + j];
+                    int chunkIndex = index/Constants.chunkVolume;
+                    var chunk = cluster.GetChunk(chunkIndex);
+                    var subChunkVolume = (Constants.chunkVolume / Constants.subChunksPerChunk);
+                    int subChunkIndex = (index % Constants.chunkVolume) /
+                                        subChunkVolume;
+
+                    int3 subChunkOffset = Utils.IndexToPositionWS(subChunkIndex, 2) * Constants.subChunkLength;
+
+                    int3 positionInSubChunk = Utils.IndexToPositionWS(index % subChunkVolume, 4);
+
+                    float3 positionWS = chunk.Parameters.PositionWS + subChunkOffset + positionInSubChunk;
+
+                    positions.x.PackedValues[j] = positionWS.x;
+                    positions.y.PackedValues[j] = positionWS.y;
+                    positions.z.PackedValues[j] = positionWS.z;
+                }
+
+                _postionsWS[i] = positions;
+            }
 
             _terrainDataBuffer =
                 new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
@@ -64,7 +94,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             if (allowPerInstructionReadback)
                 CurrentInstructionSurfaceDistanceReadback =
-                    new NativeArray<PackedFloat>(positions.Length, Allocator.Temp);
+                    new NativeArray<PackedFloat>(_postionsWS.Length, Allocator.Temp);
             else
                 CurrentInstructionSurfaceDistanceReadback = default;
         }
@@ -89,6 +119,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _terrainDataBuffer.Dispose();
             _postionStack.Dispose();
             _hasWrittenToCurrentCombiner.Dispose();
+            _postionsWS.Dispose();
 
             if (CurrentInstructionSurfaceDistanceReadback.IsCreated)
                 CurrentInstructionSurfaceDistanceReadback.Dispose();
@@ -156,7 +187,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-                        var readback = _readbackCollection[geometryInstruction.GeometryInstructionSubType].GetChunk()
+                       // var readback = _readbackCollection[geometryInstruction.GeometryInstructionSubType].GetChunk()
+                       terrainData.SurfaceDistance = 10f;
                         break;
                     case GeometryInstructionType.Shape:
                     {
