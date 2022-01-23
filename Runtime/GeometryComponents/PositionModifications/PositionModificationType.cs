@@ -2,9 +2,10 @@
 {
     public enum PositionModificationType
     {
-        Mirror = 0,
+        VerticalMirror = 0,
         Wave = 1,
-        Transform = 2,
-        Repetition = 3
+        Offset = 2,
+        Repetition = 3,
+        Twist = 4,
     }
 }
