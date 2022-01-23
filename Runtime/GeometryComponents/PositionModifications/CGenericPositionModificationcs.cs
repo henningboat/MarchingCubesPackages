@@ -26,7 +26,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
                     case PositionModificationType.Repetition:
                         return UnsafeCastHelper.Cast<float32, RepetitionPositionModification>(ref Data)
                             .TransformPosition(positionOS);
-                    
+                    case PositionModificationType.VerticalMirror:
+                        return UnsafeCastHelper.Cast<float32, VerticalMirrorPositionModification>(ref Data)
+                            .TransformPosition(positionOS);
+                    case PositionModificationType.Offset:
+                        return UnsafeCastHelper.Cast<float32, OffsetPositionModification>(ref Data)
+                            .TransformPosition(positionOS);
+                    case PositionModificationType.Twist:
+                        return UnsafeCastHelper.Cast<float32, TwistPositionModification>(ref Data)
+                            .TransformPosition(positionOS);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
