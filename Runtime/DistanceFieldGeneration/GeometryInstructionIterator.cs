@@ -1,5 +1,6 @@
 ﻿using System;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
 using Unity.Collections;
@@ -30,17 +31,17 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
         private readonly bool _allowPerInstructionReadback;
-        private bool _clear;
+        private GeometryFieldReadbackCollection _readbackCollection;
 
         #endregion
 
         #region Constructors
 
         public GeometryInstructionIterator(NativeArray<PackedFloat3> positions,
-            NativeArray<GeometryInstruction> combinerInstructions, bool clear, bool allowPerInstructionReadback,
-            NativeArray<PackedDistanceFieldData> currentDistanceValue=default)
+            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback,
+            GeometryFieldReadbackCollection readbackCollection)
         {
-            _clear = clear;
+            _readbackCollection = readbackCollection;
             _allowPerInstructionReadback = allowPerInstructionReadback;
             _combinerInstructions = combinerInstructions.AsReadOnly();
             //todo cache this between pre-pass and actual pass
@@ -58,24 +59,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);
 
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
-
-            if (clear == false)
-            {
-                _hasWrittenToCurrentCombiner[0] = true;
-                for (int i = 0; i < currentDistanceValue.Length; i++)
-                {
-                    _terrainDataBuffer[i] = currentDistanceValue[i];
-                }
-
-                _lastCombinerDepth = 0;
-                
-                NativeArray<PackedFloat3>.Copy(_postionsWS, 0, _postionStack,
-                    0, _postionsWS.Length);
-            }
-            else
-            {
-                _lastCombinerDepth = -1;
-            }
+            
+            _lastCombinerDepth = -1;
 
             if (allowPerInstructionReadback)
                 CurrentInstructionSurfaceDistanceReadback =
@@ -171,7 +156,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-                        //these are handeled in BuildMainGraphSystem
+                        var readback = _readbackCollection[geometryInstruction.GeometryInstructionSubType].GetChunk()
                         break;
                     case GeometryInstructionType.Shape:
                     {

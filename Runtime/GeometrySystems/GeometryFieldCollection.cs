@@ -65,6 +65,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 _geometryPerLayer[geometryInstructionList.TargetLayer.ID].Add(geometryInstructionList);
             }
 
+            GeometryFieldReadbackCollection collection = default;
+            for (int i = 0; i < _geometryLayerHandlers.Length; i++)
+            {
+                collection[i] = _geometryLayerHandlers[i].GeometryFieldData;
+            }
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
             {
