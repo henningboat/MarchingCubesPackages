@@ -60,9 +60,6 @@ namespace Editor.GeometryGraph
                 .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             var combinerItems = new SearcherItem("Combiners", "", combiners.ToList());
 
-            // var positionModifications = TypeCache.GetTypesDerivedFrom(typeof(PositionModificationNode)).Where(type => !type.IsAbstract).Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
-            // var positionModificationItems = new SearcherItem("Distortion", "", positionModifications.ToList());
-
             var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract)
                 .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             mathNodes.Add(MakeSearcherItem((typeof(ResultNode), "Result")));
