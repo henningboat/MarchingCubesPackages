@@ -10,14 +10,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
     [BurstCompile]
     internal struct JCalculateDistanceField : IJobParallelFor
     {
-        private GeometryFieldData _geometryFieldData;
         private NativeArray<GeometryInstruction> _geometryInstructions;
         private DistanceDataReadbackCollection _readbackCollection;
+        private int _geometryLayerIndex;
 
-        public JCalculateDistanceField(GeometryFieldData geometryFieldData, NativeArray<GeometryInstruction> geometryInstructions, DistanceDataReadbackCollection readbackCollection)
+        public JCalculateDistanceField(int geometryLayerIndex, NativeArray<GeometryInstruction> geometryInstructions, DistanceDataReadbackCollection readbackCollection)
         {
+            _geometryLayerIndex = geometryLayerIndex;
             _geometryInstructions = geometryInstructions;
-            _geometryFieldData = geometryFieldData;
             _readbackCollection = readbackCollection;
         }
 
@@ -26,7 +26,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             var clusterIndex = index / Constants.chunksPerCluster;
             var chunkIndexInCluster = index % Constants.chunksPerCluster;
 
-            var cluster = _geometryFieldData.GetCluster(clusterIndex);
+            var cluster = _readbackCollection[_geometryLayerIndex].GetCluster(clusterIndex);
             var chunk = cluster.GetChunk(chunkIndexInCluster);
 
             DistanceFieldResolver.CalculateDistanceFieldForChunk(cluster, chunk, _geometryInstructions,_readbackCollection);

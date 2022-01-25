@@ -26,16 +26,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
         [NativeDisableParallelForRestriction] public  NativeArray<GeometryChunkParameters> DistanceFieldChunkDatas;
         [NativeDisableParallelForRestriction] public  NativeArray<CClusterParameters> ClusterParameters;
 
-        public void Dispose()
+        public JobHandle Dispose(JobHandle jobHandle=default)
         {
-            if (GeometryBuffer.IsCreated) GeometryBuffer.Dispose();
-            if (ClusterParameters.IsCreated) ClusterParameters.Dispose();
-            if (DistanceFieldChunkDatas.IsCreated) DistanceFieldChunkDatas.Dispose();
+            if (GeometryBuffer.IsCreated) jobHandle=GeometryBuffer.Dispose(jobHandle);
+            if (ClusterParameters.IsCreated) jobHandle=ClusterParameters.Dispose(jobHandle);
+            if (DistanceFieldChunkDatas.IsCreated) jobHandle=DistanceFieldChunkDatas.Dispose(jobHandle);
+            return jobHandle;
         }
 
-        public GeometryFieldData(int3 clusterCounts, GeometryLayer layer)
+        public GeometryFieldData(int3 clusterCounts, GeometryLayer layer, Allocator persistent)
         {
-            if (layer.Stored == false) throw new Exception("Only stored layers can have GeometryFieldData instances");
+            if (layer.Stored == false&& math.any(clusterCounts>0)) throw new Exception("Only stored layers can have GeometryFieldData instances");
 
             GeometryLayer = layer;
 
@@ -43,17 +44,23 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             GeometryClusterChunkCounts = clusterCounts;
             ClusterCount = clusterCounts.Volume();
             TotalVoxelCount = ClusterCount * Constants.clusterVolume;
-            GeometryBuffer = new NativeArray<PackedDistanceFieldData>(TotalVoxelCount, Allocator.Persistent);
-
-            var initializeDistanceFIeld = new InitializeTerrainData {geometryBuffer = GeometryBuffer};
-            var jobHandle = initializeDistanceFIeld.Schedule();
+            GeometryBuffer = new NativeArray<PackedDistanceFieldData>(TotalVoxelCount, persistent);
 
             TotalChunkCount = ClusterCount * Constants.chunksPerCluster;
             TotalSubChunkCount = TotalChunkCount * Constants.subChunksPerChunk;
 
-            ClusterParameters = new NativeArray<CClusterParameters>(ClusterCount, Allocator.Persistent);
-            DistanceFieldChunkDatas = new NativeArray<GeometryChunkParameters>(TotalChunkCount, Allocator.Persistent);
+            ClusterParameters = new NativeArray<CClusterParameters>(ClusterCount, persistent);
+            DistanceFieldChunkDatas = new NativeArray<GeometryChunkParameters>(TotalChunkCount, persistent);
 
+            if (TotalChunkCount == 0)
+            {
+                return;
+            }
+            
+            var initializeDistanceFIeld = new InitializeTerrainData {geometryBuffer = GeometryBuffer};
+            var jobHandle = initializeDistanceFIeld.Schedule();
+
+            
             var clusterIndex = 0;
 
             for (var x = 0; x < clusterCounts.x; x++)

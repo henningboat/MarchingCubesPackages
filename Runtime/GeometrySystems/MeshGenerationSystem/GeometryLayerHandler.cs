@@ -24,8 +24,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public GeometryLayerHandler(int3 clusterCounts, GeometryLayer geometryLayer)
         {
-            GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer);
-            _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
+            GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer, Allocator.Persistent);
         }
 
         public unsafe JobHandle Update(JobHandle jobHandle,
@@ -37,8 +36,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             jobHandle.Complete();
 
             _geometryPerLayer = geometryPerLayer;
-            
-            _allGeometryInstructionsList.Clear();
+
+            _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.TempJob);
 
             var outputLayerInstructionLists = _geometryPerLayer[GeometryFieldData.GeometryLayer.ID];
 
@@ -47,9 +46,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             {
                 return jobHandle;
             }
-            
+
             _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
-            
+
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 
@@ -57,23 +56,35 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
             jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
-            
-            jobHandle.Complete();
 
-            DistanceDataReadbackCollection readbackCollection=new DistanceDataReadbackCollection();
-            
-            for (int i = 0; i < allLayers.Count; i++)
+            DistanceDataReadbackCollection readbackCollection = new DistanceDataReadbackCollection();
+
+            for (int i = 0; i < readbackCollection.Capacity; i++)
             {
-                var geometryBuffer = allLayerHandlers[i].GeometryFieldData.GeometryBuffer;
-                readbackCollection[i] = new UnsafeList<PackedDistanceFieldData>(
-                    (PackedDistanceFieldData*) geometryBuffer.GetUnsafeReadOnlyPtr(), geometryBuffer.Length);
+                if (i < allLayerHandlers.Length)
+                {
+                    readbackCollection[i] = allLayerHandlers[i].GeometryFieldData;
+                }
+                else
+                {
+                    readbackCollection[i] = new GeometryFieldData(0, default, Allocator.TempJob);
+                }
             }
-            
-            var calculateDistanceFieldJob = new JCalculateDistanceField(GeometryFieldData, geometryInstructions, readbackCollection);
+
+            var calculateDistanceFieldJob = new JCalculateDistanceField(GetLayerIndex(GeometryFieldData.GeometryLayer),
+                geometryInstructions, readbackCollection);
             jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
-            
-            jobHandle.Complete();
-            
+
+            for (int i = 0; i < readbackCollection.Capacity; i++)
+            {
+                if (i >= allLayerHandlers.Length)
+                {
+                    jobHandle = readbackCollection[i].Dispose(jobHandle);
+                }
+            }
+
+            jobHandle = _allGeometryInstructionsList.Dispose(jobHandle);
+
             return jobHandle;
         }
 
@@ -116,8 +127,13 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         private GeometryInstruction CreateLayerCopyInstruction(GeometryLayer sourceLayer, int combinerDepth)
         {
-            int layerIndex = _allLayers.FindIndex(layer => layer.ID == sourceLayer.ID);
+            int layerIndex = GetLayerIndex(sourceLayer);
             return new GeometryInstruction { CombinerDepth = combinerDepth, GeometryInstructionSubType = layerIndex, GeometryInstructionType = GeometryInstructionType.CopyLayer};
+        }
+
+        private int GetLayerIndex(GeometryLayer sourceLayer)
+        {
+            return _allLayers.FindIndex(layer => layer.ID == sourceLayer.ID);
         }
 
         public void Dispose()

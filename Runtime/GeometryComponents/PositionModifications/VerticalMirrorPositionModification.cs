@@ -6,7 +6,7 @@ using SIMDMath;
 namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications
 {
     [Serializable]
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Sequential, Size = 1)]
     public struct VerticalMirrorPositionModification : IPositionModification
     {
         public PositionModificationType Type => PositionModificationType.VerticalMirror;

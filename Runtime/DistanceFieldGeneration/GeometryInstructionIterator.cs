@@ -196,7 +196,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                         {
                             var indexInCluster = _inicesInCluster[i*4+j];
                             var readback =
-                                _readbackLayers[geometryInstruction.GeometryInstructionSubType][indexInCluster/4];
+                                _readbackLayers[geometryInstruction.GeometryInstructionSubType].GeometryBuffer[indexInCluster/4];
 
                             readbackSurfaceDistance.PackedValues[j] = readback.SurfaceDistance.PackedValues[indexInCluster % 4];
                             readbackPackedMaterialData[j] = readback.TerrainMaterial[indexInCluster % 4];
