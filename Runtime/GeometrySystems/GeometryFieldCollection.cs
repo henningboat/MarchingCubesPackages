@@ -68,7 +68,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
             {
-               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _geometryLayers);
+               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _geometryLayers,_geometryLayerHandlers );
             }
 
             return jobHandle;

@@ -1,6 +1,7 @@
 ﻿using System;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
 using Unity.Collections;
@@ -30,7 +31,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         private NativeArray<bool> _hasWrittenToCurrentCombiner;
         private int _lastCombinerDepth;
 
-        private NativeArray<UnsafeList<PackedDistanceFieldData>> _readbackLayers;
+        private DistanceDataReadbackCollection _readbackLayers;
         private NativeArray<int> _inicesInCluster;
 
         public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
@@ -41,10 +42,10 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         #region Constructors
 
         public GeometryInstructionIterator(GeometryCluster cluster, NativeArray<int> indicesInCluster,
-            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback)
+            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback, DistanceDataReadbackCollection readbackLayers)
         {
             _inicesInCluster = indicesInCluster;
-            _readbackLayers = default;
+            _readbackLayers = readbackLayers;
             
             _allowPerInstructionReadback = allowPerInstructionReadback;
             _combinerInstructions = combinerInstructions.AsReadOnly();
@@ -187,8 +188,21 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-                       // var readback = _readbackCollection[geometryInstruction.GeometryInstructionSubType].GetChunk()
-                       terrainData.SurfaceDistance = 10f;
+
+                        PackedFloat readbackSurfaceDistance = default;
+                        PackedTerrainMaterial readbackPackedMaterialData = default;
+
+                        for (int j = 0; j < 4; j++)
+                        {
+                            var indexInCluster = _inicesInCluster[i*4+j];
+                            var readback =
+                                _readbackLayers[geometryInstruction.GeometryInstructionSubType][indexInCluster/4];
+
+                            readbackSurfaceDistance.PackedValues[j] = readback.SurfaceDistance.PackedValues[indexInCluster % 4];
+                            readbackPackedMaterialData[j] = readback.TerrainMaterial[indexInCluster % 4];
+                        }
+                        
+                        terrainData = new PackedDistanceFieldData(readbackSurfaceDistance, readbackPackedMaterialData);
                         break;
                     case GeometryInstructionType.Shape:
                     {

@@ -5,7 +5,9 @@ using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -26,9 +28,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             _allGeometryInstructionsList = new NativeList<GeometryInstruction>(Allocator.Persistent);
         }
 
-        public JobHandle Update(JobHandle jobHandle,
+        public unsafe JobHandle Update(JobHandle jobHandle,
             Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
-            List<GeometryLayer> allLayers)
+            List<GeometryLayer> allLayers, GeometryLayerHandler[] allLayerHandlers)
         {
             _allLayers = allLayers;
             //todo placeholder
@@ -55,10 +57,23 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
             jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
+            
+            jobHandle.Complete();
 
-            var calculateDistanceFieldJob = new JCalculateDistanceField(GeometryFieldData, geometryInstructions);
+            DistanceDataReadbackCollection readbackCollection=new DistanceDataReadbackCollection();
+            
+            for (int i = 0; i < allLayers.Count; i++)
+            {
+                var geometryBuffer = allLayerHandlers[i].GeometryFieldData.GeometryBuffer;
+                readbackCollection[i] = new UnsafeList<PackedDistanceFieldData>(
+                    (PackedDistanceFieldData*) geometryBuffer.GetUnsafeReadOnlyPtr(), geometryBuffer.Length);
+            }
+            
+            var calculateDistanceFieldJob = new JCalculateDistanceField(GeometryFieldData, geometryInstructions, readbackCollection);
             jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
-
+            
+            jobHandle.Complete();
+            
             return jobHandle;
         }
 

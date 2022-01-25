@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
@@ -13,7 +14,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     public static class DistanceFieldResolver
     {
-        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, NativeArray<GeometryInstruction> geometryInstructions)
+        public static void CalculateDistanceFieldForChunk(GeometryCluster cluster, GeometryChunk chunk, 
+            NativeArray<GeometryInstruction> geometryInstructions, DistanceDataReadbackCollection readbackCollection)
         {
             var clusterParameters = cluster.Parameters;
             var chunkParameters = chunk.Parameters;
@@ -92,7 +94,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 }
                 
                 detailIterator =
-                    new GeometryInstructionIterator(cluster, positions, geometryInstructions, false);
+                    new GeometryInstructionIterator(cluster, positions, geometryInstructions, false, readbackCollection);
                 detailIterator.CalculateAllTerrainData();
             }
             
