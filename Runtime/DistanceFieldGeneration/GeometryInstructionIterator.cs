@@ -36,6 +36,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
         private readonly bool _allowPerInstructionReadback;
+        private readonly int _clusterIndex;
 
         #endregion
 
@@ -46,6 +47,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         {
             _inicesInCluster = indicesInCluster;
             _readbackLayers = readbackLayers;
+
+            _clusterIndex = cluster.Parameters.ClusterIndex;
             
             _allowPerInstructionReadback = allowPerInstructionReadback;
             _combinerInstructions = combinerInstructions.AsReadOnly();
@@ -194,7 +197,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
                         for (int j = 0; j < 4; j++)
                         {
-                            var indexInCluster = _inicesInCluster[i*4+j];
+                            var indexInCluster = _inicesInCluster[i*4+j] + Constants.clusterVolume*_clusterIndex;
                             var readback =
                                 _readbackLayers[geometryInstruction.GeometryInstructionSubType].GeometryBuffer[indexInCluster/4];
 

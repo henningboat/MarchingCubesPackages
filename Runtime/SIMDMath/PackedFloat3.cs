@@ -7,6 +7,17 @@ namespace SIMDMath
     [StructLayout(LayoutKind.Sequential)]
     public struct PackedFloat3
     {
+        public override string ToString()
+        {
+            string text="";
+            for (int i = 0; i < 4; i++)
+            {
+                text += $"a:{x.PackedValues[i]}|{y.PackedValues[i]}|{z.PackedValues[i]}  ";
+            }
+
+            return text;
+        }
+
         public bool Equals(PackedFloat3 other)
         {
             return x.Equals(other.x) && y.Equals(other.y) && z.Equals(other.z);

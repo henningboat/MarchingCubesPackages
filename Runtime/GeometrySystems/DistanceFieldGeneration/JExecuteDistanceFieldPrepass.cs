@@ -1,5 +1,6 @@
 ﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using SIMDMath;
 using Unity.Burst;
 using Unity.Collections;
@@ -12,88 +13,115 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
     [BurstCompile]
     public struct JExecuteDistanceFieldPrepass : IJobParallelFor
     {
-        private GeometryFieldData _geometryFieldData;
         [ReadOnly] private NativeArray<GeometryInstruction> _geometryInstructions;
+        private DistanceDataReadbackCollection _data;
+        private int _layerIndex;
 
-        public JExecuteDistanceFieldPrepass(GeometryFieldData geometryFieldData,
+        public JExecuteDistanceFieldPrepass(DistanceDataReadbackCollection data, int layerIndex,
             NativeArray<GeometryInstruction> geometryInstructions)
         {
+            _layerIndex = layerIndex;
+            _data = data;
             _geometryInstructions = geometryInstructions;
-            _geometryFieldData = geometryFieldData;
         }
 
         public void Execute(int clusterIndex)
         {
-            var cluster = _geometryFieldData.GetCluster(clusterIndex);
-            var positions =
-                new NativeArray<PackedFloat3>(Constants.chunksPerCluster / Constants.PackedCapacity, Allocator.Temp);
-
+            var geometryFieldData = _data[_layerIndex];
+            var cluster = geometryFieldData.GetCluster(clusterIndex);
+            
             var hashPerChunk = new NativeArray<Hash128>(Constants.chunksPerCluster, Allocator.Temp);
 
-            //somewhat unclean way to get a packed array of the center points of all 512 chunks in a cluster
-            for (var i = 0; i < Constants.chunksPerCluster / Constants.PackedCapacity; i++)
+            NativeArray<int> indicesInCluster = new NativeArray<int>(512,Allocator.Temp);
+
+
+
+            int middleIndexWithinChunk = 63;
+            for (var i = 0; i < Constants.chunksPerCluster ; i++)
             {
-                var position =
-                    new PackedFloat3(Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(i, new int3(2, 8, 8)));
-                position *= 8;
-                if (i % 2 == 0)
-                    position.x = new PackedFloat(0, 8, 16, 24);
-                else
-                    position.x = new PackedFloat(32, 40, 48, 56);
-
-                position += 3.5f;
-
-                position += new PackedFloat3(cluster.Parameters.PositionWS);
-
-                positions[i] = position;
+                var chunk = cluster.GetChunk(i);
+                indicesInCluster[i] = chunk.Parameters.IndexInCluster * Constants.chunkVolume + middleIndexWithinChunk;
             }
 
-            // var iterator =
-            //     new GeometryInstructionIterator(positions, _geometryInstructions, _geometryFieldData.GeometryLayer.ClearEveryFrame, true);
-            //
-            // for (var i = 0; i < _geometryInstructions.Length; i++)
+            var iterator =
+                new GeometryInstructionIterator(cluster,indicesInCluster, _geometryInstructions, true, _data);
+
+            indicesInCluster.Dispose();
+
+            int instructionIndex = 0;
+
+            // if (geometryFieldData.GeometryLayer.ClearEveryFrame == false)
             // {
-            //     iterator.ProcessTerrainData(i);
-            //     var currentGeometryInstruction = _geometryInstructions[i];
-            //     for (var j = 0; j < iterator.CurrentInstructionSurfaceDistanceReadback.Length; j++)
-            //     {
-            //         var distance = iterator.CurrentInstructionSurfaceDistanceReadback[j].PackedValues;
-            //         var isWriting = (distance < 10) & (distance > -10);
-            //         for (var k = 0; k < 4; k++)
-            //             if (isWriting[k])
-            //             {
-            //                 var hash128 = hashPerChunk[k + 4 * j];
-            //                 var hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-            //                 hash128.Append(ref hashOfInstruction);
-            //                 hashPerChunk[k + j * 4] = hash128;
-            //             }
-            //     }
+            //     iterator.ProcessTerrainData(0);
+            //     //if the layer reads it's own frame, we don't want to read our own hash from last frame
+            //     instructionIndex++;
             // }
+
+            for (; instructionIndex < _geometryInstructions.Length; instructionIndex++)
+            {
+                iterator.ProcessTerrainData(instructionIndex);
+                var currentGeometryInstruction = _geometryInstructions[instructionIndex];
+                for (var i = 0; i < iterator.CurrentInstructionSurfaceDistanceReadback.Length; i++)
+                {
+                    var distance = iterator.CurrentInstructionSurfaceDistanceReadback[i].PackedValues;
+                    var isWriting = (distance < 10) & (distance > -10);
+                    for (var k = 0; k < 4; k++)
+                        if (isWriting[k])
+                        {
+                            int chunkIndex = k + 4 * i;
+                            var hash128 = hashPerChunk[chunkIndex];
+
+                            Hash128 hashOfInstruction;
+                            if (currentGeometryInstruction.GeometryInstructionType == GeometryInstructionType.CopyLayer)
+                            {
+                                var readbackCluster = _data[currentGeometryInstruction.GeometryInstructionSubType]
+                                    .GetCluster(clusterIndex);
+                                if (readbackCluster.Parameters.WriteMask[chunkIndex] == false)
+                                {
+                                    continue;
+                                }
+                                
+                                hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
+
+                                //only if we don't currently read from our own layer, we want to add the current hash of the
+                                //read content to the mix. Else, we would get a new has everytime
+                                if (i != 0 || geometryFieldData.GeometryLayer.ClearEveryFrame)
+                                {
+                                    var currentHashOnReadbackLayer = readbackCluster.GetChunk(chunkIndex).Parameters
+                                        .CurrentGeometryInstructionsHash;
+                                    hashOfInstruction.Append(ref currentHashOnReadbackLayer);
+                                }
+                            }
+                            else
+                            {
+                                hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
+                            }
+
+                            hash128.Append(ref hashOfInstruction);
+                            hashPerChunk[chunkIndex] = hash128;
+                        }
+                }
+            }
 
             var clusterParameters = cluster.Parameters;
 
-            for (var i = 0; i < 512; i++)
+            for (var chunkIndex = 0; chunkIndex < 512; chunkIndex++)
             {
-                var newInstructionHash = hashPerChunk[i];
-                clusterParameters.WriteMask[i] = newInstructionHash != default;
+                var newInstructionHash = hashPerChunk[chunkIndex];
+                var writeMaskValue = newInstructionHash != default;
 
-                var chunk = cluster.GetChunk(i);
+                clusterParameters.WriteMask[chunkIndex] = writeMaskValue;
+
+                var chunk = cluster.GetChunk(chunkIndex);
                 var chunkParameters = chunk.Parameters;
                 chunkParameters.InstructionsChangedSinceLastFrame =
                     newInstructionHash != chunkParameters.CurrentGeometryInstructionsHash;
                 chunkParameters.CurrentGeometryInstructionsHash = newInstructionHash;
-
-                
-                //todo placeholder 
-                clusterParameters.WriteMask[i] = true;
-                chunkParameters.InstructionsChangedSinceLastFrame = true;
-                
                 
                 chunk.Parameters = chunkParameters;
             }
 
             hashPerChunk.Dispose();
-            positions.Dispose();
 
             cluster.Parameters = clusterParameters;
         }

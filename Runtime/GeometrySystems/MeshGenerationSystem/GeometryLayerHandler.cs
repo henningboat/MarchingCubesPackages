@@ -47,15 +47,15 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 return jobHandle;
             }
 
-            _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
+            if (!GeometryLayer.ClearEveryFrame)
+            {
+                _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
+            }
 
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
-
-            var prepassJob = new JExecuteDistanceFieldPrepass(GeometryFieldData, geometryInstructions);
-            jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
 
             DistanceDataReadbackCollection readbackCollection = new DistanceDataReadbackCollection();
 
@@ -71,7 +71,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 }
             }
 
-            var calculateDistanceFieldJob = new JCalculateDistanceField(GetLayerIndex(GeometryFieldData.GeometryLayer),
+            var geometryLayerIndex = GetLayerIndex(GeometryFieldData.GeometryLayer);
+            var prepassJob = new JExecuteDistanceFieldPrepass(readbackCollection, geometryLayerIndex, geometryInstructions);
+            jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
+
+            var calculateDistanceFieldJob = new JCalculateDistanceField(geometryLayerIndex,
                 geometryInstructions, readbackCollection);
             jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
 
