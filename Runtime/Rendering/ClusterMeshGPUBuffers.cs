@@ -59,7 +59,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices,
             int materialIDFilter,
             CClusterParameters clusterParameters, int timeStamp,
-            GPUVertexCountReadbackHandler gpuVertexCountReadbackHandler)
+            GPUVertexCountReadbackHandler gpuVertexCountReadbackHandler, Material defaultMaterial)
         {
             const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
 
@@ -172,7 +172,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             
             _mesh.SetSubMeshes(new[] {new SubMeshDescriptor(0, clusterParameters.vertexCount)}, MeshGeneratorBuilder.MeshUpdateFlagsNone);
             
-            Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), DynamicCubeMarchingSettingsHolder.Instance.Materials.FirstOrDefault(), 0);
+            Graphics.DrawMesh(_mesh, Matrix4x4.Translate((float3)clusterParameters.PositionWS), defaultMaterial, 0);
         }
 
         public const int ChunkLength = 8;

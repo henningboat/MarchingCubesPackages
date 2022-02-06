@@ -32,7 +32,15 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
         {
             var geometryInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.CopyLayer, 0,
                 new List<GeometryGraphProperty>());
-            geometryInstruction.SourceLayerID = sourceLayerAsset.GeometryLayer.ID;
+            if (sourceLayerAsset != null)
+            {
+                geometryInstruction.SourceLayerID = sourceLayerAsset.GeometryLayer.ID;
+            }
+            else
+            {
+                geometryInstruction.SourceLayerID = default;
+            }
+
             context.WriteInstruction(geometryInstruction);
         }
     }

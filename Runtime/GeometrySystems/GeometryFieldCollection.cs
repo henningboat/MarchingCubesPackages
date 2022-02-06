@@ -16,20 +16,26 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     {
         private GeometryLayerHandler[] _geometryLayerHandlers;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
-        private List<GeometryLayer> _geometryLayers;
+        private List<GeometryLayer> _storedGeometryLayers;
         public GeometryFieldData GetOutputFieldData => _geometryLayerHandlers.Last().GeometryFieldData;
 
-        public void InitializeIfDirty(List<GeometryLayer> geometryLayers, int3 size)
+        public void InitializeIfDirty(List<GeometryLayer> storedGeometryLayers, int3 size, out bool didInitialize)
         {
-            if (!CheckDirty(geometryLayers, size)) return;
+            if (!CheckDirty(storedGeometryLayers, size))
+            {
+                didInitialize = false;
+                return;
+            };
 
             Dispose();
 
-            _geometryLayers = geometryLayers;
-            _geometryLayerHandlers = new GeometryLayerHandler[geometryLayers.Count];
+            _storedGeometryLayers = storedGeometryLayers;
+            _geometryLayerHandlers = new GeometryLayerHandler[storedGeometryLayers.Count];
             
-            for (var i = 0; i < geometryLayers.Count; i++)
-                _geometryLayerHandlers[i] = new GeometryLayerHandler(size, geometryLayers[i]);
+            for (var i = 0; i < storedGeometryLayers.Count; i++)
+                _geometryLayerHandlers[i] = new GeometryLayerHandler(size, storedGeometryLayers[i]);
+
+            didInitialize = true;
         }
 
         public void Dispose()
@@ -53,7 +59,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         }
 
         public JobHandle ScheduleJobs(JobHandle jobHandle,
-            List<GeometryInstructionListBuffers> geometryInstructionListBuffersList)
+            List<GeometryInstructionListBuffers> geometryInstructionListBuffersList, List<GeometryLayer> allGeometryLayers)
         {
             _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
 
@@ -68,7 +74,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
             {
-               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _geometryLayers,_geometryLayerHandlers );
+               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers, allGeometryLayers,_geometryLayerHandlers.ToList() );
             }
 
             return jobHandle;
@@ -77,6 +83,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public GeometryFieldData LayerByIndex(int i)
         {
             return _geometryLayerHandlers[i].GeometryFieldData;
+        }
+
+        public GeometryFieldData GetFieldFromLayer(GeometryLayer requestedLayer)
+        {
+            return _geometryLayerHandlers.First(handler => handler.GeometryLayer == requestedLayer).GeometryFieldData;
         }
     }
 }

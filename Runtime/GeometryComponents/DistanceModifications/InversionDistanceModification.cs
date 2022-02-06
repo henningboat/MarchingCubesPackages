@@ -27,7 +27,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModificati
 
         public PackedFloat GetSurfaceDistance(PackedFloat currentDistance)
         {
-            return currentDistance + _inflationAmount;
+            return currentDistance - _inflationAmount;
         }
 
         public DistanceModificationType Type => DistanceModificationType.Inflation;

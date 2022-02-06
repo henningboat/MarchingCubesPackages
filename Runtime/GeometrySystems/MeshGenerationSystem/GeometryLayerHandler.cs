@@ -18,6 +18,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     {
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
+        private List<GeometryLayer> _storedLayers;
+        private List<SerializableGUID> _allLayerIDs;
         private List<GeometryLayer> _allLayers;
 
         public GeometryFieldData GeometryFieldData { get; }
@@ -27,11 +29,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer, Allocator.Persistent);
         }
 
-        public unsafe JobHandle Update(JobHandle jobHandle,
+        public JobHandle Update(JobHandle jobHandle,
             Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
-            List<GeometryLayer> allLayers, GeometryLayerHandler[] allLayerHandlers)
+            List<GeometryLayer> storedGeometryLayers,
+            List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers)
         {
             _allLayers = allLayers;
+            _storedLayers = storedGeometryLayers;
+            _allLayerIDs = geometryPerLayer.Keys.ToList();
             //todo placeholder
             jobHandle.Complete();
 
@@ -61,7 +66,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             for (int i = 0; i < readbackCollection.Capacity; i++)
             {
-                if (i < allLayerHandlers.Length)
+                if (i < allLayerHandlers.Count)
                 {
                     readbackCollection[i] = allLayerHandlers[i].GeometryFieldData;
                 }
@@ -81,7 +86,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
             for (int i = 0; i < readbackCollection.Capacity; i++)
             {
-                if (i >= allLayerHandlers.Length)
+                if (i >= allLayerHandlers.Count)
                 {
                     jobHandle = readbackCollection[i].Dispose(jobHandle);
                 }
@@ -137,7 +142,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         private int GetLayerIndex(GeometryLayer sourceLayer)
         {
-            return _allLayers.FindIndex(layer => layer.ID == sourceLayer.ID);
+            return _storedLayers.FindIndex(layer => layer.ID == sourceLayer.ID);
         }
 
         public void Dispose()

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
@@ -6,6 +8,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
@@ -13,24 +16,15 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     public class GeometryFieldManager : MonoBehaviour
     {
         [SerializeField] private int3 _clusterCounts = new(1, 1, 1);
-        [SerializeField] private List<GeometryLayerAsset> _additionalGeometryLayers = new();
+        [SerializeField] private List<GeometryLayerAsset> _geometryLayers = new();
+
+        private List<IGeometryFieldReceiver> _geometryFieldReceivers=new();
 
         private GeometryLayerHandler _buildRenderGraphSystem;
+        private GeometryFieldCollection _geometryFieldCollection;
         private bool _initialized;
         private PrepareGraphsSystem _prepareGraphsSystem;
-        private UpdateMeshesSystem _updateMeshesSystem;
-        private GeometryFieldCollection _geometryFieldCollection;
-
-        [SerializeField] private bool _outputOtherLayer;
-        
-
-        private void OnEnable()
-        {
-            _initialized = false;
-            _geometryFieldCollection = new GeometryFieldCollection();
-            _prepareGraphsSystem = new PrepareGraphsSystem();
-            _updateMeshesSystem = new UpdateMeshesSystem();
-        }
+        private JobHandle _receiverJobHandles;
 
         public void Update()
         {
@@ -38,13 +32,28 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             if (BuildPipeline.isBuildingPlayer) return;
 #endif
 
-            var allGeometryLayers = new List<GeometryLayer>();
-            foreach (var additionalGeometryLayer in _additionalGeometryLayers)
-                allGeometryLayers.Add(additionalGeometryLayer.GeometryLayer);
-            allGeometryLayers.Add(GeometryLayer.OutputLayer);
+             _geometryFieldReceivers = GetComponents<IGeometryFieldReceiver>().ToList();
 
-            _geometryFieldCollection.InitializeIfDirty(allGeometryLayers, _clusterCounts);
+            var storedGeometryLayers = new List<GeometryLayer> ();
+            
+            storedGeometryLayers.AddRange(_geometryLayers.Select(asset => asset!=null?asset.GeometryLayer:GeometryLayer.OutputLayer));
+            storedGeometryLayers = storedGeometryLayers.Distinct().ToList();
+            if (storedGeometryLayers.Count == 0)
+            {
+                storedGeometryLayers.Add(GeometryLayer.OutputLayer);
+            }
+            
+            _geometryFieldCollection.InitializeIfDirty(storedGeometryLayers, _clusterCounts, out bool didInitialize);
 
+            if (didInitialize)
+            {
+                foreach (var geometryFieldReceiver in _geometryFieldReceivers)
+                {
+                    geometryFieldReceiver.Initialize(
+                        _geometryFieldCollection.GetFieldFromLayer(geometryFieldReceiver.RequestedLayer()));
+                }
+            }
+            
             var allGraphs = FindObjectsOfType<GeometryInstance>();
             var geometryGraphBuffers = new List<GeometryInstructionListBuffers>();
             foreach (var graph in allGraphs)
@@ -56,25 +65,42 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             var jobHandle = new JobHandle();
             jobHandle = _prepareGraphsSystem.Update(jobHandle, geometryGraphBuffers);
 
-            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers);
+            var allGeometryLayers = allGraphs.Select(instance => instance.TargetLayer).Distinct().ToList();
+            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers,allGeometryLayers);
 
-            if (_outputOtherLayer)
+            _receiverJobHandles = default;
+            
+            jobHandle.Complete();
+            
+            foreach (var receiver in _geometryFieldReceivers)
             {
-                _updateMeshesSystem.Update(jobHandle, _geometryFieldCollection.LayerByIndex(0));
+                _receiverJobHandles= JobHandle.CombineDependencies(_receiverJobHandles,
+                    receiver.ScheduleJobs(jobHandle,
+                        _geometryFieldCollection.GetFieldFromLayer(receiver.RequestedLayer())));
             }
-            else
+        }
+
+        private void LateUpdate()
+        {
+            _receiverJobHandles.Complete();
+            foreach (var receiver in _geometryFieldReceivers)
             {
-                _updateMeshesSystem.Update(jobHandle, _geometryFieldCollection.GetOutputFieldData);
+                receiver.OnJobsFinished(_geometryFieldCollection.GetFieldFromLayer(receiver.RequestedLayer()));
             }
+        }
+
+        private void OnEnable()
+        {
+            _initialized = false;
+            _geometryFieldCollection = new GeometryFieldCollection();
+            _prepareGraphsSystem = new PrepareGraphsSystem();
         }
 
         private void OnDisable()
         {
             if (_initialized)
             {
-                _updateMeshesSystem.Dispose();
-
-
+                _geometryFieldCollection.Dispose();
                 _initialized = false;
             }
         }
