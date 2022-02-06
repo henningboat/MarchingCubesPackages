@@ -48,10 +48,6 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
             _terrainIndexMap.SetData(chunkPositionsToRender);
 
-            Shader.SetGlobalInt("numPointsPerAxis", ChunkLength);
-            Shader.SetGlobalBuffer("_GlobalTerrainBuffer", globalTerrainBuffer);
-            Shader.SetGlobalBuffer("_GlobalTerrainIndexMap", globalTerrainIndexMap);
-            Shader.SetGlobalVector("_TerrainMapSize", new Vector3(terrainMapSize.x, terrainMapSize.y, terrainMapSize.z));
 
 
             //Fine positions in the grid that contain triangles

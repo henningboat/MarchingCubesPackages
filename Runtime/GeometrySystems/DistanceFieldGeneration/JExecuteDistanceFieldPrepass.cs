@@ -117,6 +117,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                 chunkParameters.InstructionsChangedSinceLastFrame =
                     newInstructionHash != chunkParameters.CurrentGeometryInstructionsHash;
                 chunkParameters.CurrentGeometryInstructionsHash = newInstructionHash;
+
+                chunkParameters.InstructionsChangedSinceLastFrame = true;
                 
                 chunk.Parameters = chunkParameters;
             }

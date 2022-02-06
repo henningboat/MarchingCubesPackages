@@ -1,5 +1,5 @@
-﻿#include "Includes/MarchTables.compute"
-#include "Includes/TerrainData.hlsl"
+﻿#include "Includes/DistanceFieldTriangulation.hlsl"
+
 float4 _Time;
 #pragma kernel ResetSubChunkTriangleCount
 #pragma kernel GetTrianglePositions
@@ -9,8 +9,6 @@ float4 _Time;
 #pragma kernel BuildIndexBuffer
 #pragma kernel WriteFromTransferToGlobalBuffer
 
-StructuredBuffer<TerrainData4> _GlobalTerrainBuffer;
-StructuredBuffer<int> _GlobalTerrainIndexMap;
 StructuredBuffer<float4> _NormalBuffer;
 
 StructuredBuffer<int4> _TerrainChunkBasePosition;
@@ -37,71 +35,16 @@ struct TriangulationInstruction
 AppendStructuredBuffer<TriangulationInstruction> _ValidTrianglePositions;
 StructuredBuffer<TriangulationInstruction> _ValidTrianglePositionResults;
 RWStructuredBuffer<VertexData> triangles;
+RWStructuredBuffer<int> _TriangleIndices;
 RWStructuredBuffer<int> _TriangleCountPerSubChunk;
 StructuredBuffer<int> _TriangleCountPerSubChunkResult;
 
 uint triangleWriteIndex=0;
-int3 _ClusterPositionWS;
 
 //todo make int3?
 float isoLevel;
 
 groupshared int groupTriangleCount=0;
-
-
-
-float3 interpolateVerts(float4 v1, float4 v2, out float t) {
-    t = (isoLevel - v1.w) / (v2.w - v1.w);
-    return v1.xyz + t * (v2.xyz-v1.xyz);
-}
-
-float3 interpolateNormals(float3 v1, float3 v2, float t) {
-    return v1.xyz + t * (v2.xyz-v1.xyz);
-}
-
-
-float4 interpolateColors(float4 v1, float4 v2, float t) {
-    return v1 + t * (v2-v1);
-}
-
-
-int GetIndexOfVert(float3 positionOS, int3 basePositionOfChunk)
-{
-    const int3 positionIndex = floor(positionOS);
-    const int index = positionIndex.x+positionIndex.y*8+positionIndex.z*64;
-    return index;
-}
-
-float3 CalculateNormalForPosition(int3 localPosition)
-{
-    float3 combinedNormal=0.00001;
-    for (int x=-1;x<2;x++)
-        for (int y=-1;y<2;y++)
-            for (int z=-1;z<2;z++)
-            {
-                if(!(x==0&&y==0&&z==0))
-                {
-                    //const float surfaceDistance = _grid[GridPositionToIndex(int3(localPosition.x+x, localPosition.y+y, localPosition.z+z))].w;
-                    const float surfaceDistance = GetPointPosition(int3(localPosition.x+x, localPosition.y+y, localPosition.z+z)).w;
-           
-                    combinedNormal += float3(x,y,z)*surfaceDistance;
-                }
-            }
-
-    return normalize(combinedNormal);
-}
-
-int indexForTriangle;
-
-int GetSubChunkIndexFromPosition(int3 positionWS)
-{
-    const int3 positionInCluster = positionWS % 64;
-    const int chunkIndexInCluster = indexFromCoordAndGridSize(positionInCluster/8,8);
-    const int subChunkIndex = indexFromCoordAndGridSize((positionInCluster % 8)/4,2);
-
-    const int subChunkIndexInCluster = chunkIndexInCluster * 8 + subChunkIndex;
-    return subChunkIndexInCluster;
-}
 
 
 
@@ -114,7 +57,6 @@ void ResetSubChunkTriangleCount (uint3 id : SV_DispatchThreadID)
 
     _TriangleCountPerSubChunk[subChunkIndexInCluster] = 0;
 }
-
 
 
 [numthreads(4,4,4)]
@@ -152,22 +94,40 @@ void GetTrianglePositions (uint3 id : SV_DispatchThreadID, uint groupIndex : SV_
 
     const int subChunkIndexInCluster = GetSubChunkIndexFromPosition(positionWS);
     
-    if(cubeIndex!=0 && cubeIndex!=255)
-    {
-        const int triangleCount = trianglesPerCubeIndex[cubeIndex];
+    if(cubeIndex == 0 || cubeIndex == 255)
+        return;
 
-        InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, indexForTriangle);
+    const int triangleCount = trianglesPerCubeIndex[cubeIndex];
+
+    InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, indexForTriangle);
     
-        const int maxTrianglesPerSubChunk =  4 * 4 * 4 * 5;
+    const int maxTrianglesPerSubChunk =  4 * 4 * 4 * 5;
 
-        TriangulationInstruction result = (TriangulationInstruction)0;
-        result.positionWS=positionWS;
-        result.cubeIndex=cubeIndex;
-        result.padding=subChunkIndexInCluster;
+    // TriangulationInstruction result = (TriangulationInstruction)0;
+    // result.positionWS=positionWS;
+    // result.cubeIndex=cubeIndex;
+    // result.padding=subChunkIndexInCluster;
+    //
+    // result.vertexBufferPosition =  3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + indexForTriangle;
+    //     
+    // _ValidTrianglePositions.Append(result);
 
-        result.vertexBufferPosition =  3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + indexForTriangle;
+    int baseIndex =  3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + indexForTriangle;
+    
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i ++)
+    {
+        // Get indices of corner points A and B for each of the three edges
+        // of the cube that need to be joined to form the triangle.
+        int a0 = cornerIndexAFromEdge[triangulation[cubeIndex][i]];
+        int b0 = cornerIndexBFromEdge[triangulation[cubeIndex][i]];
+        //
+        // int a1 = cornerIndexAFromEdge[triangulation[cubeIndex][i+1]];
+        // int b1 = cornerIndexBFromEdge[triangulation[cubeIndex][i+1]];
+        //
+        // int a2 = cornerIndexAFromEdge[triangulation[cubeIndex][i+2]];
+        // int b2 = cornerIndexBFromEdge[triangulation[cubeIndex][i+2]];
         
-        _ValidTrianglePositions.Append(result);
+        _TriangleIndices[baseIndex+i]= PackVertexData(positionWS,a0,b0);
     }
 }
 
@@ -185,17 +145,6 @@ void ClearVertexData (uint3 id : SV_DispatchThreadID)
     triangles[index]=(VertexData)0;
 }
 
-float4 unpackVertexColor(uint i)
-{
-    float4 unpack;
-    
-    unpack.x = float((i & uint(0xff000000)) >> 24);
-    unpack.y = float((i & uint(0x00ff0000)) >> 16);
-    unpack.z = float((i & uint(0x0000ff00)) >> 8);
-    unpack.w = float((i & uint(0x000000ff)) >> 0);
-    
-    return unpack;
-}
 
 uint packVertexColor(float4 data)
 {
@@ -209,18 +158,7 @@ uint packVertexColor(float4 data)
     return packed;
 }
 
-uint interpolateMaterial(uint a, uint b, float t)
-{
-    //return t<0.5?a:b;
-    float4 aUnpacked = unpackVertexColor(a);
-    float4 bUnpacked = unpackVertexColor(b);
-    
-    //todo check if saturate is actually needed here
-    
-    float4 blended = lerp(aUnpacked, bUnpacked, saturate(t));
 
-    return packVertexColor(blended);
-}
 
 [numthreads(1,512,1)]
 void Triangulation (uint3 id : SV_DispatchThreadID)
@@ -302,20 +240,20 @@ void Triangulation (uint3 id : SV_DispatchThreadID)
         vertexB.normal = interpolateNormals(cubeNormals[a1], cubeNormals[b1],tB);
         vertexC.normal = interpolateNormals(cubeNormals[a2], cubeNormals[b2],tC);
 
-        //todo actually select the right one
         vertexA.materialData=interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0],tA);
         vertexB.materialData=interpolateMaterial(cubeVertexColors[a1], cubeVertexColors[b1],tB);
         vertexC.materialData=interpolateMaterial(cubeVertexColors[a2], cubeVertexColors[b2],tC);
     
         int baseIndex = valid_triangle_position_result.vertexBufferPosition + i;
-        triangles[baseIndex+0]=vertexC;
+        triangles[baseIndex+0]=vertexA;
         triangles[baseIndex+1]=vertexB;
-        triangles[baseIndex+2]=vertexA;
+        triangles[baseIndex+2]=vertexC;
     }
 }
 
-RWStructuredBuffer<uint> _ClusterMeshIndexBuffer;
+RWStructuredBuffer<int> _ClusterMeshIndexBuffer;
 RWStructuredBuffer<uint> _IndexBufferCounter;
+StructuredBuffer<int> _AllVertexData;
 
 int _TriangulationSubChunkCount;
 int _IndexBufferSize;
@@ -332,24 +270,13 @@ void BuildIndexBuffer (uint3 id : SV_DispatchThreadID)
 
     int maxVertsPerCluster = 4*4*4*5*3;
 
-    int zeroIndexBufferOffset;
-    InterlockedAdd(_IndexBufferCounter[1],maxVertsPerCluster - vertexCountOfSubChunk, zeroIndexBufferOffset);
-    
     int vertexOffset=maxVertsPerCluster*subChunkIndexInCluster;
 
     AllMemoryBarrier();
     
-    for(int i = 0;i<maxVertsPerCluster;i++)
+    for(int i = 0;i<vertexCountOfSubChunk;i++)
     {
-        //_ClusterMeshIndexBuffer[vertexOffset+i]=vertexOffset+i;
-        if(i<vertexCountOfSubChunk)
-        {
-            _ClusterMeshIndexBuffer[indexBufferOffset+i] = vertexOffset+i;
-        }
-        else
-        {
-            _ClusterMeshIndexBuffer[(_IndexBufferSize-zeroIndexBufferOffset) - (i-vertexCountOfSubChunk)]=0;
-        }
+        _ClusterMeshIndexBuffer[indexBufferOffset+i] = _AllVertexData[vertexOffset+i];
     }
 }
 

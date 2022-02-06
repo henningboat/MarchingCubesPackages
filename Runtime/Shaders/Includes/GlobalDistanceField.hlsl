@@ -1,81 +1,16 @@
-﻿int numPointsPerAxis;
-
-
-uint3 _TerrainMapSize;
-int _MaterialIDFilter;
-
-
-static const int terrainChunkLength = 8;
-
-
-int indexFromCoordAndGridSize(int3 position, int3 gridSize)
+﻿
+int GetSubChunkIndexFromPosition(int3 positionWS)
 {
-    return position.z * gridSize.y * gridSize.x + position.y * gridSize.x + position.x;
+    const int3 positionInCluster = positionWS % 64;
+    const int chunkIndexInCluster = indexFromCoordAndGridSize(positionInCluster/8,8);
+    const int subChunkIndex = indexFromCoordAndGridSize((positionInCluster % 8)/4,2);
+
+    const int subChunkIndexInCluster = chunkIndexInCluster * 8 + subChunkIndex;
+    return subChunkIndexInCluster;
 }
 
-int indexFromCoord(int x, int y, int z)
-{
-    return z * numPointsPerAxis * numPointsPerAxis + y * numPointsPerAxis + x;
-}
 
-int GetPointPositionInIndexMap(uint3 position)
-{
-    uint3 positionInIndexMap = 0;
-    positionInIndexMap.x = position.x / 8;
-    positionInIndexMap.y = position.y / 8;
-    positionInIndexMap.z = position.z / 8;
-    
-    const uint indexInTerrainIndexMap = indexFromCoordAndGridSize(positionInIndexMap, _TerrainMapSize);
-    return indexInTerrainIndexMap;
-}
 
-float4 GetPointPosition(uint3 position)
-{
-    const uint positionInIndexMap = GetPointPositionInIndexMap(position);
-    const uint terrainChunkCapacity = 512;
-     int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
-   // chunkIndex=2+8;
-    const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
-
-    const uint3 positionWithinTerrainChunk = position % 8;
-
-    const int subChunkIndex = indexFromCoordAndGridSize(positionWithinTerrainChunk/4,2);
-
-    const uint indexWithinSubChunk = indexFromCoordAndGridSize(position % 4,4);
-    const uint indexInTerrainBuffer = baseIndexOfTerrainChunk + subChunkIndex * 64 + indexWithinSubChunk;
-    
-
-    float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
-
-    if (position.x <= 0 || position.y <= 0 || position.z <= 0 ||
-        position.x > _TerrainMapSize.x * 8 - 1 ||
-        position.y > _TerrainMapSize.y * 8 - 1 ||
-        position.z > _TerrainMapSize.z * 8 - 1)
-    {
-        surfaceDistance = 0.1f;
-    }
-    
-    return float4(position.x, position.y, position.z, surfaceDistance);
-}
-
-int GetCubeMaterialData(uint3 position)
-{
-    const uint positionInIndexMap = GetPointPositionInIndexMap(position);
-    const uint terrainChunkCapacity = 512;
-    int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
-    // chunkIndex=2+8;
-    const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
-
-    const uint3 positionWithinTerrainChunk = position % 8;
-
-    const int subChunkIndex = indexFromCoordAndGridSize(positionWithinTerrainChunk/4,2);
-
-    const uint indexWithinSubChunk = indexFromCoordAndGridSize(position % 4,4);
-    const uint indexInTerrainBuffer = baseIndexOfTerrainChunk + subChunkIndex * 64 + indexWithinSubChunk;
-    
-
-    return _GlobalTerrainBuffer[indexInTerrainBuffer / 4].terrainMaterial.data[indexInTerrainBuffer % 4];
-}
 
 float GetSurfaceDistanceInterpolated(float3 positionWS)
 {
