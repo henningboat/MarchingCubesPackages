@@ -22,9 +22,10 @@ int PackVertexData(int3 positionWS, int edgeA, int edgeB)
     _DistanceFieldExtends = 64;
     
     int positionIndex = PositionToIndex(positionWS,_DistanceFieldExtends);
-   positionIndex*=64;
-     positionIndex+=edgeA*8;
+    positionIndex*=64;
+    positionIndex+=edgeA*8;
     positionIndex+=edgeB;
+
     return positionIndex;
 }
 
@@ -165,7 +166,6 @@ int GetPointPositionInIndexMap(uint3 position)
     return normalize(combinedNormal);
 }
 
- int indexForTriangle;
 
 int GetCubeMaterialData(uint3 position)
 {
@@ -250,4 +250,7 @@ float3 interpolateMaterial(uint a, uint b, float t)
 
     color=interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0],tA);
 
+
+    vertexPosition=GetPointPosition(positionWS).xyz;
+    vertexPosition = lerp(cubeCorners[a0], cubeCorners[b0], 0.5);
 }

@@ -89,12 +89,16 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
                     _trianglePositionCountBuffer.SetData(new[] {1, 1, 1, 1, 1});
 
-                    var resetTriangleCountKernel = _computeShader.FindKernel("ResetSubChunkTriangleCount");
-                    _computeShader.SetBuffer(resetTriangleCountKernel, "_TerrainChunkBasePosition",
-                        _chunksToTriangulize);
-                    _computeShader.SetBuffer(resetTriangleCountKernel, "_TriangleCountPerSubChunk",
-                        _triangleCountPerSubChunk);
-                    _computeShader.Dispatch(resetTriangleCountKernel, triangulationInstructions.Length, 1, 1);
+                    //todo decide if the 
+                    int[] clearData = new int[4096];
+                    _triangleCountPerSubChunk.SetData(clearData);
+                    
+                    // var resetTriangleCountKernel = _computeShader.FindKernel("ResetSubChunkTriangleCount");
+                    // _computeShader.SetBuffer(resetTriangleCountKernel, "_TerrainChunkBasePosition",
+                    //     _chunksToTriangulize);
+                    // _computeShader.SetBuffer(resetTriangleCountKernel, "_TriangleCountPerSubChunk",
+                    //     _triangleCountPerSubChunk);
+                    // _computeShader.Dispatch(resetTriangleCountKernel, triangulationInstructions.Length, 1, 1);
 
 
                     //Fine positions in the grid that contain triangles
@@ -131,7 +135,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
                 float4 extends = _clusterCounts.xyzz * Constants.clusterLength;
 
-                _propertyBlock.SetBuffer("_TriangleIndeces", _triangulationIndices);
+                _propertyBlock.SetBuffer("_TriangleIndeces", _indexBuffer);
                 _propertyBlock.SetInt("numPointsPerAxis", ChunkLength);
                 _propertyBlock.SetInt("_MaterialIDFilter", materialIDFilter);
                 _propertyBlock.SetVector("_DistanceFieldExtends", extends);
