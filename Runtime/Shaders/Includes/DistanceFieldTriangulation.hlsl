@@ -1,5 +1,4 @@
 ﻿#include "MarchTables.compute"
- int3 _DistanceFieldExtends;
 
 int3 IndexToPositionWS(int i, int3 size)
 {
@@ -12,6 +11,10 @@ int3 IndexToPositionWS(int i, int3 size)
     return int3(x, y, z);
 }
 
+int _TerrainMapSizeX;
+int _TerrainMapSizeY;
+int _TerrainMapSizeZ;
+
 int PositionToIndex(int3 position, int3 size)
 {
     return position.x + position.y * size.x + position.z * size.x * size.y;
@@ -19,9 +22,9 @@ int PositionToIndex(int3 position, int3 size)
 
 int PackVertexData(int3 positionWS, int edgeA, int edgeB)
 {
-    _DistanceFieldExtends = 64;
+    int3 distanceFieldExtends = int3(_TerrainMapSizeX, _TerrainMapSizeY, _TerrainMapSizeZ)*8;
     
-    int positionIndex = PositionToIndex(positionWS,_DistanceFieldExtends);
+    int positionIndex = PositionToIndex(positionWS,distanceFieldExtends);
     positionIndex*=64;
     positionIndex+=edgeA*8;
     positionIndex+=edgeB;
@@ -31,9 +34,9 @@ int PackVertexData(int3 positionWS, int edgeA, int edgeB)
 
 void UnpackVertexData(int packedVertex, out int3 positionWS, out int edgeA, out int edgeB)
 {
-    _DistanceFieldExtends = 64;
+    int3 distanceFieldExtends = int3(_TerrainMapSizeX, _TerrainMapSizeY, _TerrainMapSizeZ)*8;
     
-    positionWS = IndexToPositionWS(packedVertex/64,_DistanceFieldExtends);
+    positionWS = IndexToPositionWS(packedVertex/64,distanceFieldExtends);
     edgeA = packedVertex%64/8;
     edgeB = packedVertex % 8;
 }
@@ -41,7 +44,7 @@ void UnpackVertexData(int packedVertex, out int3 positionWS, out int edgeA, out 
 int numPointsPerAxis;
 
 
-uint3 _TerrainMapSize;
+
 int _MaterialIDFilter;
 
 struct PackedTerrainMaterial{
@@ -105,7 +108,7 @@ int GetPointPositionInIndexMap(uint3 position)
     positionInIndexMap.y = position.y / 8;
     positionInIndexMap.z = position.z / 8;
     
-    const uint indexInTerrainIndexMap = indexFromCoordAndGridSize(positionInIndexMap, _TerrainMapSize);
+    const uint indexInTerrainIndexMap = indexFromCoordAndGridSize(positionInIndexMap, int3(_TerrainMapSizeX,_TerrainMapSizeY,_TerrainMapSizeZ));
     return indexInTerrainIndexMap;
 }
 
@@ -130,9 +133,9 @@ int GetPointPositionInIndexMap(uint3 position)
      float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
 
      if (position.x <= 0 || position.y <= 0 || position.z <= 0 ||
-         position.x > _TerrainMapSize.x * 8 - 1 ||
-         position.y > _TerrainMapSize.y * 8 - 1 ||
-         position.z > _TerrainMapSize.z * 8 - 1)
+         position.x > _TerrainMapSizeX * 8 - 1 ||
+         position.y > _TerrainMapSizeY * 8 - 1 ||
+         position.z > _TerrainMapSizeZ * 8 - 1)
      {
          surfaceDistance = 0.1f;
      }
@@ -249,8 +252,4 @@ float3 interpolateMaterial(uint a, uint b, float t)
     normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0],tA);
 
     color=interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0],tA);
-
-
-    vertexPosition=GetPointPosition(positionWS).xyz;
-    vertexPosition = lerp(cubeCorners[a0], cubeCorners[b0], 0.5);
 }

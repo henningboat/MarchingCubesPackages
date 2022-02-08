@@ -116,6 +116,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             };
 
             jobHandle = calculateIndeicesJob.Schedule(_geometryFieldData.ClusterCount, 1, jobHandle);
+            
             return jobHandle;
         }
 

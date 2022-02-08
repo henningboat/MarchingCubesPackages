@@ -44,7 +44,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             GeometryClusterChunkCounts = clusterCounts;
             ClusterCount = clusterCounts.Volume();
             TotalVoxelCount = ClusterCount * Constants.clusterVolume;
-            GeometryBuffer = new NativeArray<PackedDistanceFieldData>(TotalVoxelCount, persistent);
+            GeometryBuffer = new NativeArray<PackedDistanceFieldData>(TotalVoxelCount/Constants.PackedCapacity, persistent);
 
             TotalChunkCount = ClusterCount * Constants.chunksPerCluster;
             TotalSubChunkCount = TotalChunkCount * Constants.subChunksPerChunk;

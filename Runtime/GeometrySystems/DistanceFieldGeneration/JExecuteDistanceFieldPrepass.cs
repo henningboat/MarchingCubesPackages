@@ -64,7 +64,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                 for (var i = 0; i < iterator.CurrentInstructionSurfaceDistanceReadback.Length; i++)
                 {
                     var distance = iterator.CurrentInstructionSurfaceDistanceReadback[i].PackedValues;
-                    var isWriting = (distance < 10) & (distance > -10);
+
+                    //todo turn back to 10
+                    const int prepassDistance = 10;
+                    
+                    var isWriting = (distance < prepassDistance) & (distance > -prepassDistance);
                     for (var k = 0; k < 4; k++)
                         if (isWriting[k])
                         {
@@ -82,7 +86,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                                 }
                                 
                                 hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-
+                            
                                 //only if we don't currently read from our own layer, we want to add the current hash of the
                                 //read content to the mix. Else, we would get a new has everytime
                                 if (i != 0 || geometryFieldData.GeometryLayer.ClearEveryFrame)
@@ -109,7 +113,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             {
                 var newInstructionHash = hashPerChunk[chunkIndex];
                 var writeMaskValue = newInstructionHash != default;
-
+                
+                
                 clusterParameters.WriteMask[chunkIndex] = writeMaskValue;
 
                 var chunk = cluster.GetChunk(chunkIndex);
@@ -118,8 +123,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                     newInstructionHash != chunkParameters.CurrentGeometryInstructionsHash;
                 chunkParameters.CurrentGeometryInstructionsHash = newInstructionHash;
 
-                chunkParameters.InstructionsChangedSinceLastFrame = true;
-                
                 chunk.Parameters = chunkParameters;
             }
 
