@@ -20,62 +20,67 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             var clusterParameters = cluster.Parameters;
             var chunkParameters = chunk.Parameters;
 
-            //todo
-            if (clusterParameters.WriteMask[chunkParameters.IndexInCluster]&& chunkParameters.InstructionsChangedSinceLastFrame)
+            if (!chunkParameters.InstructionsChangedSinceLastFrame)
             {
-                // var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
-                // var currentDistanceValue = new NativeArray<PackedDistanceFieldData>(2, Allocator.Temp);
-                //
-                // for (var i = 0; i < 2; i++)
-                // {
-                //     int4 offsetX = new int4(2, 6, 2, 6);
-                //     int4 offsetY = new int4(2, 2, 6, 6);
-                //     int4 offsetZ = new int4(i) * 4 + 2;
-                //
-                //
-                //     var packedOffsetInChunk = new PackedFloat3(offsetX, offsetY, offsetZ);
-                //     positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + packedOffsetInChunk;
-                //
-                //     var packedReadBackValue = new PackedDistanceFieldData();
-                //
-                //     //super ugly and probably costs a bunch of performance
-                //     for (int j = 0; j < 4; j++)
-                //     {
-                //         int3 offsetInChunk = new int3(offsetX[j], offsetY[j], offsetZ[j]);
-                //         offsetInChunk = 3;
-                //
-                //         int subChunkIndex = Utils.PositionToIndex(offsetInChunk / 4, 2);
-                //         int indexInSubChunk = Utils.PositionToIndex(offsetInChunk%4, 4);
-                //
-                //         int indexInChunk = subChunkIndex * Constants.chunkVolume / Constants.subChunksPerChunk + indexInSubChunk;
-                //
-                //         packedReadBackValue.SurfaceDistance.PackedValues[j] =
-                //             chunk[indexInChunk / 4].SurfaceDistance.PackedValues[indexInChunk % 4];
-                //     }
-                //
-                //     currentDistanceValue[i] = packedReadBackValue;
-                // }
-                //
-                // var iterator = new GeometryInstructionIterator(positionsToCheck, geometryInstructions, clearEveryFrame, false,currentDistanceValue);
-                //
-                // iterator.CalculateAllTerrainData();
-                //
-                // GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
-                //
-                // chunkParameters.InnerDataMask = mask;
-                // chunkParameters.ChunkInsideTerrain = insideTerrainMask;
-                //
-                // positionsToCheck.Dispose();
-                // currentDistanceValue.Dispose();
-
-                chunkParameters.InnerDataMask = 255;
-                chunkParameters.ChunkInsideTerrain = 255;
-            }
-            else
-            {
-                chunkParameters.InnerDataMask = 0;
                 return;
             }
+                //todo
+            if (!clusterParameters.WriteMask[chunkParameters.IndexInCluster])
+            {
+                for (int i = 0; i < 128; i++)
+                {
+                    chunk[i] = new PackedDistanceFieldData() {SurfaceDistance = 10};
+                }
+                return;
+            }
+            
+            // var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
+            // var currentDistanceValue = new NativeArray<PackedDistanceFieldData>(2, Allocator.Temp);
+            //
+            // for (var i = 0; i < 2; i++)
+            // {
+            //     int4 offsetX = new int4(2, 6, 2, 6);
+            //     int4 offsetY = new int4(2, 2, 6, 6);
+            //     int4 offsetZ = new int4(i) * 4 + 2;
+            //
+            //
+            //     var packedOffsetInChunk = new PackedFloat3(offsetX, offsetY, offsetZ);
+            //     positionsToCheck[i] = new PackedFloat3(chunkParameters.PositionWS) + packedOffsetInChunk;
+            //
+            //     var packedReadBackValue = new PackedDistanceFieldData();
+            //
+            //     //super ugly and probably costs a bunch of performance
+            //     for (int j = 0; j < 4; j++)
+            //     {
+            //         int3 offsetInChunk = new int3(offsetX[j], offsetY[j], offsetZ[j]);
+            //         offsetInChunk = 3;
+            //
+            //         int subChunkIndex = Utils.PositionToIndex(offsetInChunk / 4, 2);
+            //         int indexInSubChunk = Utils.PositionToIndex(offsetInChunk%4, 4);
+            //
+            //         int indexInChunk = subChunkIndex * Constants.chunkVolume / Constants.subChunksPerChunk + indexInSubChunk;
+            //
+            //         packedReadBackValue.SurfaceDistance.PackedValues[j] =
+            //             chunk[indexInChunk / 4].SurfaceDistance.PackedValues[indexInChunk % 4];
+            //     }
+            //
+            //     currentDistanceValue[i] = packedReadBackValue;
+            // }
+            //
+            // var iterator = new GeometryInstructionIterator(positionsToCheck, geometryInstructions, clearEveryFrame, false,currentDistanceValue);
+            //
+            // iterator.CalculateAllTerrainData();
+            //
+            // GetCoverageAndFillMaskFromSurfaceDistance(iterator._terrainDataBuffer, out var mask, out var insideTerrainMask);
+            //
+            // chunkParameters.InnerDataMask = mask;
+            // chunkParameters.ChunkInsideTerrain = insideTerrainMask;
+            //
+            // positionsToCheck.Dispose();
+            // currentDistanceValue.Dispose();
+
+            chunkParameters.InnerDataMask = 255;
+            chunkParameters.ChunkInsideTerrain = 255;
 
             chunk.Parameters = chunkParameters;
             

@@ -167,7 +167,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         public void Execute(int chunkIndex)
         {
             var chunk = GeometryField.GetChunk(chunkIndex);
-            if (chunk.Parameters.InstructionsChangedSinceLastFrame && chunk.Parameters.HasData)
+            if (chunk.Parameters.InstructionsChangedSinceLastFrame)
                 ChunksWithModifiedIndices.AddNoResize(chunkIndex);
         }
     }
