@@ -118,7 +118,7 @@ int GetPointPositionInIndexMap(uint3 position)
  {
      const uint positionInIndexMap = GetPointPositionInIndexMap(position);
      const uint terrainChunkCapacity = 512;
-     int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
+     int chunkIndex = positionInIndexMap;
      // chunkIndex=2+8;
      const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
 
@@ -174,7 +174,7 @@ int GetCubeMaterialData(uint3 position)
 {
     const uint positionInIndexMap = GetPointPositionInIndexMap(position);
     const uint terrainChunkCapacity = 512;
-    int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
+    int chunkIndex = positionInIndexMap;
     // chunkIndex=2+8;
     const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
 

@@ -12,6 +12,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
         private ComputeBuffer _trianglePositionBuffer;
         private ComputeBuffer _trianglePositionCountBuffer;
         private ComputeBuffer _chunksToTriangulize;
+        private ComputeBuffer _chunksWithTriangles;
         private ComputeBuffer _triangleCountPerSubChunk;
         private ComputeBuffer _indexBufferCounter;
         private ComputeBuffer _vertexBuffer;
@@ -27,17 +28,19 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             result._computeShader = DynamicCubeMarchingSettingsHolder.Instance.Compute;
             result._argsBuffer = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
             result._argsBuffer.SetData(new[] {3, 0, 0, 0});
-            
-            
+
+
             result._trianglePositionCountBuffer =
                 new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
 
             result._triangleCountPerSubChunk = new ComputeBuffer(512 * 8, 4);
 
 
-            result._chunksToTriangulize = new ComputeBuffer(10000, 4 * 4, ComputeBufferType.Default);
-            result._indexBufferCounter =
-                new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
+            result._chunksToTriangulize =
+                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
+            result._chunksWithTriangles =
+                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
+            result._indexBufferCounter = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
 
             result._triangleCountPerSubChunk.SetData(new[] {result._triangleCountPerSubChunk.count});
 
@@ -58,7 +61,6 @@ namespace henningboat.CubeMarching.Runtime.Rendering
         }
 
         public void UpdateWithSurfaceData(ComputeBuffer globalTerrainBuffer,
-            ComputeBuffer globalTerrainIndexMap,
             NativeSlice<CTriangulationInstruction> triangulationInstructions,
             NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices,
             int materialIDFilter,
@@ -69,8 +71,6 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             // clusterParameters.lastVertexBufferChangeTimestamp = frameTimeStamp;
 
             var clusterPositionWS = clusterParameters.PositionWS;
-
-            _indexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
 
             if (triangulationInstructions.Length > 0)
             {
@@ -98,21 +98,19 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetBuffer(getPositionKernel, "_TerrainChunkBasePosition", _chunksToTriangulize);
                 _computeShader.SetBuffer(getPositionKernel, "_ValidTrianglePositions", _trianglePositionBuffer);
                 _computeShader.SetBuffer(getPositionKernel, "_GlobalTerrainBuffer", globalTerrainBuffer);
-                _computeShader.SetBuffer(getPositionKernel, "_GlobalTerrainIndexMap", globalTerrainIndexMap);
                 _computeShader.SetBuffer(getPositionKernel, "_TriangleCountPerSubChunk", _triangleCountPerSubChunk);
                 _computeShader.SetBuffer(getPositionKernel, "_TriangleIndices", _triangulationIndices);
                 _trianglePositionBuffer.SetCounterValue(0);
                 _computeShader.Dispatch(getPositionKernel, triangulationInstructions.Length, 1, 1);
                 ComputeBuffer.CopyCount(_trianglePositionBuffer, _trianglePositionCountBuffer, 0);
-            }
 
-            //todo remove the ||true
-            if (clusterParameters.needsIndexBufferUpdate || true)
-            {
-                _chunksToTriangulize.SetData(cSubChunkWithTrianglesIndices.ToArray());
+
+                _chunksWithTriangles.SetData(cSubChunkWithTrianglesIndices.ToArray());
+
+                _indexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
 
                 var indexBufferKernel = _computeShader.FindKernel("BuildIndexBuffer");
-                _computeShader.SetBuffer(indexBufferKernel, "_TerrainChunkBasePosition", _chunksToTriangulize);
+                _computeShader.SetBuffer(indexBufferKernel, "_TerrainChunkBasePosition", _chunksWithTriangles);
                 _computeShader.SetBuffer(indexBufferKernel, "_TriangleCountPerSubChunkResult",
                     _triangleCountPerSubChunk);
                 _computeShader.SetBuffer(indexBufferKernel, "_IndexBufferCounter", _indexBufferCounter);
@@ -122,6 +120,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetInt("_TerrainMapSizeX", _chunkCounts.x);
                 _computeShader.SetInt("_TerrainMapSizeY", _chunkCounts.y);
                 _computeShader.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+
 
                 _computeShader.SetInts("_TerrainMapSize", _chunkCounts.x, _chunkCounts.y, _chunkCounts.z);
                 _computeShader.Dispatch(indexBufferKernel, cSubChunkWithTrianglesIndices.Length, 1, 1);
@@ -134,7 +133,6 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             _propertyBlock.SetInt("numPointsPerAxis", ChunkLength);
             _propertyBlock.SetInt("_MaterialIDFilter", materialIDFilter);
             _propertyBlock.SetVector("_DistanceFieldExtends", extends);
-            _propertyBlock.SetBuffer("_GlobalTerrainIndexMap", globalTerrainIndexMap);
             _propertyBlock.SetBuffer("_GlobalTerrainBuffer", globalTerrainBuffer);
             _propertyBlock.SetBuffer("_ValidTrianglePositionResults", _trianglePositionBuffer);
             _propertyBlock.SetBuffer("_ArgsBuffer", _trianglePositionCountBuffer);
@@ -161,6 +159,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             _indexBufferCounter.Dispose();
             _indexBuffer.Dispose();
             _triangulationIndices.Dispose();
+            _chunksWithTriangles.Dispose();
         }
     }
 }
