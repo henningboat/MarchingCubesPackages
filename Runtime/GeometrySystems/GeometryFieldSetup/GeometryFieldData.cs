@@ -29,8 +29,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
         public JobHandle Dispose(JobHandle jobHandle=default)
         {
             if (GeometryBuffer.IsCreated) jobHandle=GeometryBuffer.Dispose(jobHandle);
-            if (ClusterParameters.IsCreated) jobHandle=ClusterParameters.Dispose(jobHandle);
-            if (DistanceFieldChunkDatas.IsCreated) jobHandle=DistanceFieldChunkDatas.Dispose(jobHandle);
+            if (ClusterParameters.IsCreated)  jobHandle=ClusterParameters.Dispose(jobHandle);
+            if (DistanceFieldChunkDatas.IsCreated)  jobHandle=DistanceFieldChunkDatas.Dispose(jobHandle);
             return jobHandle;
         }
 

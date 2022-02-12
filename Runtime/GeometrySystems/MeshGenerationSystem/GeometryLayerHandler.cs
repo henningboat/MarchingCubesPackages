@@ -5,28 +5,34 @@ using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
-    internal class GeometryLayerHandler:IDisposable
+    internal class GeometryLayerHandler : IDisposable
     {
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
-        private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
-        private List<GeometryLayer> _storedLayers;
         private List<SerializableGUID> _allLayerIDs;
         private List<GeometryLayer> _allLayers;
-
-        public GeometryFieldData GeometryFieldData { get; }
+        private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
+        private List<GeometryLayer> _storedLayers;
 
         public GeometryLayerHandler(int3 clusterCounts, GeometryLayer geometryLayer)
         {
             GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer, Allocator.Persistent);
+        }
+
+        public GeometryFieldData GeometryFieldData { get; }
+
+        public int3 ClusterCounts => GeometryFieldData.ClusterCounts;
+        public GeometryLayer GeometryLayer => GeometryFieldData.GeometryLayer;
+
+        public void Dispose()
+        {
+            GeometryFieldData.Dispose().Complete();
         }
 
         public JobHandle Update(JobHandle jobHandle,
@@ -47,37 +53,27 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             var outputLayerInstructionLists = _geometryPerLayer[GeometryFieldData.GeometryLayer.ID];
 
 
-            if (outputLayerInstructionLists == null)
-            {
-                return jobHandle;
-            }
+            if (outputLayerInstructionLists == null) return jobHandle;
 
             if (!GeometryLayer.ClearEveryFrame)
-            {
                 _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
-            }
 
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
 
-            DistanceDataReadbackCollection readbackCollection = new DistanceDataReadbackCollection();
+            var readbackCollection = new DistanceDataReadbackCollection();
 
-            for (int i = 0; i < readbackCollection.Capacity; i++)
-            {
+            for (var i = 0; i < readbackCollection.Capacity; i++)
                 if (i < allLayerHandlers.Count)
-                {
                     readbackCollection[i] = allLayerHandlers[i].GeometryFieldData;
-                }
                 else
-                {
                     readbackCollection[i] = new GeometryFieldData(0, default, Allocator.TempJob);
-                }
-            }
 
             var geometryLayerIndex = GetLayerIndex(GeometryFieldData.GeometryLayer);
-            var prepassJob = new JExecuteDistanceFieldPrepass(readbackCollection, geometryLayerIndex, geometryInstructions);
+            var prepassJob =
+                new JExecuteDistanceFieldPrepass(readbackCollection, geometryLayerIndex, geometryInstructions);
             jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
 
             var calculateDistanceFieldJob = new JCalculateDistanceField(geometryLayerIndex,
@@ -124,10 +120,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                         else
                         {
                             if (_geometryPerLayer.TryGetValue(instruction.SourceLayerID, out var childLayerContent))
-                            {
                                 foreach (var childInstructionList in childLayerContent)
                                     AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
-                            }
                         }
                     }
                 }
@@ -136,24 +130,18 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         private GeometryInstruction CreateLayerCopyInstruction(GeometryLayer sourceLayer, int combinerDepth)
         {
-            int layerIndex = GetLayerIndex(sourceLayer);
-            return new GeometryInstruction { CombinerDepth = combinerDepth, GeometryInstructionSubType = layerIndex, GeometryInstructionType = GeometryInstructionType.CopyLayer};
+            var layerIndex = GetLayerIndex(sourceLayer);
+            return new GeometryInstruction
+            {
+                CombinerDepth = combinerDepth, GeometryInstructionSubType = layerIndex,
+                GeometryInstructionType = GeometryInstructionType.CopyLayer
+            };
         }
 
         private int GetLayerIndex(GeometryLayer sourceLayer)
         {
             return _storedLayers.FindIndex(layer => layer.ID == sourceLayer.ID);
         }
-
-        public void Dispose()
-        {
-            _allGeometryInstructionsList.Dispose();
-            GeometryFieldData.Dispose();
-        }
-        
-        public int3 ClusterCounts => GeometryFieldData.ClusterCounts;
-        public GeometryLayer GeometryLayer => GeometryFieldData.GeometryLayer;
-        
     }
 
     public static class NativeArrayExtensions
