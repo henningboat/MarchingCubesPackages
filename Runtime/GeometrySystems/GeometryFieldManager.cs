@@ -42,7 +42,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             _geometryFieldCollection.InitializeIfDirty(storedGeometryLayers, _clusterCounts, out var didInitialize);
 
             _initialized = true;
-
+            
             if (didInitialize)
                 foreach (var geometryFieldReceiver in _geometryFieldReceivers)
                 {
@@ -101,7 +101,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         }
 
         private void OnDrawGizmos()
-        {
+            {
             Gizmos.DrawWireCube((float3) _clusterCounts * 0.5f * Constants.clusterLength,
                 (float3) _clusterCounts * Constants.clusterLength * Vector3.one);
         }

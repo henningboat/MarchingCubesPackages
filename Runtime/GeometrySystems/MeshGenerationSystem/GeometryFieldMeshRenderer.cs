@@ -63,7 +63,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                     _subChunksWithTrianglesData.Slice(subChunkIndex, clusterParameters.subChunksWithTrianglesCount);
                 var gpuBuffers = _gpuDataPerCluster[clusterIndex];
 
-                gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer,
+                gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
                     clusterParameters, _defaultMaterial);
             }
@@ -135,7 +135,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 }
             }
 
-            _indexMapComputeBuffer = new ComputeBuffer(_geometryFieldData.TotalChunkCount, 4);
+            _indexMapComputeBuffer = new ComputeBuffer(indexMap.Length, 4);
             _indexMapComputeBuffer.SetData(indexMap);
 
             _gpuDataPerCluster = new ClusterMeshGPUBuffers[geometryFieldData.ClusterCount];
