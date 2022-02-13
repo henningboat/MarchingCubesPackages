@@ -8,7 +8,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public override string ToString()
         {
-            return $"{PositionInCluster}  Cube:{RawTriangleIndex}";
+            return $"{PositionInCluster} ({positionIndex})  Cube:{RawTriangleIndex}";
         }
 
         public ClusterTriangle(uint value)
@@ -27,6 +27,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 return positionInCluster;
             }
         }
+
+        public uint positionIndex => Value & PositionPartBitmask;
 
         public int CubeIndex => (int)RawTriangleIndex / 5;
         public int OffsetInCube => (int)RawTriangleIndex % 5;

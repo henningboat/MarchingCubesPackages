@@ -33,7 +33,7 @@ struct ClusterTriangle
         return IndexToPositionWS(positionIndex,64);
     }
 
-    int3 GetCubeIndex()
+    int GetCubeIndex()
     {
         int cubeIndex = value >> 18;
         return cubeIndex;
@@ -45,7 +45,7 @@ ClusterTriangle PackTriangle(int3 positionInCluster, int cubeIndex, int offsetIn
     int3 distanceFieldExtends = int3(_TerrainMapSizeX, _TerrainMapSizeY, _TerrainMapSizeZ) * 8;
     uint positionIndex = PositionToIndex(positionInCluster, distanceFieldExtends);
 
-    uint combinedCubeIndex = cubeIndex;
+    uint combinedCubeIndex = cubeIndex * 5 + offsetInsideCube;
 
     ClusterTriangle clusterTriangle;
     clusterTriangle.value = positionIndex;
@@ -93,6 +93,10 @@ float4 unpackVertexColor(uint i)
 float3 interpolateVerts(float4 v1, float4 v2, out float t)
 {
     t = (0 - v1.w) / (v2.w - v1.w);
+
+//todo should not be neccecary
+    t=saturate(t);
+    
     return v1.xyz + t * (v2.xyz - v1.xyz);
 }
 
@@ -269,7 +273,7 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
 
     
     int cubeIndex = clusterTriangle.GetCubeIndex(); 
-    int indexIndex = triangulation[cubeIndex][vertexIndexInCluster];
+    int indexIndex = triangulation[cubeIndex / 5][vertexIndexInCluster+3*(cubeIndex%5)];
     
     int a0 = cornerIndexAFromEdge[indexIndex];
     int b0 = cornerIndexBFromEdge[indexIndex];

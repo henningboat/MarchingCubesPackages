@@ -11,27 +11,6 @@ StructuredBuffer<int4> _TerrainChunkBasePosition;
 
 #include "Includes/GlobalDistanceField.hlsl"
 
-groupshared float3 _GeneratedNormals;
-
-
-struct VertexData
-{
-    float4 vertex;
-    float3 normal;
-    int materialData;
-};
-
-struct TriangulationInstruction
-{
-    int3 positionWS;
-    int cubeIndex;
-    int vertexBufferPosition;
-    int3 padding;
-};
-
-AppendStructuredBuffer<TriangulationInstruction> _ValidTrianglePositions;
-StructuredBuffer<TriangulationInstruction> _ValidTrianglePositionResults;
-RWStructuredBuffer<VertexData> triangles;
 RWStructuredBuffer<ClusterTriangle> _TriangleIndices;
 RWStructuredBuffer<int> _TriangleCountPerSubChunk;
 StructuredBuffer<int> _TriangleCountPerSubChunkResult;
@@ -93,28 +72,19 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
     if (cubeIndex == 0 || cubeIndex == 255)
         return;
 
-    const int triangleCount = trianglesPerCubeIndex[cubeIndex];
+    const int triangleCount = vertexCountPerCubeIndex[cubeIndex]/3;
 
     int offsetInSubChunk;
 
     InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, offsetInSubChunk);
 
     const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
+    
+    int baseIndex = maxTrianglesPerSubChunk * subChunkIndexInCluster + offsetInSubChunk;
 
-    // TriangulationInstruction result = (TriangulationInstruction)0;
-    // result.positionWS=positionWS;
-    // result.cubeIndex=cubeIndex;
-    // result.padding=subChunkIndexInCluster;
-    //
-    // result.vertexBufferPosition =  3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + indexForTriangle;
-    //     
-    // _ValidTrianglePositions.Append(result);
-
-    int baseIndex = 3 * maxTrianglesPerSubChunk * subChunkIndexInCluster + offsetInSubChunk;
-
-    for (int i = 0; triangulation[cubeIndex][i] != -1; i ++)
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i +=3)
     {
-        _TriangleIndices[baseIndex + i] = PackTriangle(positionWS, cubeIndex, i);
+        _TriangleIndices[baseIndex + i/3] = PackTriangle(positionWS, cubeIndex, i/3);
     }
 }
 
@@ -156,13 +126,13 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
     int indexBufferOffset = 0;
     InterlockedAdd(_IndexBufferCounter[0], vertexCountOfSubChunk * 3, indexBufferOffset);
 
-    int maxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
+    int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5 ;
 
-    int vertexOffset = maxVertsPerCluster * subChunkIndexInCluster;
+    int vertexOffset = maxTrianglesPerSubChunk * subChunkIndexInCluster;
 
     AllMemoryBarrier();
 
-    for (int i = 0; i < maxVertsPerCluster; i++)
+    for (int i = 0; i < maxTrianglesPerSubChunk; i++)
     {
         if (i < vertexCountOfSubChunk)
         {
