@@ -207,7 +207,7 @@ float3 interpolateMaterial(uint a, uint b, float t)
     return blended.rgb;
 }
 
-void GetVertexDataFromPackedVertex(int packedVertex, int vertexID, out float3 vertexPosition, out float3 normal,
+void GetVertexDataFromPackedVertex(int packedVertex, out float3 vertexPosition, out float3 normal,
                                    out float3 color)
 {
     int3 positionWS;
