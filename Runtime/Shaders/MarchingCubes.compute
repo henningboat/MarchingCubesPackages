@@ -32,7 +32,7 @@ struct TriangulationInstruction
 AppendStructuredBuffer<TriangulationInstruction> _ValidTrianglePositions;
 StructuredBuffer<TriangulationInstruction> _ValidTrianglePositionResults;
 RWStructuredBuffer<VertexData> triangles;
-RWStructuredBuffer<int> _TriangleIndices;
+RWStructuredBuffer<ClusterTriangle> _TriangleIndices;
 RWStructuredBuffer<int> _TriangleCountPerSubChunk;
 StructuredBuffer<int> _TriangleCountPerSubChunkResult;
 
@@ -114,7 +114,7 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
 
     for (int i = 0; triangulation[cubeIndex][i] != -1; i ++)
     {
-        _TriangleIndices[baseIndex + i] = PackTriangle(positionWS, triangulation[cubeIndex][i], i);
+        _TriangleIndices[baseIndex + i] = PackTriangle(positionWS, cubeIndex, i);
     }
 }
 
@@ -139,9 +139,9 @@ uint packVertexColor(float4 data)
     return packed;
 }
 
-RWStructuredBuffer<int> _ClusterMeshIndexBuffer;
+RWStructuredBuffer<ClusterTriangle> _ClusterMeshIndexBuffer;
 RWStructuredBuffer<uint> _IndexBufferCounter;
-StructuredBuffer<int> _AllVertexData;
+StructuredBuffer<ClusterTriangle> _AllVertexData;
 
 int _TriangulationSubChunkCount;
 int _IndexBufferSize;
@@ -154,7 +154,7 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
 
     int vertexCountOfSubChunk = _TriangleCountPerSubChunkResult[subChunkIndexInCluster];
     int indexBufferOffset = 0;
-    InterlockedAdd(_IndexBufferCounter[0], vertexCountOfSubChunk, indexBufferOffset);
+    InterlockedAdd(_IndexBufferCounter[0], vertexCountOfSubChunk * 3, indexBufferOffset);
 
     int maxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
 
@@ -166,7 +166,7 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
     {
         if (i < vertexCountOfSubChunk)
         {
-            _ClusterMeshIndexBuffer[indexBufferOffset + i] = _AllVertexData[vertexOffset + i];
+            _ClusterMeshIndexBuffer[indexBufferOffset/3 + i] = _AllVertexData[vertexOffset + i];
         }
     }
 }

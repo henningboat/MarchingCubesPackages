@@ -1,4 +1,5 @@
 ﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -124,6 +125,11 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
                 _computeShader.SetInts("_TerrainMapSize", _chunkCounts.x, _chunkCounts.y, _chunkCounts.z);
                 _computeShader.Dispatch(indexBufferKernel, cSubChunkWithTrianglesIndices.Length, 1, 1);
+
+                var dataReadback = new ClusterTriangle[_indexBuffer.count];
+                _indexBuffer.GetData(dataReadback);
+                
+                Debug.Log(dataReadback[0]);
             }
 
 
