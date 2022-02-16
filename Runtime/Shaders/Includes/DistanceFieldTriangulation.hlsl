@@ -219,14 +219,20 @@ float3 interpolateMaterial(uint a, uint b, float t)
     return blended.rgb;
 }
 
+int _PositionInClusterX;
+int _PositionInClusterY;
+int _PositionInClusterZ;
+
 void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
                                    out float3 normal,
                                    out float3 color)
 {
-    int3 positionWS;
     int triangleTypeIndex;
 
-    positionWS = clusterTriangle.GetPositionInCluster();
+    int3 positionInCluster = clusterTriangle.GetPositionInCluster();
+
+    int3 positionWS = positionInCluster + int3(_PositionInClusterX,_PositionInClusterY,_PositionInClusterZ);
+    
     triangleTypeIndex = 16;
 
     float4 cubeCorners[8] = {
@@ -272,7 +278,7 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
     int a0 = cornerIndexAFromEdge[indexIndex];
     int b0 = cornerIndexBFromEdge[indexIndex];
 
-    vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA) + _ClusterPositionWS;
+    vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA);
     normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
 
     color = interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0], tA);

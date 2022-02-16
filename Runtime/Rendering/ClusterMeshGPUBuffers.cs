@@ -138,6 +138,10 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             _propertyBlock.SetInt("_TerrainMapSizeX", _chunkCounts.x);
             _propertyBlock.SetInt("_TerrainMapSizeY", _chunkCounts.y);
             _propertyBlock.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+            
+            _propertyBlock.SetInt("_PositionInClusterX", clusterParameters.PositionWS.x);
+            _propertyBlock.SetInt("_PositionInClusterY", clusterParameters.PositionWS.y);
+            _propertyBlock.SetInt("_PositionInClusterZ", clusterParameters.PositionWS.z);
 
             _propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) clusterParameters.PositionWS);
 
