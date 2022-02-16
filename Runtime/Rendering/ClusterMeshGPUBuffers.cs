@@ -28,8 +28,8 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             result._computeShader = DynamicCubeMarchingSettingsHolder.Instance.Compute;
             result._argsBuffer = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
             result._argsBuffer.SetData(new[] {3, 0, 0, 0});
-            
-            
+
+
             result._trianglePositionCountBuffer =
                 new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
 
@@ -93,6 +93,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetInt("_TerrainMapSizeX", _chunkCounts.x);
                 _computeShader.SetInt("_TerrainMapSizeY", _chunkCounts.y);
                 _computeShader.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+                _computeShader.SetInts("_ClusterPositionWS", clusterParameters.PositionWS.x,clusterParameters.PositionWS.y,clusterParameters.PositionWS.z);
                 _computeShader.SetBuffer(getPositionKernel, "_TerrainChunkBasePosition", _chunksToTriangulize);
                 _computeShader.SetBuffer(getPositionKernel, "_GlobalTerrainBuffer", globalTerrainBuffer);
                 _computeShader.SetBuffer(getPositionKernel, "_GlobalTerrainIndexMap", globalTerrainIndexMap);
@@ -100,6 +101,10 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetBuffer(getPositionKernel, "_TriangleIndices", _triangulationIndices);
                 _computeShader.Dispatch(getPositionKernel, triangulationInstructions.Length, 1, 1);
 
+
+                var dataReadback = new ClusterTriangle[_triangulationIndices.count];
+                _triangulationIndices.GetData(dataReadback);
+                
 
                 _chunksWithTriangles.SetData(cSubChunkWithTrianglesIndices.ToArray());
 
@@ -133,6 +138,8 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             _propertyBlock.SetInt("_TerrainMapSizeX", _chunkCounts.x);
             _propertyBlock.SetInt("_TerrainMapSizeY", _chunkCounts.y);
             _propertyBlock.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+
+            _propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) clusterParameters.PositionWS);
 
 
             Graphics.DrawProceduralIndirect(defaultMaterial, new Bounds(Vector3.zero, Vector3.one * 10000),

@@ -26,11 +26,11 @@ struct ClusterTriangle
     uint value;
 
     #define PositionPartBitmask 0x3FFFF;
-    
+
     int3 GetPositionInCluster()
     {
         int positionIndex = value & PositionPartBitmask;
-        return IndexToPositionWS(positionIndex,64);
+        return IndexToPositionWS(positionIndex, 64);
     }
 
     int GetCubeIndex()
@@ -42,14 +42,14 @@ struct ClusterTriangle
 
 ClusterTriangle PackTriangle(int3 positionInCluster, int cubeIndex, int offsetInsideCube)
 {
-    int3 distanceFieldExtends = int3(_TerrainMapSizeX, _TerrainMapSizeY, _TerrainMapSizeZ) * 8;
-    uint positionIndex = PositionToIndex(positionInCluster, distanceFieldExtends);
+    int3 cluserSize = 64;
+    uint positionIndex = PositionToIndex(positionInCluster, cluserSize);
 
     uint combinedCubeIndex = cubeIndex * 5 + offsetInsideCube;
 
     ClusterTriangle clusterTriangle;
     clusterTriangle.value = positionIndex;
-    clusterTriangle.value  |= combinedCubeIndex << 18;
+    clusterTriangle.value |= combinedCubeIndex << 18;
     return clusterTriangle;
 }
 
@@ -94,8 +94,8 @@ float3 interpolateVerts(float4 v1, float4 v2, out float t)
 {
     t = (0 - v1.w) / (v2.w - v1.w);
 
-//todo should not be neccecary
-    t=saturate(t);
+    //todo should not be neccecary
+    t = saturate(t);
     
     return v1.xyz + t * (v2.xyz - v1.xyz);
 }
@@ -153,15 +153,7 @@ float4 GetPointPosition(uint3 position)
 
 
     float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
-
-    if (position.x <= 0 || position.y <= 0 || position.z <= 0 ||
-        position.x > _TerrainMapSizeX * 8 - 1 ||
-        position.y > _TerrainMapSizeY * 8 - 1 ||
-        position.z > _TerrainMapSizeZ * 8 - 1)
-    {
-        surfaceDistance = 0.1f;
-    }
-
+    
     return float4(position.x, position.y, position.z, surfaceDistance);
 }
 
@@ -227,14 +219,15 @@ float3 interpolateMaterial(uint a, uint b, float t)
     return blended.rgb;
 }
 
-void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition, out float3 normal,
+void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
+                                   out float3 normal,
                                    out float3 color)
 {
     int3 positionWS;
     int triangleTypeIndex;
 
     positionWS = clusterTriangle.GetPositionInCluster();
-    triangleTypeIndex=16;
+    triangleTypeIndex = 16;
 
     float4 cubeCorners[8] = {
         GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
@@ -268,17 +261,18 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
         CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
         CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
     };
-    
+
     float tA;
 
-    
-    int cubeIndex = clusterTriangle.GetCubeIndex(); 
-    int indexIndex = triangulation[cubeIndex / 5][vertexIndexInCluster+3*(cubeIndex%5)];
-    
+
+    int cubeIndex = clusterTriangle.GetCubeIndex();
+
+    int indexIndex = triangulation[cubeIndex / 5][vertexIndexInCluster + 3 * (cubeIndex % 5)];
+
     int a0 = cornerIndexAFromEdge[indexIndex];
     int b0 = cornerIndexBFromEdge[indexIndex];
 
-    vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA) - _ClusterPositionWS;
+    vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA) + _ClusterPositionWS;
     normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
 
     color = interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0], tA);

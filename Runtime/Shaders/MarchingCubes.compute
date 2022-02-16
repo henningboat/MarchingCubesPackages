@@ -72,19 +72,21 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
     if (cubeIndex == 0 || cubeIndex == 255)
         return;
 
-    const int triangleCount = vertexCountPerCubeIndex[cubeIndex]/3;
+    const int triangleCount = vertexCountPerCubeIndex[cubeIndex] / 3;
 
     int offsetInSubChunk;
 
     InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, offsetInSubChunk);
 
     const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
-    
+
+    int3 positionInsideCluster = positionWS - _ClusterPositionWS;
+
     int baseIndex = maxTrianglesPerSubChunk * subChunkIndexInCluster + offsetInSubChunk;
 
-    for (int i = 0; triangulation[cubeIndex][i] != -1; i +=3)
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
     {
-        _TriangleIndices[baseIndex + i/3] = PackTriangle(positionWS, cubeIndex, i/3);
+        _TriangleIndices[baseIndex + i / 3] = PackTriangle(positionInsideCluster, cubeIndex, i / 3);
     }
 }
 
@@ -126,7 +128,7 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
     int indexBufferOffset = 0;
     InterlockedAdd(_IndexBufferCounter[0], vertexCountOfSubChunk * 3, indexBufferOffset);
 
-    int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5 ;
+    int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
 
     int vertexOffset = maxTrianglesPerSubChunk * subChunkIndexInCluster;
 
@@ -136,7 +138,7 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
     {
         if (i < vertexCountOfSubChunk)
         {
-            _ClusterMeshIndexBuffer[indexBufferOffset/3 + i] = _AllVertexData[vertexOffset + i];
+            _ClusterMeshIndexBuffer[indexBufferOffset / 3 + i] = _AllVertexData[vertexOffset + i];
         }
     }
 }
