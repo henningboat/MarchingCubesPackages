@@ -2,10 +2,7 @@
 using System.Linq;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
-using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -25,13 +22,15 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             {
                 didInitialize = false;
                 return;
-            };
+            }
+
+            ;
 
             Dispose();
 
             _storedGeometryLayers = storedGeometryLayers;
             _geometryLayerHandlers = new GeometryLayerHandler[storedGeometryLayers.Count];
-            
+
             for (var i = 0; i < storedGeometryLayers.Count; i++)
                 _geometryLayerHandlers[i] = new GeometryLayerHandler(size, storedGeometryLayers[i]);
 
@@ -59,7 +58,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         }
 
         public JobHandle ScheduleJobs(JobHandle jobHandle,
-            List<GeometryInstructionListBuffers> geometryInstructionListBuffersList, List<GeometryLayer> allGeometryLayers)
+            List<GeometryInstructionListBuffers> geometryInstructionListBuffersList,
+            List<GeometryLayer> allGeometryLayers)
         {
             _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
 
@@ -73,9 +73,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             }
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
-            {
-               jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers, allGeometryLayers,_geometryLayerHandlers.ToList() );
-            }
+                jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers,
+                    allGeometryLayers, _geometryLayerHandlers.ToList());
 
             return jobHandle;
         }
@@ -85,9 +84,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             return _geometryLayerHandlers[i].GeometryFieldData;
         }
 
-        public GeometryFieldData GetFieldFromLayer(GeometryLayer requestedLayer)
+        public GeometryLayerHandler GetFieldFromLayer(GeometryLayer requestedLayer)
         {
-            return _geometryLayerHandlers.First(handler => handler.GeometryLayer == requestedLayer).GeometryFieldData;
+            return _geometryLayerHandlers.First(handler => handler.GeometryLayer == requestedLayer);
         }
     }
 }

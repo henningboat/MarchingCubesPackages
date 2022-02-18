@@ -1,4 +1,5 @@
 ﻿using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
 using henningboat.CubeMarching.Runtime.Rendering;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
@@ -12,7 +13,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     {
         [SerializeField] private GeometryLayerAsset _geometryLayerAsset;
         [SerializeField] private Material _defaultMaterial;
-        private NativeList<int> _chhunksToUploadToGPU;
+        private NativeList<int> _chunksModifiedThisFrame;
 
         private ComputeBuffer _distanceFieldComputeBuffer;
 
@@ -34,12 +35,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public void OnJobsFinished(GeometryFieldData geometryFieldData)
         {
-            if (_chhunksToUploadToGPU.Length > 0)
+            if (_chunksModifiedThisFrame.Length > 0)
             {
                 var computeBufferNativeArray =
                     _distanceFieldComputeBuffer.BeginWrite<PackedDistanceFieldData>(0,
                         _geometryFieldData.GeometryBuffer.Length);
-                foreach (var chunkToUpload in _chhunksToUploadToGPU)
+                foreach (var chunkToUpload in _chunksModifiedThisFrame)
                 {
                     var packedChunkSize = Constants.chunkVolume / Constants.PackedCapacity;
                     var chunkIndex = chunkToUpload * packedChunkSize;
@@ -49,8 +50,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
                 _distanceFieldComputeBuffer.EndWrite<PackedDistanceFieldData>(_geometryFieldData.GeometryBuffer.Length);
             }
-
-            _chhunksToUploadToGPU.Dispose();
 
             for (var clusterIndex = 0; clusterIndex < _gpuDataPerCluster.Length; clusterIndex++)
             {
@@ -74,22 +73,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             return _geometryLayerAsset != null ? _geometryLayerAsset.GeometryLayer : GeometryLayer.OutputLayer;
         }
 
-        public JobHandle ScheduleJobs(JobHandle jobHandle, GeometryFieldData requestedField)
+        public JobHandle ScheduleJobs(JobHandle jobHandle, GeometryFieldData requestedField,
+            NativeList<int> chunksModifiedThisFrame)
         {
-            _chhunksToUploadToGPU =
-                new NativeList<int>(_geometryFieldData.TotalChunkCount, Allocator.TempJob);
-
-            //todo remove this
-            jobHandle.Complete();
-
-            var extractModifiedChunksJob = new JExtractModifiedChunks
-            {
-                GeometryField = _geometryFieldData,
-                ChunksWithModifiedIndices = _chhunksToUploadToGPU.AsParallelWriter()
-            };
-
-            jobHandle = extractModifiedChunksJob.Schedule(_geometryFieldData.TotalChunkCount, 64, jobHandle);
-
+            _chunksModifiedThisFrame = chunksModifiedThisFrame;
             var calculateIndeicesJob = new JCalculateTriangulationIndicesJob
             {
                 GeometryField = _geometryFieldData,
@@ -159,9 +146,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     }
 
     [BurstCompile]
-    internal struct JExtractModifiedChunks : IJobParallelFor
+    internal struct JGetChunksWithModifications : IJobParallelFor
     {
-        public GeometryFieldData GeometryField;
+        [ReadOnly] public GeometryFieldData GeometryField;
         [WriteOnly] public NativeList<int>.ParallelWriter ChunksWithModifiedIndices;
 
         public void Execute(int chunkIndex)

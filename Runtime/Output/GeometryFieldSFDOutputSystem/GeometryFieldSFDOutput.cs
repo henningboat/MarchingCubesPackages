@@ -13,8 +13,13 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldSFDOutputSystem
     {
         [SerializeField] private GeometryLayerAsset _geometryLayerAsset;
         [SerializeField] private Texture3D _sdf;
+        private NativeList<int> _chunksModifiedThisFrame;
         private NativeArray<float> _sdfTextureData;
         private int3 _voxelCounts;
+
+        public Texture3D SDF => _sdf;
+        public Vector3 SDFPosition { get; private set; }
+        public Vector3 SDFScale { get; private set; }
 
         public void Dispose()
         {
@@ -29,8 +34,14 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldSFDOutputSystem
             return _geometryLayerAsset != null ? _geometryLayerAsset.GeometryLayer : GeometryLayer.OutputLayer;
         }
 
-        public JobHandle ScheduleJobs(JobHandle dependencies, GeometryFieldData requestedField)
+        public JobHandle ScheduleJobs(JobHandle dependencies, GeometryFieldData requestedField,
+            NativeList<int> chunksModifiedThisFrame)
         {
+            _chunksModifiedThisFrame = chunksModifiedThisFrame;
+
+            SDFScale = (float3) requestedField.ClusterCounts * Constants.clusterLength;
+            SDFPosition = SDFScale * 0.5f;
+
             return default;
         }
 
@@ -47,7 +58,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldSFDOutputSystem
                 {VoxelCounts = _voxelCounts, GeometryFieldData = geometryFieldData, SDFData = _sdfTextureData};
 
             job.Schedule().Complete();
-            
+
             _sdfTextureData.Dispose();
             _sdf.Apply();
         }

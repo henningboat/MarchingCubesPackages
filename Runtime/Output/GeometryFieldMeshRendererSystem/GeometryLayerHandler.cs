@@ -2,27 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
-namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
+namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem
 {
-    internal class GeometryLayerHandler : IDisposable
+    public class GeometryLayerHandler : IDisposable
     {
         private NativeList<GeometryInstruction> _allGeometryInstructionsList;
         private List<SerializableGUID> _allLayerIDs;
         private List<GeometryLayer> _allLayers;
         private Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> _geometryPerLayer;
         private List<GeometryLayer> _storedLayers;
+        public NativeList<int> ChunksUpdatedThisFrame;
 
         public GeometryLayerHandler(int3 clusterCounts, GeometryLayer geometryLayer)
         {
             GeometryFieldData = new GeometryFieldData(clusterCounts, geometryLayer, Allocator.Persistent);
+            ChunksUpdatedThisFrame = new NativeList<int>(GeometryFieldData.TotalChunkCount, Allocator.Persistent);
         }
 
         public GeometryFieldData GeometryFieldData { get; }
@@ -33,6 +37,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         public void Dispose()
         {
             GeometryFieldData.Dispose().Complete();
+            ChunksUpdatedThisFrame.Dispose();
         }
 
         public JobHandle Update(JobHandle jobHandle,
@@ -85,6 +90,18 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                     jobHandle = readbackCollection[i].Dispose(jobHandle);
 
             jobHandle = _allGeometryInstructionsList.Dispose(jobHandle);
+
+
+            var getChunksWithModificationsJob = new JGetChunksWithModifications
+            {
+                GeometryField = GeometryFieldData,
+                ChunksWithModifiedIndices = ChunksUpdatedThisFrame.AsParallelWriter()
+            };
+
+            jobHandle = getChunksWithModificationsJob.Schedule(GeometryFieldData.TotalChunkCount, 256, jobHandle);
+
+            //todo remove this
+            jobHandle.Complete();
 
             return jobHandle;
         }
