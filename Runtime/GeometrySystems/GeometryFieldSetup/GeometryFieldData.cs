@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
-using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
-using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 {
@@ -22,21 +18,22 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
         public readonly int3 GeometryClusterChunkCounts;
         public int ClusterCount { get; }
 
-        [NativeDisableParallelForRestriction] public  NativeArray<PackedDistanceFieldData> GeometryBuffer;
-        [NativeDisableParallelForRestriction] public  NativeArray<GeometryChunkParameters> DistanceFieldChunkDatas;
-        [NativeDisableParallelForRestriction] public  NativeArray<CClusterParameters> ClusterParameters;
+        [NativeDisableParallelForRestriction] public NativeArray<PackedDistanceFieldData> GeometryBuffer;
+        [NativeDisableParallelForRestriction] public NativeArray<GeometryChunkParameters> DistanceFieldChunkDatas;
+        [NativeDisableParallelForRestriction] public NativeArray<CClusterParameters> ClusterParameters;
 
-        public JobHandle Dispose(JobHandle jobHandle=default)
+        public JobHandle Dispose(JobHandle jobHandle = default)
         {
-            if (GeometryBuffer.IsCreated) jobHandle=GeometryBuffer.Dispose(jobHandle);
-            if (ClusterParameters.IsCreated)  jobHandle=ClusterParameters.Dispose(jobHandle);
-            if (DistanceFieldChunkDatas.IsCreated)  jobHandle=DistanceFieldChunkDatas.Dispose(jobHandle);
+            if (GeometryBuffer.IsCreated) jobHandle = GeometryBuffer.Dispose(jobHandle);
+            if (ClusterParameters.IsCreated) jobHandle = ClusterParameters.Dispose(jobHandle);
+            if (DistanceFieldChunkDatas.IsCreated) jobHandle = DistanceFieldChunkDatas.Dispose(jobHandle);
             return jobHandle;
         }
 
         public GeometryFieldData(int3 clusterCounts, GeometryLayer layer, Allocator persistent)
         {
-            if (layer.Stored == false&& math.any(clusterCounts>0)) throw new Exception("Only stored layers can have GeometryFieldData instances");
+            if (layer.Stored == false && math.any(clusterCounts > 0))
+                throw new Exception("Only stored layers can have GeometryFieldData instances");
 
             GeometryLayer = layer;
 
@@ -44,7 +41,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             GeometryClusterChunkCounts = clusterCounts;
             ClusterCount = clusterCounts.Volume();
             TotalVoxelCount = ClusterCount * Constants.clusterVolume;
-            GeometryBuffer = new NativeArray<PackedDistanceFieldData>(TotalVoxelCount/Constants.PackedCapacity, persistent);
+            GeometryBuffer =
+                new NativeArray<PackedDistanceFieldData>(TotalVoxelCount / Constants.PackedCapacity, persistent);
 
             TotalChunkCount = ClusterCount * Constants.chunksPerCluster;
             TotalSubChunkCount = TotalChunkCount * Constants.subChunksPerChunk;
@@ -52,15 +50,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             ClusterParameters = new NativeArray<CClusterParameters>(ClusterCount, persistent);
             DistanceFieldChunkDatas = new NativeArray<GeometryChunkParameters>(TotalChunkCount, persistent);
 
-            if (TotalChunkCount == 0)
-            {
-                return;
-            }
-            
+            if (TotalChunkCount == 0) return;
+
             var initializeDistanceFIeld = new InitializeTerrainData {geometryBuffer = GeometryBuffer};
             var jobHandle = initializeDistanceFIeld.Schedule();
 
-            
+
             var clusterIndex = 0;
 
             for (var x = 0; x < clusterCounts.x; x++)
@@ -82,6 +77,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 
         public const int chunkVolume = Constants.chunkLength * Constants.chunkLength * Constants.chunkLength;
         public int3 ClusterCounts { get; }
+        public int3 VoxelCounts => ClusterCounts * Constants.clusterLength;
 
         [BurstCompile]
         private struct InitializeTerrainData : IJob
@@ -140,6 +136,36 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
         {
             var cluster = GetCluster(chunkIndex / Constants.chunksPerCluster);
             return cluster.GetChunk(chunkIndex % Constants.chunksPerCluster);
+        }
+
+        public float GetSingleDistance(int3 voxelPosition)
+        {
+            var clusterPosition = voxelPosition / Constants.clusterLength;
+            var clusterIndex = Runtime.DistanceFieldGeneration.Utils.PositionToIndex(clusterPosition, ClusterCounts);
+
+            var chunkPosition = voxelPosition % Constants.clusterLength / Constants.chunkLengthPerCluster;
+            var chunkIndex =
+                Runtime.DistanceFieldGeneration.Utils.PositionToIndex(chunkPosition, Constants.chunkLength);
+
+            var subChunkPosition = voxelPosition % Constants.chunkLength / Constants.subChunkLength;
+            var subChunkIndex = Runtime.DistanceFieldGeneration.Utils.PositionToIndex(subChunkPosition, 2);
+
+            var positionInSubChunk = voxelPosition % Constants.subChunkLength;
+            var indexInSubChunk =
+                Runtime.DistanceFieldGeneration.Utils.PositionToIndex(positionInSubChunk, Constants.subChunkLength);
+
+            var indexOfVoxel = clusterIndex * Constants.clusterVolume;
+            indexOfVoxel += chunkIndex * Constants.chunkVolume;
+            indexOfVoxel += subChunkIndex * Constants.subChunkVolume;
+            indexOfVoxel += indexInSubChunk;
+
+            if (indexOfVoxel / 4 > GeometryBuffer.Length)
+            {
+                Debug.Log("oh no");
+                return 0;
+            }
+
+            return GeometryBuffer[indexOfVoxel / 4].SurfaceDistance.PackedValues[indexOfVoxel % 4];
         }
     }
 }
