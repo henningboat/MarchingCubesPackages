@@ -1,5 +1,4 @@
-﻿
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.Runtime.Rendering
 {

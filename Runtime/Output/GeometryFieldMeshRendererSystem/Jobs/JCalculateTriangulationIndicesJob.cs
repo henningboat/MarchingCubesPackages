@@ -11,28 +11,33 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     public struct JCalculateTriangulationIndicesJob : IJobParallelFor
     {
         [NativeDisableParallelForRestriction] public NativeArray<CTriangulationInstruction> TriangulationInstructions;
-        [NativeDisableParallelForRestriction] public NativeArray<CSubChunkWithTrianglesIndex> SubChunksWithTrianglesData;
+
+        [NativeDisableParallelForRestriction]
+        public NativeArray<CSubChunkWithTrianglesIndex> SubChunksWithTrianglesData;
+
         [NativeDisableParallelForRestriction] public NativeArray<int> VertexCountPerSubChunk;
         [NativeDisableParallelForRestriction] public GeometryFieldData GeometryField;
-        
+
         public void Execute(int clusterIndex)
         {
             var cluster = GeometryField.GetCluster(clusterIndex);
-            int offsetInSubChunkBuffer = clusterIndex * Constants.subChunksPerCluster;
+            var offsetInSubChunkBuffer = clusterIndex * Constants.subChunksPerCluster;
 
             var clusterParameters = cluster.Parameters;
             clusterParameters.needsIndexBufferUpdate = false;
 
-            int subChunksWithTrianglesCount = 0;
+            var subChunksWithTrianglesCount = 0;
             var subChunksWithTrianglesSlice =
                 SubChunksWithTrianglesData.Slice(clusterIndex * Constants.subChunksPerCluster,
                     Constants.subChunksPerCluster);
 
             var totalVertexCount = 0;
 
-            NativeSlice<int> vertexCountPerSubChunk = VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
+            var vertexCountPerSubChunk =
+                VertexCountPerSubChunk.Slice(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
 
-            var triangulationInstructions = TriangulationInstructions.SliceList(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
+            var triangulationInstructions =
+                TriangulationInstructions.SliceList(offsetInSubChunkBuffer, Constants.subChunksPerCluster);
 
             for (var chunkIndex = 0; chunkIndex < Constants.chunksPerCluster; chunkIndex++)
             {
@@ -51,13 +56,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                     {
                         var subChunkOffset = Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(i, 2) * 4;
 
-                        
+
                         const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
-                        
+
                         //todo re-add checking for this 
                         if (chunkParameters.InstructionsChangedSinceLastFrame)
                         {
-                            triangulationInstructions.Add( new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
+                            triangulationInstructions.Add(
+                                new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));
                             vertexCountPerSubChunk[subChunkIndex] = maxTrianglesPerSubChunk;
                         }
 
@@ -66,7 +72,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                             SubChunkIndex = subChunkIndex, ChunkPositionGS = positionOfChunkWS + subChunkOffset
                         };
                         subChunksWithTrianglesCount++;
-                           
+
                         totalVertexCount += vertexCountPerSubChunk[subChunkIndex];
                     }
                     else

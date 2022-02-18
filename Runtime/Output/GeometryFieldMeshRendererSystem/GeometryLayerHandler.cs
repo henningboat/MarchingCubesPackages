@@ -80,13 +80,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 geometryInstructions, readbackCollection);
             jobHandle = calculateDistanceFieldJob.Schedule(GeometryFieldData.TotalChunkCount, 1, jobHandle);
 
-            for (int i = 0; i < readbackCollection.Capacity; i++)
-            {
+            for (var i = 0; i < readbackCollection.Capacity; i++)
                 if (i >= allLayerHandlers.Count)
-                {
                     jobHandle = readbackCollection[i].Dispose(jobHandle);
-                }
-            }
 
             jobHandle = _allGeometryInstructionsList.Dispose(jobHandle);
 

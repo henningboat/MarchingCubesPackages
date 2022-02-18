@@ -15,8 +15,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         private GeometryFieldData _data7;
 
         public int Capacity => 8;
-        
-        unsafe public GeometryFieldData this[int index]
+
+        public GeometryFieldData this[int index]
         {
             get
             {
@@ -37,14 +37,30 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
             {
                 switch (index)
                 {
-                    case 0: _data0=value;break;
-                    case 1: _data1=value;break;
-                    case 2: _data2=value;break;
-                    case 3: _data3=value;break;
-                    case 4: _data4=value;break;
-                    case 5: _data5=value;break;
-                    case 6: _data6=value;break;
-                    case 7: _data7=value;break;
+                    case 0:
+                        _data0 = value;
+                        break;
+                    case 1:
+                        _data1 = value;
+                        break;
+                    case 2:
+                        _data2 = value;
+                        break;
+                    case 3:
+                        _data3 = value;
+                        break;
+                    case 4:
+                        _data4 = value;
+                        break;
+                    case 5:
+                        _data5 = value;
+                        break;
+                    case 6:
+                        _data6 = value;
+                        break;
+                    case 7:
+                        _data7 = value;
+                        break;
                 }
             }
         }

@@ -13,16 +13,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public ClusterTriangle(uint value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         private const uint PositionPartBitmask = 0b111111111111111111;
+
         public int3 PositionInCluster
         {
             get
             {
-                uint index = Value & PositionPartBitmask;
-                int3 positionInCluster =
+                var index = Value & PositionPartBitmask;
+                var positionInCluster =
                     Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS((int) index, Constants.clusterLength);
                 return positionInCluster;
             }
@@ -30,14 +31,14 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public uint positionIndex => Value & PositionPartBitmask;
 
-        public int CubeIndex => (int)RawTriangleIndex / 5;
-        public int OffsetInCube => (int)RawTriangleIndex % 5;
-        
+        public int CubeIndex => (int) RawTriangleIndex / 5;
+        public int OffsetInCube => (int) RawTriangleIndex % 5;
+
         public uint RawTriangleIndex
         {
             get
             {
-                uint index = Value >> 18;
+                var index = Value >> 18;
                 return index;
             }
         }
