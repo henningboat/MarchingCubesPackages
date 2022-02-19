@@ -140,6 +140,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
 
         public float GetSingleDistance(int3 voxelPosition)
         {
+            voxelPosition = math.clamp(voxelPosition, 0, GeometryClusterChunkCounts * 64 - 1);
+
             var clusterPosition = voxelPosition / Constants.clusterLength;
             var clusterIndex = Runtime.DistanceFieldGeneration.Utils.PositionToIndex(clusterPosition, ClusterCounts);
 
@@ -158,12 +160,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
             indexOfVoxel += chunkIndex * Constants.chunkVolume;
             indexOfVoxel += subChunkIndex * Constants.subChunkVolume;
             indexOfVoxel += indexInSubChunk;
-
-            if (indexOfVoxel / 4 > GeometryBuffer.Length)
-            {
-                Debug.Log("oh no");
-                return 0;
-            }
 
             return GeometryBuffer[indexOfVoxel / 4].SurfaceDistance.PackedValues[indexOfVoxel % 4];
         }

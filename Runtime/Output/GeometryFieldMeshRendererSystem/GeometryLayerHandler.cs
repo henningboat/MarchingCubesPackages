@@ -48,6 +48,9 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
             _allLayers = allLayers;
             _storedLayers = storedGeometryLayers;
             _allLayerIDs = geometryPerLayer.Keys.ToList();
+
+            ChunksUpdatedThisFrame.Clear();
+
             //todo placeholder
             jobHandle.Complete();
 

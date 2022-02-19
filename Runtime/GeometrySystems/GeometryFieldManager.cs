@@ -77,10 +77,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             foreach (var receiver in _geometryFieldReceivers)
             {
                 var geometryFieldData = _geometryFieldCollection.GetFieldFromLayer(receiver.RequestedLayer());
-                var receiverJobHandle = receiver.ScheduleJobs(jobHandle, geometryFieldData.GeometryFieldData,
+                jobHandle = receiver.ScheduleJobs(jobHandle, geometryFieldData.GeometryFieldData,
                     geometryFieldData.ChunksUpdatedThisFrame);
-                _receiverJobHandles = JobHandle.CombineDependencies(_receiverJobHandles, receiverJobHandle);
             }
+
+            _receiverJobHandles = jobHandle;
         }
 
         private void LateUpdate()

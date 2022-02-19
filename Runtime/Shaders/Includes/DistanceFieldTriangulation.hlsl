@@ -153,6 +153,11 @@ float4 GetPointPosition(uint3 position)
 
 
     float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
+
+    if(any(position<1||position>63))
+    {
+        surfaceDistance=0.1;
+    }
     
     return float4(position.x, position.y, position.z, surfaceDistance);
 }

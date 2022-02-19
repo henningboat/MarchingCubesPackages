@@ -17,7 +17,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
             positionOS *= scale;
-            return (Voronoi(positionOS) + new PackedFloat(valueOffset)) * scale.x;
+            return Voronoi(positionOS) + new PackedFloat(valueOffset);
         }
 
         public ShapeType Type => ShapeType.Voronoi;
@@ -51,12 +51,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             {
                 var b = new PackedFloat3(new PackedFloat(i), new PackedFloat(j), new PackedFloat(k));
                 var r = b - f + Hash(p + b);
-                var d = dot(r, r);
+                //var d = dot(r, r);
+                var d = length(r);
 
                 var newDistanceIsSmallest = d.PackedValues < res.PackedValues;
 
-                res.PackedValues = math.@select(res.PackedValues, d.PackedValues, newDistanceIsSmallest);
-                res2.PackedValues = math.@select(min(res2, d).PackedValues, res2.PackedValues,
+                res.PackedValues = math.select(res.PackedValues, d.PackedValues, newDistanceIsSmallest);
+                res2.PackedValues = math.select(min(res2, d).PackedValues, res2.PackedValues,
                     newDistanceIsSmallest);
             }
 

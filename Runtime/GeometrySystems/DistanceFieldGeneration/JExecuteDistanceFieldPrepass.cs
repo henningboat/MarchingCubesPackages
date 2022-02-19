@@ -1,11 +1,8 @@
 ﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
-using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
-using SIMDMath;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration
@@ -15,7 +12,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
     {
         [ReadOnly] private NativeArray<GeometryInstruction> _geometryInstructions;
         private DistanceDataReadbackCollection _data;
-        private int _layerIndex;
+        private readonly int _layerIndex;
 
         public JExecuteDistanceFieldPrepass(DistanceDataReadbackCollection data, int layerIndex,
             NativeArray<GeometryInstruction> geometryInstructions)
@@ -29,26 +26,30 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
         {
             var geometryFieldData = _data[_layerIndex];
             var cluster = geometryFieldData.GetCluster(clusterIndex);
-            
+
             var hashPerChunk = new NativeArray<Hash128>(Constants.chunksPerCluster, Allocator.Temp);
 
-            NativeArray<int> indicesInCluster = new NativeArray<int>(512,Allocator.Temp);
+            //there's probably a better way to do this, but for now this ensures that a chunk with no instructions
+            //still does not get a has of zero, which forces it to still be initialized
+            var defaultHash = Hash128.Compute(2.3278103498234f);
+            for (var i = 0; i < Constants.chunksPerCluster; i++) hashPerChunk[i] = defaultHash;
+
+            var indicesInCluster = new NativeArray<int>(512, Allocator.Temp);
 
 
-
-            int middleIndexWithinChunk = 63;
-            for (var i = 0; i < Constants.chunksPerCluster ; i++)
+            var middleIndexWithinChunk = 63;
+            for (var i = 0; i < Constants.chunksPerCluster; i++)
             {
                 var chunk = cluster.GetChunk(i);
                 indicesInCluster[i] = chunk.Parameters.IndexInCluster * Constants.chunkVolume + middleIndexWithinChunk;
             }
 
             var iterator =
-                new GeometryInstructionIterator(cluster,indicesInCluster, _geometryInstructions, true, _data);
+                new GeometryInstructionIterator(cluster, indicesInCluster, _geometryInstructions, true, _data);
 
             indicesInCluster.Dispose();
 
-            int instructionIndex = 0;
+            var instructionIndex = 0;
 
             // if (geometryFieldData.GeometryLayer.ClearEveryFrame == false)
             // {
@@ -67,12 +68,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
 
                     //todo turn back to 10
                     const int prepassDistance = 12;
-                    
+
                     var isWriting = (distance < prepassDistance) & (distance > -prepassDistance);
                     for (var k = 0; k < 4; k++)
                         if (isWriting[k])
                         {
-                            int chunkIndex = k + 4 * i;
+                            var chunkIndex = k + 4 * i;
                             var hash128 = hashPerChunk[chunkIndex];
 
                             Hash128 hashOfInstruction;
@@ -80,13 +81,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                             {
                                 var readbackCluster = _data[currentGeometryInstruction.GeometryInstructionSubType]
                                     .GetCluster(clusterIndex);
-                                if (readbackCluster.Parameters.WriteMask[chunkIndex] == false)
-                                {
-                                    continue;
-                                }
-                                
+                                if (readbackCluster.Parameters.WriteMask[chunkIndex] == false) continue;
+
                                 hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-                            
+
                                 //only if we don't currently read from our own layer, we want to add the current hash of the
                                 //read content to the mix. Else, we would get a new has everytime
                                 if (i != 0 || geometryFieldData.GeometryLayer.ClearEveryFrame)
@@ -113,8 +111,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             {
                 var newInstructionHash = hashPerChunk[chunkIndex];
                 var writeMaskValue = newInstructionHash != default;
-                
-                
+
+
                 clusterParameters.WriteMask[chunkIndex] = writeMaskValue;
 
                 var chunk = cluster.GetChunk(chunkIndex);

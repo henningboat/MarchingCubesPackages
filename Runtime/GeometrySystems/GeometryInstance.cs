@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
+using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
@@ -49,6 +50,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public void SetOverwrites(List<GeometryGraphPropertyOverwrite> newOverwrites)
         {
             _overwrites = newOverwrites;
+        }
+
+        public void SetOverwrite(int propertyIndex, float32 value)
+        {
+            _overwrites[propertyIndex].Value = value;
         }
 
         public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result)
