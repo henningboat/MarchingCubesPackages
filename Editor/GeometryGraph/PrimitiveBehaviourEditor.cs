@@ -13,16 +13,19 @@ namespace Editor.GeometryGraph
     [CustomEditor(typeof(GeometryInstance), true)]
     public class GeometryInstanceEditor : UnityEditor.Editor
     {
+        private SerializedProperty _combinerOperation;
         private SerializedProperty _geometryLayer;
 
         protected virtual void OnEnable()
         {
+            _combinerOperation = serializedObject.FindProperty("_combinerOperation");
             _geometryLayer = serializedObject.FindProperty("_geometryLayer");
         }
 
         public override void OnInspectorGUI()
         {
             EditorGUILayout.ObjectField(_geometryLayer);
+            EditorGUILayout.PropertyField(_combinerOperation);
 
             var instance = target as GeometryInstance;
             var data = instance.GeometryInstructionList;

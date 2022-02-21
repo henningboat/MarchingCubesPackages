@@ -35,22 +35,34 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         public void OnJobsFinished(GeometryFieldData geometryFieldData)
         {
+            // if (_chunksModifiedThisFrame.Length > 0)
+            // {
+            //     var computeBufferNativeArray =
+            //         _distanceFieldComputeBuffer.BeginWrite<PackedDistanceFieldData>(0,
+            //             _geometryFieldData.GeometryBuffer.Length);
+            //     foreach (var chunkToUpload in _chunksModifiedThisFrame)
+            //     {
+            //         var packedChunkSize = Constants.chunkVolume / Constants.PackedCapacity;
+            //         var chunkIndex = chunkToUpload * packedChunkSize;
+            //         computeBufferNativeArray.CopyFrom(_geometryFieldData.GeometryBuffer, chunkIndex, chunkIndex,
+            //             packedChunkSize);
+            //     }
+            //
+            //     _distanceFieldComputeBuffer.EndWrite<PackedDistanceFieldData>(_geometryFieldData.GeometryBuffer.Length);
+            // }
+
+            //todo placeholder, it's probably better to only copy modified parts
             if (_chunksModifiedThisFrame.Length > 0)
             {
                 var computeBufferNativeArray =
                     _distanceFieldComputeBuffer.BeginWrite<PackedDistanceFieldData>(0,
                         _geometryFieldData.GeometryBuffer.Length);
-                foreach (var chunkToUpload in _chunksModifiedThisFrame)
-                {
-                    var packedChunkSize = Constants.chunkVolume / Constants.PackedCapacity;
-                    var chunkIndex = chunkToUpload * packedChunkSize;
-                    computeBufferNativeArray.CopyFrom(_geometryFieldData.GeometryBuffer, chunkIndex, chunkIndex,
-                        packedChunkSize);
-                }
-
+                computeBufferNativeArray.CopyFrom(_geometryFieldData.GeometryBuffer);
+                
                 _distanceFieldComputeBuffer.EndWrite<PackedDistanceFieldData>(_geometryFieldData.GeometryBuffer.Length);
             }
-
+            
+            
             for (var clusterIndex = 0; clusterIndex < _gpuDataPerCluster.Length; clusterIndex++)
             {
                 var clusterParameters = _geometryFieldData.ClusterParameters[clusterIndex];

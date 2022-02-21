@@ -8,6 +8,7 @@
         SmoothSubtract = 3,
         Add = 4,
         Replace = 5,
-        ReplaceMaterial = 6
+        ReplaceMaterial = 6,
+        Subtract = 7,
     }
 }

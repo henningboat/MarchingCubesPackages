@@ -1,11 +1,11 @@
 ﻿using System;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem
 {
@@ -41,6 +41,19 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem
             inputDeps = MathInstructions.Dispose(inputDeps);
             inputDeps = GeometryInstructions.Dispose(inputDeps);
             return inputDeps;
+        }
+
+        public void SetTopLevelBlendOperation(CombinerOperation combinerOperation)
+        {
+            for (var i = 0; i < GeometryInstructions.Length; i++)
+            {
+                var geometryInstruction = GeometryInstructions[i];
+                if (geometryInstruction.CombinerDepth == 0)
+                {
+                    geometryInstruction.CombinerBlendOperation = combinerOperation;
+                    GeometryInstructions[i] = geometryInstruction;
+                }
+            }
         }
     }
 }

@@ -59,7 +59,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public JobHandle ScheduleJobs(JobHandle jobHandle,
             List<GeometryInstructionListBuffers> geometryInstructionListBuffersList,
-            List<GeometryLayer> allGeometryLayers)
+            List<GeometryLayer> allGeometryLayers, bool forceClear)
         {
             _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
 
@@ -74,7 +74,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
                 jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers,
-                    allGeometryLayers, _geometryLayerHandlers.ToList());
+                    allGeometryLayers, _geometryLayerHandlers.ToList(),forceClear);
 
             return jobHandle;
         }

@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
         public JobHandle Update(JobHandle jobHandle,
             Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
             List<GeometryLayer> storedGeometryLayers,
-            List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers)
+            List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers, bool forceClear)
         {
             _allLayers = allLayers;
             _storedLayers = storedGeometryLayers;
@@ -63,7 +63,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             if (outputLayerInstructionLists == null) return jobHandle;
 
-            if (!GeometryLayer.ClearEveryFrame)
+            if (!GeometryLayer.ClearEveryFrame && !forceClear)
                 _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
 
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)

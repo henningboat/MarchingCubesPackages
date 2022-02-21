@@ -35,11 +35,20 @@ namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
                 case CombinerOperation.ReplaceMaterial:
                     packedTerrainData = ReplaceTerrainColor(valuesA, valuesB);
                     break;
+                case CombinerOperation.Subtract:
+                    packedTerrainData = CombineTerrainSubtract(valuesA, valuesB);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             return packedTerrainData;
+        }
+
+        private static PackedDistanceFieldData CombineTerrainSubtract(PackedDistanceFieldData valuesA, PackedDistanceFieldData valuesB)
+        {
+            valuesB.SurfaceDistance = max(-valuesA.SurfaceDistance, valuesB.SurfaceDistance);
+            return valuesB;
         }
 
         private static PackedDistanceFieldData ReplaceTerrainColor(PackedDistanceFieldData a, PackedDistanceFieldData b)

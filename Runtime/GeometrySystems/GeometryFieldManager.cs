@@ -17,7 +17,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     {
         [SerializeField] private int3 _clusterCounts = new(1, 1, 1);
         [SerializeField] private List<GeometryLayerAsset> _geometryLayers = new();
-
+        [SerializeField][Tooltip("Always overwrite layers, even if they have ")] private bool _alwaysClearInEditMode=true;
+        
+        
         private GeometryLayerHandler _buildRenderGraphSystem;
         private NativeList<int> _chhunksToUploadToGPU;
         private GeometryFieldCollection _geometryFieldCollection;
@@ -55,7 +57,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                             .GeometryFieldData);
                 }
 
-            var allGraphs = FindObjectsOfType<GeometryInstance>();
+            var allGraphs = FindObjectsOfType<GeometryInstance>().OrderBy(instance => instance.Order);
             var geometryGraphBuffers = new List<GeometryInstructionListBuffers>();
             foreach (var graph in allGraphs)
             {
@@ -67,7 +69,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             jobHandle = _prepareGraphsSystem.Update(jobHandle, geometryGraphBuffers);
 
             var allGeometryLayers = allGraphs.Select(instance => instance.TargetLayer).Distinct().ToList();
-            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers, allGeometryLayers);
+            
+            var forceClear = Application.isPlaying==false && _alwaysClearInEditMode;
+            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers, allGeometryLayers, forceClear);
 
             _receiverJobHandles = default;
 

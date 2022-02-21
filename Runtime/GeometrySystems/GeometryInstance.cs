@@ -1,23 +1,59 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
-using UnityEngine.GraphToolsFoundation.Overdrive;
-using UnityEngine.Serialization;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [ExecuteInEditMode]
     public abstract class GeometryInstance : MonoBehaviour
-    { 
+    {
         [SerializeField] private GeometryLayerAsset _geometryLayer;
-
-        private GeometryInstructionListBuffers _instructionListBuffer;
+        [SerializeField] private CombinerOperation _combinerOperation;
 
         // ReSharper disable once InconsistentNaming
         [SerializeField] private List<GeometryGraphPropertyOverwrite> _overwrites = new();
+
+        private GeometryInstructionListBuffers _instructionListBuffer;
         public abstract GeometryInstructionList GeometryInstructionList { get; }
+
+        public GeometryLayer TargetLayer
+        {
+            get
+            {
+                if (_geometryLayer != null) return _geometryLayer.GeometryLayer;
+
+                return default;
+            }
+        }
+
+        public int Order
+        {
+            get
+            {
+                switch (_combinerOperation)
+                {
+                    case CombinerOperation.Min:
+                        return 0;
+                    case CombinerOperation.SmoothMin:
+                        return 5;
+                    case CombinerOperation.Subtract:
+                        return 10;
+                    case CombinerOperation.SmoothSubtract:
+                        return 20;
+                    case CombinerOperation.Max:
+                        return 30;
+                    case CombinerOperation.Add:
+                    case CombinerOperation.Replace:
+                    case CombinerOperation.ReplaceMaterial:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         private void OnDisable()
         {
@@ -39,6 +75,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             _instructionListBuffer.ValueBuffer.Write(transform.worldToLocalMatrix,
                 GeometryInstructionList.MainTransformation.Index);
+
+            _instructionListBuffer.SetTopLevelBlendOperation(_combinerOperation);
         }
 
 
@@ -78,16 +116,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             UpdateOverwritesInValueBuffer();
 
             return true;
-        }
-
-        public GeometryLayer TargetLayer
-        {
-            get
-            {
-                if (_geometryLayer != null) return _geometryLayer.GeometryLayer;
-
-                return default;
-            }
         }
 
         private void TryDisposeGraphBuffers()
