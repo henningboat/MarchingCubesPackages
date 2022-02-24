@@ -16,8 +16,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
         public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
         {
-            positionOS *= scale;
-            return Voronoi(positionOS) + new PackedFloat(valueOffset);
+            positionOS *= 1/scale;
+            return Voronoi(positionOS)*scale.x + new PackedFloat(valueOffset);
         }
 
         public ShapeType Type => ShapeType.Voronoi;

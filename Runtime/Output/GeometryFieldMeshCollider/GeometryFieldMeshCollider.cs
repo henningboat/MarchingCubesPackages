@@ -65,6 +65,8 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshCollider
             JobHandle jobHandle;
             jobHandle = generateVertexVertexBufferJob.Schedule(Constants.chunksPerCluster, 16, dependencies);
 
+            //todo remove this
+            jobHandle.Complete();
             return jobHandle;
         }
 
@@ -92,8 +94,6 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshCollider
             }
             
             if (!_needsMeshUpdate) return;
-
-            Debug.Log(_vertexBuffer.Length);
 
             if (_mesh != null) _mesh.DeleteSafe();
 
