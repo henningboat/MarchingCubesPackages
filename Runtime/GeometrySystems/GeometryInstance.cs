@@ -47,6 +47,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                     case CombinerOperation.Max:
                         return 30;
                     case CombinerOperation.Add:
+                        return 40;
                     case CombinerOperation.Replace:
                     case CombinerOperation.ReplaceMaterial:
                     default:
