@@ -21,11 +21,11 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             unsafe
             {
                 PackedFloat result = default;
-                SDFData shape = assetData.GetData();
+                SDF2DData* shape = assetData.GetData<SDF2DData>(0);
                 for (int i = 0; i < 4; i++)
                 {
                     float2 uv = new float2(positionOS.x.PackedValues[i], positionOS.y.PackedValues[i]);
-                    result.PackedValues[i] = (offset - shape.Sample(uv)) * distanceScale;
+                    result.PackedValues[i] = shape->Sample(uv) * distanceScale;
                 }
 
                 return result;

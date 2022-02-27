@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
@@ -18,28 +19,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
     [Serializable]
     public struct GeometryInstruction
     {
-        #region Public Fields
-
-        public int CombinerDepth;
-        public GeometryInstructionType GeometryInstructionType;
-
-        public int GeometryInstructionSubType;
-
-        public int32 PropertyIndexes;
-        public float32 ResolvedPropertyValues;
-
-        public GeometryInstructionFlags _flags;
-        public bool HasMaterial => (_flags & GeometryInstructionFlags.HasMaterial) != 0;
-        public bool WritesToDistanceField => GeometryInstructionType != GeometryInstructionType.PositionModification;
-        public CombinerOperation CombinerBlendOperation;
-        public float CombinerBlendFactor => ResolvedPropertyValues[15];
-
-        public Hash128 GeometryInstructionHash;
-
-        [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")] public SerializableGUID ReferenceGUID;
-
-        #endregion
-
         public void AddValueBufferOffset(int valueBufferOffset)
         {
             PropertyIndexes.AddOffset(valueBufferOffset);
@@ -79,7 +58,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         }
 
         /// <summary>
-        /// Returns a hash of all data of the instruction that is actually used
+        ///     Returns a hash of all data of the instruction that is actually used
         /// </summary>
         /// <returns></returns>
         public void UpdateHash()
@@ -106,60 +85,65 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             GeometryInstructionHash = hash;
         }
+
+        #region Public Fields
+
+        public int CombinerDepth;
+        public GeometryInstructionType GeometryInstructionType;
+
+        public int GeometryInstructionSubType;
+
+        public int32 PropertyIndexes;
+        public float32 ResolvedPropertyValues;
+
+        public GeometryInstructionFlags _flags;
+        public bool HasMaterial => (_flags & GeometryInstructionFlags.HasMaterial) != 0;
+        public bool WritesToDistanceField => GeometryInstructionType != GeometryInstructionType.PositionModification;
+        public CombinerOperation CombinerBlendOperation;
+        public float CombinerBlendFactor => ResolvedPropertyValues[15];
+
+        public Hash128 GeometryInstructionHash;
+
+        [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")]
+        public SerializableGUID ReferenceGUID;
+
+        //If the instruction requires to read from an asset (for example SDF), this will be set to the index of
+        //that asset in the GeometryInstructionList. 
+        //During runtime, it is then replaced with the index inside of the asset inside AssetDataStorage
+        public int assetReferenceIndex;
+
+        #endregion
     }
 
-    public unsafe struct AssetDataStorage:IDisposable
-    {
-        private NativeList<byte> DataBuffer;
 
-        public AssetDataStorage(Allocator allocator)
-        {
-            DataBuffer = new NativeList<byte>(allocator);
-        }
-
-        public unsafe SDFData GetData()
-        {
-            SDFData result = new SDFData();
-            var unsafeReadOnlyPtr = DataBuffer.GetUnsafeReadOnlyPtr();
-            result.Size = UnsafeUtility.ReadArrayElement<int2>(unsafeReadOnlyPtr,0);
-            result.Data = (float*) ((byte*)unsafeReadOnlyPtr + (ulong) sizeof(int2));
-            return result;
-        }
-
-        public void AddSDFShape(SDFData sdf)
-        {
-            sdf.GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize);
-            DataBuffer.Capacity += headerSize + dataSize;
-            DataBuffer.Length += headerSize + dataSize;
-
-            var dataBufferPointer = DataBuffer.GetUnsafePtr();
-            UnsafeUtility.MemCpy(dataBufferPointer,headerPointer,headerSize);
-            UnsafeUtility.MemCpy((byte*)dataBufferPointer + (ulong) headerSize, dataPointer, dataSize);
-        }
-
-        public void Dispose()
-        {
-            DataBuffer.Dispose();
-        }
-    }
-
-    public unsafe struct SDFData: IDisposable
+    /// <summary>
+    ///     Important: Only pass this struct by reference, since the actual data is stored behind it inside
+    ///     AssetDataStorage.DataBuffer
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct SDF2DData : IDisposable, IBinaryAsset
     {
         public int2 Size;
-        public float* Data;
+
+        public float* Data => (float*) UnsafeUtility.AddressOf(ref Size) + sizeof(SDF2DData);
 
         public int DataSize => Size.x * Size.y * sizeof(float);
-        
-        public SDFData(Texture2D sdfTexture)
+
+        public static void Create(Texture3D sdfTexture, AssetDataStorage dataStorage)
         {
-            Size = new int2(sdfTexture.width, sdfTexture.height);
-            Data = (float*)UnsafeUtility.Malloc(Size.x * Size.y * sizeof(float), 4, Allocator.Temp);
+            var size = new int2(sdfTexture.width, sdfTexture.height);
+            var sdf2DData =
+                dataStorage.CreateAsset<SDF2DData>(sdfTexture.GetInstanceID(), size.x * size.y * sizeof(float));
 
             var textureData = sdfTexture.GetPixels();
-            for (int i = 0; i < textureData.Length; i++)
-            {
-                Data[i] = textureData[i].a;
-            }
+
+            var sliceOffset = sdfTexture.depth / 2 * sdfTexture.width * sdfTexture.height;
+
+            sdf2DData->Size = size;
+
+            var dataBuffer = UnsafeUtils.GetDataBuffer<float, SDF2DData>(sdf2DData);
+
+            for (var i = 0; i < size.x * size.y; i++) dataBuffer[i] = textureData[i + sliceOffset].r;
         }
 
         public void GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize)
@@ -173,31 +157,44 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public float Sample(float2 uv)
         {
             uv = clamp(uv, 0, Size - 2);
-            int2 flooredUV = (int2) floor(uv);
+            var flooredUV = (int2) floor(uv);
 
-            float c00 = SamplePixel(flooredUV);
-            float c10 = SamplePixel(flooredUV + int2(1, 0));
-            float c01 = SamplePixel(flooredUV + int2(0, 1));
-            float c11 = SamplePixel(flooredUV + int2(1, 1));
+            var c00 = SamplePixel(flooredUV);
+            var c10 = SamplePixel(flooredUV + int2(1, 0));
+            var c01 = SamplePixel(flooredUV + int2(0, 1));
+            var c11 = SamplePixel(flooredUV + int2(1, 1));
 
-            float2 subPixelPosition = uv % 1;
-            float row0 = lerp(c00, c10, subPixelPosition.x);
-            float row1 = lerp(c01, c11, subPixelPosition.x);
+            var subPixelPosition = uv % 1;
+            var row0 = lerp(c00, c10, subPixelPosition.x);
+            var row1 = lerp(c01, c11, subPixelPosition.x);
 
-            float interpolatedValue = lerp(row0, row1, subPixelPosition.y);
+            var interpolatedValue = lerp(row0, row1, subPixelPosition.y);
             return interpolatedValue;
         }
-      
+
 
         public float SamplePixel(int2 pixel)
         {
-            int index = Utils.PositionToIndex(pixel, Size);
+            var index = Utils.PositionToIndex(pixel, Size);
             return Data[index];
         }
-        
+
         public void Dispose()
         {
             UnsafeUtility.Free(Data, Allocator.Temp);
         }
+    }
+
+    public static unsafe class UnsafeUtils
+    {
+        public static TResult* GetDataBuffer<TResult, THeaderType>(THeaderType* asset)
+            where THeaderType : unmanaged where TResult : unmanaged
+        {
+            return (TResult*) asset + (ulong) sizeof(THeaderType);
+        }
+    }
+
+    public interface IBinaryAsset
+    {
     }
 }

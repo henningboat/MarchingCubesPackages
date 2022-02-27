@@ -21,6 +21,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         [SerializeField] private List<GeometryLayerAsset> _geometryLayers = new();
         [SerializeField][Tooltip("Always overwrite layers, even if they have ")] private bool _alwaysClearInEditMode=true;
         [FormerlySerializedAs("_texture2D")] [SerializeField] private Texture2D _sdfTexture;
+        [FormerlySerializedAs("_texture2D")] [SerializeField] private Texture3D _texture;
 
         private GeometryLayerHandler _buildRenderGraphSystem;
         private NativeList<int> _chhunksToUploadToGPU;
@@ -60,12 +61,13 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                         _geometryFieldCollection.GetFieldFromLayer(geometryFieldReceiver.RequestedLayer())
                             .GeometryFieldData);
                 }
+                
+                _assetDataStorage.Dispose();
 
                 _assetDataStorage = new AssetDataStorage(Allocator.Persistent);
-                using (var sdf = new SDFData(_sdfTexture))
-                {
-                    _assetDataStorage.AddSDFShape(sdf);
-                }
+                SDF2DData.Create(_texture, _assetDataStorage);
+                SDF2DData.Create(_texture, _assetDataStorage);
+                SDF2DData.Create(_texture, _assetDataStorage);
             }
 
             var allGraphs = FindObjectsOfType<GeometryInstance>().OrderBy(instance => instance.Order);

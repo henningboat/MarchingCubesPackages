@@ -5,6 +5,7 @@ using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {

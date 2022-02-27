@@ -10,13 +10,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         [SerializeField] private ShapeType _shapeType;
         [SerializeField] private GeometryInstructionList instructionList;
 
+        public override GeometryInstructionList GeometryInstructionList => instructionList;
+
 #if UNITY_EDITOR
         public void Initialize(GeometryInstructionList geometryInstructionList)
         {
             instructionList = geometryInstructionList;
         }
-        #endif
-        
-        public override GeometryInstructionList GeometryInstructionList => instructionList;
+#endif
     }
 }

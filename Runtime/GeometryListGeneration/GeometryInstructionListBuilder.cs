@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
@@ -10,6 +9,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 {
@@ -37,6 +37,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public List<GeometryGraphProperty> _exposedVariables;
         private Stack<GeometryGraphProperty> _transformationStack;
         private Stack<GeometryGraphProperty> _colorStack;
+
+        private List<Object> _assetDependencies = new();
 
         public GeometryInstructionListBuilder()
         {
@@ -238,7 +240,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             var index = _propertyValueBuffer.Length;
 
             var geometryGraphProperty = new GeometryGraphProperty(index, id, type, value, name, debugInformation);
-
+ 
             AddToValueBuffer(value, geometryGraphProperty);
 
             return geometryGraphProperty;
@@ -249,11 +251,28 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             for (var i = 0; i < property.GetSizeInBuffer(); i++) _propertyValueBuffer.Add(value[i]);
         }
 
-        public void WriteInstruction(GeometryInstruction instruction)
+        public void WriteInstruction(GeometryInstruction instruction, Object assetDependency = null)
         {
+            int localAssetIndex = -1;
+            if (assetDependency != null)
+            {
+                RegisterAssetAndGetIndex(assetDependency, out localAssetIndex);
+            }
+
             GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor,
+                localAssetIndex);
             _geometryInstructionBuffer.Add(instruction);
+        }
+
+        private void RegisterAssetAndGetIndex(Object assetDependency, out int localAssetIndex)
+        {
+            if(!_assetDependencies.Contains(assetDependency))
+            {
+                _assetDependencies.Add(assetDependency);
+            }
+            
+            localAssetIndex= _assetDependencies.IndexOf(assetDependency);
         }
 
         public GeometryInstructionList GetGeometryGraphData()

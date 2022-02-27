@@ -35,7 +35,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 
         public static void AddAdditionalData(ref GeometryInstruction instruction, int depth,
             CombinerOperation combinerOperation,
-            GeometryGraphProperty combinerBlendValue, GeometryGraphProperty transformation, GeometryGraphProperty color)
+            GeometryGraphProperty combinerBlendValue, GeometryGraphProperty transformation, GeometryGraphProperty color,
+            int localAssetIndex = -1)
         {
             var propertyIndexes = instruction.PropertyIndexes;
 
@@ -51,6 +52,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             instruction.CombinerDepth = depth;
             instruction.CombinerBlendOperation = combinerOperation;
             instruction.PropertyIndexes = propertyIndexes;
+
+            instruction.assetReferenceIndex = localAssetIndex;
         }
     }
 }

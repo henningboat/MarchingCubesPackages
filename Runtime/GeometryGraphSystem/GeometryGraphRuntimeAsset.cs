@@ -18,7 +18,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
         [SerializeField] private float[] _valueBuffer;
         [SerializeField] private MathInstruction[] _mathInstructions;
         [SerializeField] private GeometryInstruction[] _geometryInstructions;
-        [SerializeField] private GeometryGraphProperty[] _variables;
+        [SerializeField] private GeometryGraphProperty[] _variables = new GeometryGraphProperty[0];
 
 
         public Hash128 ContentHash => _contentHash;
