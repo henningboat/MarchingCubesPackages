@@ -19,7 +19,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return SimdMath.length(q) - thickness;
         }
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             return sdTorus(positionOS, radius, thickness);
         }

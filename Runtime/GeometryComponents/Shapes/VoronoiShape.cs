@@ -15,7 +15,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(4)] [DefaultValue(0.1f, 0.1f, 0.1f)]
         public float3 scale;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             positionOS *= 1/scale;
             return Voronoi(positionOS)*scale.x + new PackedFloat(valueOffset);

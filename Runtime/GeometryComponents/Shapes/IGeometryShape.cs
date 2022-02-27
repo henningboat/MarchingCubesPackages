@@ -8,7 +8,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     public interface IGeometryShape
     {
         [UsedImplicitly]
-        PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData);
+        PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction);
 
         ShapeType Type { get; }
     }

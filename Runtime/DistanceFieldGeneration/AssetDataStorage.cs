@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -48,6 +51,36 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 InstanceID = instanceID;
                 ByteOffsetInDataBuffer = byteOffsetInDataBuffer;
             }
+        }
+
+        public void EnsureAssetInStorage(Object assetDependency, out int geometryInstructionAssetIndexInGlobalBuffer)
+        {
+            var newInstanceID = assetDependency.GetInstanceID();
+            var needsToBeAdded = true;
+            foreach (var existingAsset in Assets)
+            {
+                if (existingAsset.InstanceID == newInstanceID)
+                {
+                    needsToBeAdded = false;
+                    break;
+                }
+            }
+
+            if (needsToBeAdded)
+            {
+                switch (assetDependency)
+                {
+                    case Texture3D texture3D:
+                        SDF2DData.Create(texture3D, this);
+                        break;
+                    default:
+                        throw new NotImplementedException(
+                            $"Assets of type {assetDependency.GetType()} can't be added to the Asset Data Storage");
+                }
+            }
+
+            geometryInstructionAssetIndexInGlobalBuffer =
+                Assets.ToArray().First(entry => entry.InstanceID == newInstanceID).ByteOffsetInDataBuffer;
         }
     }
 }

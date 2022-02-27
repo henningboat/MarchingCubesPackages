@@ -65,17 +65,26 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 _assetDataStorage.Dispose();
 
                 _assetDataStorage = new AssetDataStorage(Allocator.Persistent);
-                SDF2DData.Create(_texture, _assetDataStorage);
-                SDF2DData.Create(_texture, _assetDataStorage);
-                SDF2DData.Create(_texture, _assetDataStorage);
             }
 
-            var allGraphs = FindObjectsOfType<GeometryInstance>().OrderBy(instance => instance.Order);
+            
+         
+            
+            var allGraphs = FindObjectsOfType<GeometryInstance>().OrderBy(instance => instance.Order).ToList();
             var geometryGraphBuffers = new List<GeometryInstructionListBuffers>();
             foreach (var graph in allGraphs)
             {
                 if (graph.enabled == false) continue;
-                if (graph.TryInitializeAndGetBuffer(out var buffers)) geometryGraphBuffers.Add(buffers);
+                if (graph.TryInitializeAndGetBuffer(out var buffers))
+                {
+                    geometryGraphBuffers.Add(buffers);
+                }
+            }  
+            
+            //this does not to happen all the time, only if something changes
+            foreach (var graph in allGraphs)
+            {
+                graph.InitializeAssetDependencies(graph, _assetDataStorage);
             }
 
             var jobHandle = new JobHandle();

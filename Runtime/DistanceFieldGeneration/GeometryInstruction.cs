@@ -109,8 +109,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         //If the instruction requires to read from an asset (for example SDF), this will be set to the index of
         //that asset in the GeometryInstructionList. 
-        //During runtime, it is then replaced with the index inside of the asset inside AssetDataStorage
         public int assetReferenceIndex;
+        
+        public int assetIndexInGlobalBuffer;
 
         #endregion
     }

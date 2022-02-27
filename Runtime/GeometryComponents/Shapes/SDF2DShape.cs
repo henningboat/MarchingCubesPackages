@@ -15,13 +15,14 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(4)] [DefaultValue(0.5f)] public float offset;
         [FieldOffset(8)] [DefaultValue(10)] public float distanceScale;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             positionOS *= scale;
             unsafe
             {
                 PackedFloat result = default;
-                SDF2DData* shape = assetData.GetData<SDF2DData>(0);
+                SDF2DData* shape = assetData.GetData<SDF2DData>(instruction.assetIndexInGlobalBuffer);
                 for (int i = 0; i < 4; i++)
                 {
                     float2 uv = new float2(positionOS.x.PackedValues[i], positionOS.y.PackedValues[i]);

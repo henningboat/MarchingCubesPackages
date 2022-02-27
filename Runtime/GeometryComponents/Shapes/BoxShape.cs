@@ -13,7 +13,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(0)] [DefaultValue(8, 8, 8)]
         public float3 Extends;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             var extends = Extends;
             var q = abs(positionWS) - extends;

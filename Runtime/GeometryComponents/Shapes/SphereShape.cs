@@ -13,7 +13,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     {
         [FieldOffset(0)] [DefaultValue(8.0f)] public float radius;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             return length(positionOS) - radius;
         }

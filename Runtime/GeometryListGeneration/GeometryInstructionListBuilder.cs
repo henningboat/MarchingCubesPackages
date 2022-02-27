@@ -291,7 +291,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             hash.Append(_propertyValueBuffer.ToArray());
             return GeometryInstructionList.InitializeData(_propertyValueBuffer.ToArray(),
                 _mathInstructionsBuffer.ToArray(), _geometryInstructionBuffer.ToArray(), hash,
-                OriginTransformation, _exposedVariables.ToArray());
+                OriginTransformation, _exposedVariables.ToArray(), _assetDependencies);
         }
 
         public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name,

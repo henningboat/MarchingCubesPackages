@@ -39,7 +39,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
             #region ITerrainModifierShape Members
 
-            public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+            public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+                GeometryInstruction instruction)
             {
                 return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
             }

@@ -16,7 +16,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
         [FieldOffset(3 * 4)] [DefaultValue(3)] public float radius;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
+            GeometryInstruction instruction)
         {
             var h = SimdMath.clamp(SimdMath.dot(positionOS, direction) / SimdMath.dot(direction, direction), 0.0f,
                 1.0f);

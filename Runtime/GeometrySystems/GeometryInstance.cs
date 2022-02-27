@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
@@ -126,6 +127,22 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             {
                 _instructionListBuffer.Dispose();
                 _instructionListBuffer = default;
+            }
+        }
+
+        public void InitializeAssetDependencies(GeometryInstance graph, AssetDataStorage assetDataStorage)
+        {
+            var geometryInstructions = graph._instructionListBuffer.GeometryInstructions;
+            for (int i = 0; i < geometryInstructions.Length; i++)
+            {
+                var geometryInstruction = geometryInstructions[i];
+                var assetReferenceIndex = geometryInstruction.assetReferenceIndex;
+                if (assetReferenceIndex >= 0)
+                {
+                    var dependency = GeometryInstructionList.AssetDependencies[assetReferenceIndex];
+                    assetDataStorage.EnsureAssetInStorage(dependency, out geometryInstruction.assetIndexInGlobalBuffer);
+                    geometryInstructions[i] = geometryInstruction;
+                }
             }
         }
     }
