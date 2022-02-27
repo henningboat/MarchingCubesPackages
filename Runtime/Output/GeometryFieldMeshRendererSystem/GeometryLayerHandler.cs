@@ -43,7 +43,8 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
         public JobHandle Update(JobHandle jobHandle,
             Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
             List<GeometryLayer> storedGeometryLayers,
-            List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers, bool forceClear)
+            List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers, bool forceClear,
+            AssetDataStorage assetDataStorage)
         {
             _allLayers = allLayers;
             _storedLayers = storedGeometryLayers;
@@ -71,7 +72,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
 
-            var readbackCollection = new DistanceDataReadbackCollection();
+            var readbackCollection = new DistanceDataReadbackCollection(assetDataStorage);
 
             for (var i = 0; i < readbackCollection.Capacity; i++)
                 if (i < allLayerHandlers.Count)
@@ -125,7 +126,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
                 else
                 {
                     var sourceLayer = _allLayers.FirstOrDefault(
-                        geometryLayer => geometryLayer.ID == instruction.SourceLayerID);
+                        geometryLayer => geometryLayer.ID == instruction.ReferenceGUID);
                     if (sourceLayer.ID.Valid)
                     {
                         if (sourceLayer.Stored)
@@ -135,7 +136,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
                         }
                         else
                         {
-                            if (_geometryPerLayer.TryGetValue(instruction.SourceLayerID, out var childLayerContent))
+                            if (_geometryPerLayer.TryGetValue(instruction.ReferenceGUID, out var childLayerContent))
                                 foreach (var childInstructionList in childLayerContent)
                                     AddInstructionListToMainGraph(childInstructionList, instruction.CombinerDepth);
                         }

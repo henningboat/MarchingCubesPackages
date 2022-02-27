@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
 using Unity.Mathematics;
@@ -38,7 +39,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
             #region ITerrainModifierShape Members
 
-            public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
+            public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
             {
                 return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
             }

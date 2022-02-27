@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes.henningboat.CubeMarching.GeometryComponents;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
@@ -20,7 +21,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
         #region Public methods
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetDataStorage)
         {
             unsafe
             {
@@ -28,20 +29,21 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
                 switch (ShapeType)
                 {
                     case ShapeType.Sphere:
-                        return ((SphereShape*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((SphereShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.BoundingBox:
-                        return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((CShapeBoundingBox*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.Torus:
-                        return ((TorusShape*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((TorusShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.Voronoi:
-                        return ((VoronoiShape*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((VoronoiShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.Plane:
-                        return ((PlaneShape*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((PlaneShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.Box:
-                        return ((BoxShape*) ptr)->GetSurfaceDistance(positionOS);
+                        return ((BoxShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     case ShapeType.Ray:
-                        return ((RayShape*) ptr)->GetSurfaceDistance(positionOS);
-                        break;
+                        return ((RayShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
+                    case ShapeType.SDF2D:
+                        return ((SDF2DShape*) ptr)->GetSurfaceDistance(positionOS, assetDataStorage);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

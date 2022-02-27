@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
 using static SIMDMath.SimdMath;
@@ -12,7 +13,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     {
         [FieldOffset(0)] [DefaultValue(8.0f)] public float radius;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData)
         {
             return length(positionOS) - radius;
         }

@@ -1,10 +1,13 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     public struct DistanceDataReadbackCollection
     {
+        public readonly AssetDataStorage AssetDataStorage;
+        
         private GeometryFieldData _data0;
         private GeometryFieldData _data1;
         private GeometryFieldData _data2;
@@ -13,6 +16,19 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         private GeometryFieldData _data5;
         private GeometryFieldData _data6;
         private GeometryFieldData _data7;
+
+        public DistanceDataReadbackCollection(AssetDataStorage assetDataStorage)
+        {
+            AssetDataStorage = assetDataStorage;
+            _data0 = default;
+            _data1 = default;
+            _data2 = default;
+            _data3 = default;
+            _data4 = default;
+            _data5 = default;
+            _data6 = default;
+            _data7 = default;
+        }
 
         public int Capacity => 8;
 

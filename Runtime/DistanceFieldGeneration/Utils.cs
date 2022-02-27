@@ -24,6 +24,13 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         {
             return position.x + position.y * size.x + position.z * size.x * size.y;
         }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int PositionToIndex(int2 position, int2 size)
+        {
+            return position.x + position.y * size.x;
+        }
 
         #endregion
     }

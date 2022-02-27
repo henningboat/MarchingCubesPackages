@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
 using Unity.Mathematics;
@@ -12,7 +13,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(0)] [DefaultValue(8, 8, 8)]
         public float3 Extends;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS)
+        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS, AssetDataStorage assetData)
         {
             var extends = Extends;
             var q = abs(positionWS) - extends;

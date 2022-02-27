@@ -217,7 +217,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                         var materialData = geometryInstruction.GetMaterialData();
                         var packedMaterialData = new PackedTerrainMaterial(materialData);
 
-                        var surfaceDistance = shape.GetSurfaceDistance(positionOS);
+                        var surfaceDistance = shape.GetSurfaceDistance(positionOS, _readbackLayers.AssetDataStorage);
 
                         //this did not really work
                         //surfaceDistance /= inverseUniformScale;

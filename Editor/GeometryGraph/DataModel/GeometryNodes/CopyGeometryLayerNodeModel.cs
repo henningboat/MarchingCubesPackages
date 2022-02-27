@@ -34,11 +34,11 @@ namespace Editor.GeometryGraph.DataModel.GeometryNodes
                 new List<GeometryGraphProperty>());
             if (sourceLayerAsset != null)
             {
-                geometryInstruction.SourceLayerID = sourceLayerAsset.GeometryLayer.ID;
+                geometryInstruction.ReferenceGUID = sourceLayerAsset.GeometryLayer.ID;
             }
             else
             {
-                geometryInstruction.SourceLayerID = default;
+                geometryInstruction.ReferenceGUID = default;
             }
 
             context.WriteInstruction(geometryInstruction);

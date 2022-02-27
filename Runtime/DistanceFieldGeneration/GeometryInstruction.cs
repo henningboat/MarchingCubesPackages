@@ -5,11 +5,13 @@ using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
+using static Unity.Mathematics.math;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -34,7 +36,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public Hash128 GeometryInstructionHash;
 
-        [FormerlySerializedAs("SourceLayer")] public SerializableGUID SourceLayerID;
+        [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")] public SerializableGUID ReferenceGUID;
 
         #endregion
 
@@ -103,6 +105,99 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             }
 
             GeometryInstructionHash = hash;
+        }
+    }
+
+    public unsafe struct AssetDataStorage:IDisposable
+    {
+        private NativeList<byte> DataBuffer;
+
+        public AssetDataStorage(Allocator allocator)
+        {
+            DataBuffer = new NativeList<byte>(allocator);
+        }
+
+        public unsafe SDFData GetData()
+        {
+            SDFData result = new SDFData();
+            var unsafeReadOnlyPtr = DataBuffer.GetUnsafeReadOnlyPtr();
+            result.Size = UnsafeUtility.ReadArrayElement<int2>(unsafeReadOnlyPtr,0);
+            result.Data = (float*) ((byte*)unsafeReadOnlyPtr + (ulong) sizeof(int2));
+            return result;
+        }
+
+        public void AddSDFShape(SDFData sdf)
+        {
+            sdf.GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize);
+            DataBuffer.Capacity += headerSize + dataSize;
+            DataBuffer.Length += headerSize + dataSize;
+
+            var dataBufferPointer = DataBuffer.GetUnsafePtr();
+            UnsafeUtility.MemCpy(dataBufferPointer,headerPointer,headerSize);
+            UnsafeUtility.MemCpy((byte*)dataBufferPointer + (ulong) headerSize, dataPointer, dataSize);
+        }
+
+        public void Dispose()
+        {
+            DataBuffer.Dispose();
+        }
+    }
+
+    public unsafe struct SDFData: IDisposable
+    {
+        public int2 Size;
+        public float* Data;
+
+        public int DataSize => Size.x * Size.y * sizeof(float);
+        
+        public SDFData(Texture2D sdfTexture)
+        {
+            Size = new int2(sdfTexture.width, sdfTexture.height);
+            Data = (float*)UnsafeUtility.Malloc(Size.x * Size.y * sizeof(float), 4, Allocator.Temp);
+
+            var textureData = sdfTexture.GetPixels();
+            for (int i = 0; i < textureData.Length; i++)
+            {
+                Data[i] = textureData[i].a;
+            }
+        }
+
+        public void GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize)
+        {
+            headerPointer = UnsafeUtility.AddressOf(ref Size);
+            headerSize = sizeof(int2);
+            dataPointer = Data;
+            dataSize = DataSize;
+        }
+
+        public float Sample(float2 uv)
+        {
+            uv = clamp(uv, 0, Size - 2);
+            int2 flooredUV = (int2) floor(uv);
+
+            float c00 = SamplePixel(flooredUV);
+            float c10 = SamplePixel(flooredUV + int2(1, 0));
+            float c01 = SamplePixel(flooredUV + int2(0, 1));
+            float c11 = SamplePixel(flooredUV + int2(1, 1));
+
+            float2 subPixelPosition = uv % 1;
+            float row0 = lerp(c00, c10, subPixelPosition.x);
+            float row1 = lerp(c01, c11, subPixelPosition.x);
+
+            float interpolatedValue = lerp(row0, row1, subPixelPosition.y);
+            return interpolatedValue;
+        }
+      
+
+        public float SamplePixel(int2 pixel)
+        {
+            int index = Utils.PositionToIndex(pixel, Size);
+            return Data[index];
+        }
+        
+        public void Dispose()
+        {
+            UnsafeUtility.Free(Data, Allocator.Temp);
         }
     }
 }

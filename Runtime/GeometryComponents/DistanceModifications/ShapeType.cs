@@ -8,6 +8,7 @@
         Voronoi,
         Plane,
         Box,
-        Ray
+        Ray,
+        SDF2D,
     }
 }
