@@ -9,7 +9,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 {
     public class SDFInstance : GeometryInstance
     {
-        [SerializeField] private Texture3D _sdf;
+        [SerializeField] private Texture2D _sdf;
         
         [SerializeField] private GeometryInstructionList _instructionList;
 

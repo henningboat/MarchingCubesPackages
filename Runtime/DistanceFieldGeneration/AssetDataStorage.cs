@@ -70,8 +70,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             {
                 switch (assetDependency)
                 {
-                    case Texture3D texture3D:
-                        SDF2DData.Create(texture3D, this);
+                    case Texture2D texture2D:
+                        SDF2DData.Create(texture2D, this);
                         break;
                     default:
                         throw new NotImplementedException(

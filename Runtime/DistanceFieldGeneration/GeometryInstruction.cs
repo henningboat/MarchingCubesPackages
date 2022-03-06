@@ -130,21 +130,18 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public int DataSize => Size.x * Size.y * sizeof(float);
 
-        public static void Create(Texture3D sdfTexture, AssetDataStorage dataStorage)
+        public static void Create(Texture2D sdfTexture, AssetDataStorage dataStorage)
         {
             var size = new int2(sdfTexture.width, sdfTexture.height);
             var sdf2DData =
                 dataStorage.CreateAsset<SDF2DData>(sdfTexture.GetInstanceID(), size.x * size.y * sizeof(float));
 
             var textureData = sdfTexture.GetPixels();
-
-            var sliceOffset = sdfTexture.depth / 2 * sdfTexture.width * sdfTexture.height;
-
             sdf2DData->Size = size;
 
             var dataBuffer = UnsafeUtils.GetDataBuffer<float, SDF2DData>(sdf2DData);
 
-            for (var i = 0; i < size.x * size.y; i++) dataBuffer[i] = textureData[i + sliceOffset].r;
+            for (var i = 0; i < size.x * size.y; i++) dataBuffer[i] = (0.5f-textureData[i].r);
         }
 
         public void GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize)

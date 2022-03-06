@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using henningboat.CubeMarching.Runtime;
+﻿using System.Linq;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
@@ -10,6 +8,24 @@ using UnityEngine;
 
 namespace Editor.GeometryGraph
 {
+    [CustomEditor(typeof(SDFInstance), true)]
+    public class SDFInstanceEditor : GeometryInstanceEditor
+    {
+        private SerializedProperty _sdf;
+
+        protected virtual void OnEnable()
+        {
+            _sdf = serializedObject.FindProperty("_sdf");
+            base.OnEnable();
+        }
+
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            EditorGUILayout.PropertyField(_sdf);
+        }
+    }
+
     [CustomEditor(typeof(GeometryInstance), true)]
     public class GeometryInstanceEditor : UnityEditor.Editor
     {
@@ -52,7 +68,7 @@ namespace Editor.GeometryGraph
                 }
 
                 if (variableDeclarationModel.Type == GeometryPropertyType.Float)
-                    currentOverwrite.Value = new float32()
+                    currentOverwrite.Value = new float32
                     {
                         [0] = EditorGUILayout.FloatField(variableDeclarationModel.Name, currentOverwrite.Value[0])
                     };
@@ -63,7 +79,7 @@ namespace Editor.GeometryGraph
                         currentOverwrite.Value[2]);
                     currentValue = EditorGUILayout.Vector3Field(variableDeclarationModel.Name, currentValue);
 
-                    currentOverwrite.Value = new float32()
+                    currentOverwrite.Value = new float32
                     {
                         [0] = currentValue.x,
                         [1] = currentValue.y,

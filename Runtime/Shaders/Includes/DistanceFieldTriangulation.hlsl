@@ -15,6 +15,10 @@ int _TerrainMapSizeX;
 int _TerrainMapSizeY;
 int _TerrainMapSizeZ;
 
+int _FieldVoxelSizeX;
+int _FieldVoxelSizeY;
+int _FieldVoxelSizeZ;
+
 int PositionToIndex(int3 position, int3 size)
 {
     return position.x + position.y * size.x + position.z * size.x * size.y;
@@ -154,7 +158,7 @@ float4 GetPointPosition(uint3 position)
 
     float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
 
-    if(any(position<1||position>63))
+    if(any(position<1||position>int3(_FieldVoxelSizeX,_FieldVoxelSizeY,_FieldVoxelSizeZ)-1))
     {
         surfaceDistance=0.1;
     }

@@ -20,8 +20,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         [SerializeField] private int3 _clusterCounts = new(1, 1, 1);
         [SerializeField] private List<GeometryLayerAsset> _geometryLayers = new();
         [SerializeField][Tooltip("Always overwrite layers, even if they have ")] private bool _alwaysClearInEditMode=true;
-        [FormerlySerializedAs("_texture2D")] [SerializeField] private Texture2D _sdfTexture;
-        [FormerlySerializedAs("_texture2D")] [SerializeField] private Texture3D _texture;
 
         private GeometryLayerHandler _buildRenderGraphSystem;
         private NativeList<int> _chhunksToUploadToGPU;

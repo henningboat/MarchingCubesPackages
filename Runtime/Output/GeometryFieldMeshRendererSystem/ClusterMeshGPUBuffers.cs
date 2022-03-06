@@ -21,6 +21,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
         private int3 _chunkCounts;
         private ComputeBuffer _triangulationIndices;
         private MaterialPropertyBlock _propertyBlock;
+        private int3 _voxelCounts;
 
         public static ClusterMeshGPUBuffers CreateGPUData(GeometryFieldData geometryFieldData)
         {
@@ -52,6 +53,8 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
             result._clusterCounts = geometryFieldData.ClusterCounts;
             result._chunkCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;
+            result._voxelCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster *
+                                  Constants.chunkLength;
             result._propertyBlock = new MaterialPropertyBlock();
 
             return result;
@@ -93,6 +96,12 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetInt("_TerrainMapSizeX", _chunkCounts.x);
                 _computeShader.SetInt("_TerrainMapSizeY", _chunkCounts.y);
                 _computeShader.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+                
+                
+                _computeShader.SetInt("_FieldVoxelSizeX", _voxelCounts.x);
+                _computeShader.SetInt("_FieldVoxelSizeY",  _voxelCounts.y);
+                _computeShader.SetInt("_FieldVoxelSizeZ",  _voxelCounts.z);
+                
                 _computeShader.SetInts("_ClusterPositionWS", clusterParameters.PositionWS.x,
                     clusterParameters.PositionWS.y, clusterParameters.PositionWS.z);
                 _computeShader.SetBuffer(getPositionKernel, "_TerrainChunkBasePosition", _chunksToTriangulize);
@@ -101,11 +110,6 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetBuffer(getPositionKernel, "_TriangleCountPerSubChunk", _triangleCountPerSubChunk);
                 _computeShader.SetBuffer(getPositionKernel, "_TriangleIndices", _triangulationIndices);
                 _computeShader.Dispatch(getPositionKernel, triangulationInstructions.Length, 1, 1);
-
-
-                var dataReadback = new ClusterTriangle[_triangulationIndices.count];
-                _triangulationIndices.GetData(dataReadback);
-
 
                 _chunksWithTriangles.SetData(cSubChunkWithTrianglesIndices.ToArray());
 
@@ -122,6 +126,10 @@ namespace henningboat.CubeMarching.Runtime.Rendering
                 _computeShader.SetInt("_TerrainMapSizeX", _chunkCounts.x);
                 _computeShader.SetInt("_TerrainMapSizeY", _chunkCounts.y);
                 _computeShader.SetInt("_TerrainMapSizeZ", _chunkCounts.z);
+
+                _computeShader.SetInt("_FieldVoxelSizeX", _voxelCounts.x);
+                _computeShader.SetInt("_FieldVoxelSizeY",  _voxelCounts.y);
+                _computeShader.SetInt("_FieldVoxelSizeZ",  _voxelCounts.z);
 
                 _computeShader.SetInts("_TerrainMapSize", _chunkCounts.x, _chunkCounts.y, _chunkCounts.z);
                 _computeShader.Dispatch(indexBufferKernel, cSubChunkWithTrianglesIndices.Length, 1, 1);
@@ -143,6 +151,10 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             _propertyBlock.SetInt("_PositionInClusterX", clusterParameters.PositionWS.x);
             _propertyBlock.SetInt("_PositionInClusterY", clusterParameters.PositionWS.y);
             _propertyBlock.SetInt("_PositionInClusterZ", clusterParameters.PositionWS.z);
+
+            _propertyBlock.SetInt("_FieldVoxelSizeX", _voxelCounts.x);
+            _propertyBlock.SetInt("_FieldVoxelSizeY",  _voxelCounts.y);
+            _propertyBlock.SetInt("_FieldVoxelSizeZ",  _voxelCounts.z);
 
             _propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) clusterParameters.PositionWS);
 

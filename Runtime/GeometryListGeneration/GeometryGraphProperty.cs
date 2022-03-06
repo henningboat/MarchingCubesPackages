@@ -2,6 +2,7 @@
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine.GraphToolsFoundation.Overdrive;
+using Object = UnityEngine.Object;
 
 namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
 {
@@ -13,6 +14,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public string DebugInformation;
         public GeometryPropertyType Type;
         public float32 DefaultValue;
+        public Object DefaultAsset;
 
         public bool IsExposed => ID != default;
 
@@ -36,6 +38,17 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             Type = type;
             DebugInformation = debugInformation;
             DefaultValue = value;
+            Name = name;
+        }
+        
+        public GeometryGraphProperty(int index, SerializableGUID id, GeometryPropertyType type, Object value,
+            string name, string debugInformation)
+        {
+            ID = id;
+            Index = index;
+            Type = type;
+            DebugInformation = debugInformation;
+            DefaultAsset = value;
             Name = name;
         }
 

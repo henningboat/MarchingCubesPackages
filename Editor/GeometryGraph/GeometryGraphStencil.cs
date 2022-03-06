@@ -63,6 +63,7 @@ namespace Editor.GeometryGraph
             var mathNodes = TypeCache.GetTypesDerivedFrom(typeof(MathNode)).Where(type => !type.IsAbstract)
                 .Select(typeInfo => MakeSearcherItem((typeInfo, typeInfo.Name))).ToList();
             mathNodes.Add(MakeSearcherItem((typeof(ResultNode), "Result")));
+            mathNodes.Add(MakeSearcherItem((typeof(ResetPositionNode), "ResetPosition")));
             mathNodes.Add(MakeSearcherItem((typeof(ColorNode), "Color")));
 
             //shape iteams
@@ -202,6 +203,20 @@ namespace Editor.GeometryGraph
 
                 commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true,
                     TypeHandle.Vector3, typeof(GeometryGraphVariableDeclarationModel)));
+            });
+
+            menu.AddItem(new GUIContent("Create Texture2D"), false, () =>
+            {
+                const string newItemName = "texture2D";
+                var finalName = newItemName;
+                var i = 0;
+                while (commandDispatcher.State.WindowState.GraphModel.VariableDeclarations.Any(
+                           v => v.Title == finalName))
+                    finalName = newItemName + i++;
+
+                commandDispatcher.Dispatch(new CreateGraphVariableDeclarationCommand(finalName, true,
+                    TypeHandleHelpers.GenerateTypeHandle(typeof(Texture2D)),
+                    typeof(GeometryGraphVariableDeclarationModel)));
             });
         }
 

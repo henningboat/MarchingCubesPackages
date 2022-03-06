@@ -1,5 +1,5 @@
 ﻿using System;
-using Editor.GeometryGraph.DataModel.GeometryNodes;
+using System.Numerics;
 using Editor.GeometryGraph.DataModel.ShapeNodes;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
