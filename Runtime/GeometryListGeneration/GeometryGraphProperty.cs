@@ -17,6 +17,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public Object DefaultAsset;
 
         public bool IsExposed => ID != default;
+        public bool IsAsset => Type == GeometryPropertyType.SDF2D;
 
         public int GetSizeInBuffer()
         {
@@ -26,6 +27,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
                 GeometryPropertyType.Float3 => 3,
                 GeometryPropertyType.Color32 => 1,
                 GeometryPropertyType.Float4X4 => 16,
+                GeometryPropertyType.SDF2D => 1,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

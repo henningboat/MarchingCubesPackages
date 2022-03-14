@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
@@ -60,7 +61,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public JobHandle ScheduleJobs(JobHandle jobHandle,
             List<GeometryInstructionListBuffers> geometryInstructionListBuffersList,
-            List<GeometryLayer> allGeometryLayers, bool forceClear, AssetDataStorage assetDataStorage)
+            List<GeometryLayer> allGeometryLayers, bool forceClear, BinaryDataStorage binaryDataStorage)
         {
             _geometryPerLayer = new Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>>();
 
@@ -75,7 +76,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
                 jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers,
-                    allGeometryLayers, _geometryLayerHandlers.ToList(),forceClear, assetDataStorage);
+                    allGeometryLayers, _geometryLayerHandlers.ToList(),forceClear, binaryDataStorage);
 
             return jobHandle;
         }

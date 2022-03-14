@@ -14,16 +14,6 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
         {
             return (int) _typeEnumValue;
         }
-
-        protected override void OnDefineNode()
-        {
-            if (_typeEnumValue == ShapeType.SDF2D)
-            {
-                this.AddDataInputPort<Texture2D>("_assetReference", "_assetReference");
-            }
-            base.OnDefineNode();
-        }
-
         public override GeometryInstructionType InstructionType => GeometryInstructionType.Shape;
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
@@ -44,7 +46,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
             Dictionary<SerializableGUID, List<GeometryInstructionListBuffers>> geometryPerLayer,
             List<GeometryLayer> storedGeometryLayers,
             List<GeometryLayer> allLayers, List<GeometryLayerHandler> allLayerHandlers, bool forceClear,
-            AssetDataStorage assetDataStorage)
+            BinaryDataStorage binaryDataStorage)
         {
             _allLayers = allLayers;
             _storedLayers = storedGeometryLayers;
@@ -72,7 +74,7 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             var geometryInstructions = _allGeometryInstructionsList.AsArray();
 
-            var readbackCollection = new DistanceDataReadbackCollection(assetDataStorage);
+            var readbackCollection = new DistanceDataReadbackCollection(binaryDataStorage);
 
             for (var i = 0; i < readbackCollection.Capacity; i++)
                 if (i < allLayerHandlers.Count)

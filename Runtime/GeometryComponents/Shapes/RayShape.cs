@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
@@ -16,8 +17,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
         [FieldOffset(3 * 4)] [DefaultValue(3)] public float radius;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
-            GeometryInstruction instruction)
+        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+            in GeometryInstruction instruction)
         {
             var h = SimdMath.clamp(SimdMath.dot(positionOS, direction) / SimdMath.dot(direction, direction), 0.0f,
                 1.0f);

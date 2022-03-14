@@ -140,6 +140,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
                 // return CreateOrGetExposedPropertyFromObject(serializableGuid,name,color32);
                 case Color _:
                     return Constant(0);
+                case Texture2D:
+                    return CreateOrGetExposedPropertyWithType(serializableGuid, name, GeometryPropertyType.SDF2D);
                 default:
                     throw new Exception(value.GetType() + " is not supported");
             }
@@ -175,6 +177,17 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         {
             var valueContainer = float32.FromFloat(value);
             const GeometryPropertyType type = GeometryPropertyType.Float;
+            if (TryGetExisting(serializableGuid, type, out var existing)) return existing;
+            var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
+                $"{name} {type.ToString()}");
+            _exposedVariables.Add(newProperty);
+            return newProperty;
+        }
+        
+        public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID serializableGuid, string name,
+            GeometryPropertyType type)
+        {
+            var valueContainer = float32.FromFloat(0);
             if (TryGetExisting(serializableGuid, type, out var existing)) return existing;
             var newProperty = GetGeometryGraphProperty(serializableGuid, type, valueContainer, name,
                 $"{name} {type.ToString()}");
@@ -260,8 +273,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             }
 
             GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor,
-                localAssetIndex);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor);
             _geometryInstructionBuffer.Add(instruction);
         }
 
@@ -294,7 +306,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
                 OriginTransformation, _exposedVariables.ToArray(), _assetDependencies);
         }
 
-        public GeometryGraphProperty CreateOrGetExposedProperty(SerializableGUID id, string name,
+        public GeometryGraphProperty CreateOrGetExposedPropertyWithType(SerializableGUID id, string name,
             GeometryPropertyType type)
         {
             if (TryGetExisting(id, type, out var existing)) return existing;
