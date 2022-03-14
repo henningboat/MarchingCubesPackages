@@ -14,6 +14,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         [SerializeField] private SerializableGUID _propertyGUID;
         [SerializeField] private float32 _value;
         [SerializeField] private GeometryPropertyValueProvider _providerObject;
+        [SerializeField] public UnityEngine.Object ObjectValue;
 
         public GeometryGraphPropertyOverwrite(SerializableGUID guid)
         {

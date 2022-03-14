@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
@@ -19,8 +20,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return SimdMath.length(q) - thickness;
         }
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
-            GeometryInstruction instruction)
+        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+            in GeometryInstruction instruction)
         {
             return sdTorus(positionOS, radius, thickness);
         }

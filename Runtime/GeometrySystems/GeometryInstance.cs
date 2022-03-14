@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
@@ -63,7 +63,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             TryDisposeGraphBuffers();
         }
 
-        private void UpdateOverwritesInValueBuffer()
+        private void UpdateOverwritesInValueBuffer(GeometryFieldManager geometryFieldManager)
         {
             foreach (var overwrite in _overwrites)
             {
@@ -72,8 +72,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 if (variable == null)
                     continue;
 
-                for (var i = 0; i < variable.GetSizeInBuffer(); i++)
-                    _instructionListBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
+                if (variable.IsAsset)
+                {
+                    int index = geometryFieldManager.EnsureAssetIsRegistered(overwrite.ObjectValue);
+                    _instructionListBuffer.ValueBuffer.Write((float)index, variable.Index);
+                }
+                else
+                {
+
+                    for (var i = 0; i < variable.GetSizeInBuffer(); i++)
+                        _instructionListBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
+                }
             }
 
             _instructionListBuffer.ValueBuffer.Write(transform.worldToLocalMatrix,
@@ -98,7 +107,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             _overwrites[propertyIndex].Value = value;
         }
 
-        public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result)
+        public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result,
+            GeometryFieldManager geometryFieldManager)
         {
             if (GeometryInstructionList == null)
             {
@@ -116,7 +126,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             result = _instructionListBuffer;
 
-            UpdateOverwritesInValueBuffer();
+            UpdateOverwritesInValueBuffer(geometryFieldManager);
 
             return true;
         }
@@ -127,22 +137,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             {
                 _instructionListBuffer.Dispose();
                 _instructionListBuffer = default;
-            }
-        }
-
-        public void InitializeAssetDependencies(GeometryInstance graph, AssetDataStorage assetDataStorage)
-        {
-            var geometryInstructions = graph._instructionListBuffer.GeometryInstructions;
-            for (int i = 0; i < geometryInstructions.Length; i++)
-            {
-                var geometryInstruction = geometryInstructions[i];
-                var assetReferenceIndex = geometryInstruction.assetReferenceIndex;
-                if (assetReferenceIndex >= 0)
-                {
-                    var dependency = GeometryInstructionList.AssetDependencies[assetReferenceIndex];
-                    assetDataStorage.EnsureAssetInStorage(dependency, out geometryInstruction.assetIndexInGlobalBuffer);
-                    geometryInstructions[i] = geometryInstruction;
-                }
             }
         }
     }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
@@ -29,7 +31,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         private bool _initialized;
         private PrepareGraphsSystem _prepareGraphsSystem;
         private JobHandle _receiverJobHandles;
-        private AssetDataStorage _assetDataStorage;
+        private BinaryDataStorage _binaryDataStorage;
 
         public void Update()
         {
@@ -60,9 +62,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                             .GeometryFieldData);
                 }
                 
-                _assetDataStorage.Dispose();
+                _binaryDataStorage.Dispose();
 
-                _assetDataStorage = new AssetDataStorage(Allocator.Persistent);
+                _binaryDataStorage = new BinaryDataStorage(Allocator.Persistent);
             }
 
             
@@ -73,16 +75,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             foreach (var graph in allGraphs)
             {
                 if (graph.enabled == false) continue;
-                if (graph.TryInitializeAndGetBuffer(out var buffers))
+                if (graph.TryInitializeAndGetBuffer(out var buffers, this))
                 {
                     geometryGraphBuffers.Add(buffers);
                 }
-            }  
-            
-            //this does not to happen all the time, only if something changes
-            foreach (var graph in allGraphs)
-            {
-                graph.InitializeAssetDependencies(graph, _assetDataStorage);
             }
 
             var jobHandle = new JobHandle();
@@ -91,7 +87,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             var allGeometryLayers = allGraphs.Select(instance => instance.TargetLayer).Distinct().ToList();
             
             var forceClear = Application.isPlaying==false && _alwaysClearInEditMode;
-            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers, allGeometryLayers, forceClear, _assetDataStorage);
+            jobHandle = _geometryFieldCollection.ScheduleJobs(jobHandle, geometryGraphBuffers, allGeometryLayers, forceClear, _binaryDataStorage);
 
             _receiverJobHandles = default;
 
@@ -128,7 +124,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             if (_initialized)
             {
                 _geometryFieldCollection.Dispose();
-                _assetDataStorage.Dispose();
+                _binaryDataStorage.Dispose();
                 _initialized = false;
             }
 
@@ -139,6 +135,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         {
             Gizmos.DrawWireCube((float3) _clusterCounts * 0.5f * Constants.clusterLength,
                 (float3) _clusterCounts * Constants.clusterLength * Vector3.one);
+        }
+
+        public int EnsureAssetIsRegistered(Object overwriteObjectValue)
+        {
+            return _binaryDataStorage.RegisterAssetAndGetIndex(overwriteObjectValue);
         }
     }
 }

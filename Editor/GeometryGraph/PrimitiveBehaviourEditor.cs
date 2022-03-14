@@ -87,15 +87,19 @@ namespace Editor.GeometryGraph
                     };
                 }
 
+                if (variableDeclarationModel.Type == GeometryPropertyType.SDF2D)
+                    currentOverwrite.ObjectValue =
+                        EditorGUILayout.ObjectField(currentOverwrite.ObjectValue, typeof(Texture2D), false);
+
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
 
-                if (GUILayout.Button("Reset")) ResetProperty(variableDeclarationModel, currentOverwrite);
+                //if (GUILayout.Button("Reset")) ResetProperty(variableDeclarationModel, currentOverwrite);
 
-                var valueProvider =
-                    EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject,
-                        typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
-                currentOverwrite.SetProviderObject(valueProvider);
+                // var valueProvider =
+                //     EditorGUILayout.ObjectField("", currentOverwrite.ProviderObject,
+                //         typeof(GeometryPropertyValueProvider), true) as GeometryPropertyValueProvider;
+                // currentOverwrite.SetProviderObject(valueProvider);
 
                 EditorGUILayout.EndHorizontal();
             }

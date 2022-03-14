@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
-using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
-using static Unity.Mathematics.math;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -107,92 +104,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")]
         public SerializableGUID ReferenceGUID;
 
-        //If the instruction requires to read from an asset (for example SDF), this will be set to the index of
-        //that asset in the GeometryInstructionList. 
-        public int assetReferenceIndex;
-        
-        public int assetIndexInGlobalBuffer;
-
         #endregion
-    }
-
-
-    /// <summary>
-    ///     Important: Only pass this struct by reference, since the actual data is stored behind it inside
-    ///     AssetDataStorage.DataBuffer
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct SDF2DData : IDisposable, IBinaryAsset
-    {
-        public int2 Size;
-
-        public float* Data => (float*) UnsafeUtility.AddressOf(ref Size) + sizeof(SDF2DData);
-
-        public int DataSize => Size.x * Size.y * sizeof(float);
-
-        public static void Create(Texture2D sdfTexture, AssetDataStorage dataStorage)
-        {
-            var size = new int2(sdfTexture.width, sdfTexture.height);
-            var sdf2DData =
-                dataStorage.CreateAsset<SDF2DData>(sdfTexture.GetInstanceID(), size.x * size.y * sizeof(float));
-
-            var textureData = sdfTexture.GetPixels();
-            sdf2DData->Size = size;
-
-            var dataBuffer = UnsafeUtils.GetDataBuffer<float, SDF2DData>(sdf2DData);
-
-            for (var i = 0; i < size.x * size.y; i++) dataBuffer[i] = (0.5f-textureData[i].r);
-        }
-
-        public void GetData(out void* headerPointer, out int headerSize, out void* dataPointer, out int dataSize)
-        {
-            headerPointer = UnsafeUtility.AddressOf(ref Size);
-            headerSize = sizeof(int2);
-            dataPointer = Data;
-            dataSize = DataSize;
-        }
-
-        public float Sample(float2 uv)
-        {
-            uv = clamp(uv, 0, Size - 2);
-            var flooredUV = (int2) floor(uv);
-
-            var c00 = SamplePixel(flooredUV);
-            var c10 = SamplePixel(flooredUV + int2(1, 0));
-            var c01 = SamplePixel(flooredUV + int2(0, 1));
-            var c11 = SamplePixel(flooredUV + int2(1, 1));
-
-            var subPixelPosition = uv % 1;
-            var row0 = lerp(c00, c10, subPixelPosition.x);
-            var row1 = lerp(c01, c11, subPixelPosition.x);
-
-            var interpolatedValue = lerp(row0, row1, subPixelPosition.y);
-            return interpolatedValue;
-        }
-
-
-        public float SamplePixel(int2 pixel)
-        {
-            var index = Utils.PositionToIndex(pixel, Size);
-            return Data[index];
-        }
-
-        public void Dispose()
-        {
-            UnsafeUtility.Free(Data, Allocator.Temp);
-        }
-    }
-
-    public static unsafe class UnsafeUtils
-    {
-        public static TResult* GetDataBuffer<TResult, THeaderType>(THeaderType* asset)
-            where THeaderType : unmanaged where TResult : unmanaged
-        {
-            return (TResult*) asset + (ulong) sizeof(THeaderType);
-        }
-    }
-
-    public interface IBinaryAsset
-    {
     }
 }

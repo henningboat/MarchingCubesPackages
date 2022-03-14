@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
@@ -16,9 +17,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
             //SDF code from
             //https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
-            public static PackedFloat ComputeBoundingBoxDistance(PackedFloat3 p, PackedFloat3 b, PackedFloat e)
+            public static PackedFloat ComputeBoundingBoxDistance(in PackedFloat3 positionOS, in PackedFloat3 b, in PackedFloat e)
             {
-                p = abs(p) - b;
+                var p = abs(positionOS) - b;
                 var q = abs(p + e) - e;
                 return min(min(
                         length(max(PackedFloat3(p.x, q.y, q.z), 0.0f)) + min(max(p.x, max(q.y, q.z)), 0.0f),
@@ -39,8 +40,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
             #region ITerrainModifierShape Members
 
-            public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
-                GeometryInstruction instruction)
+            public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+                in GeometryInstruction instruction)
             {
                 return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
             }

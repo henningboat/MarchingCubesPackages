@@ -7,7 +7,7 @@ using Unity.Jobs;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration
 {
-    [BurstCompile]
+    [BurstCompile(FloatPrecision.Low,FloatMode.Fast, OptimizeFor = OptimizeFor.Performance)]
     internal struct JCalculateDistanceField : IJobParallelFor
     {
         private NativeArray<GeometryInstruction> _geometryInstructions;

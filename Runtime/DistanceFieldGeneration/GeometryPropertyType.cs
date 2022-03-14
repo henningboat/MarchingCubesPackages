@@ -1,4 +1,5 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -9,7 +10,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         Float,
         Float3,
         Float4X4,
-        Color32
+        Color32,
+        SDF2D
     }
 
     public static class GeometryPropertyTypeExtensions
@@ -22,6 +24,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             if (type == typeof(float4x4)) return GeometryPropertyType.Float4X4;
 
+            if (type == typeof(SDF2DAssetReference)) return GeometryPropertyType.SDF2D;
+            
             throw new ArgumentOutOfRangeException(type.ToString());
         }
     }

@@ -1,12 +1,14 @@
 ﻿using System;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
     public struct DistanceDataReadbackCollection
     {
-        public readonly AssetDataStorage AssetDataStorage;
+        public readonly BinaryDataStorage BinaryDataStorage;
         
         private GeometryFieldData _data0;
         private GeometryFieldData _data1;
@@ -17,9 +19,9 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         private GeometryFieldData _data6;
         private GeometryFieldData _data7;
 
-        public DistanceDataReadbackCollection(AssetDataStorage assetDataStorage)
+        public DistanceDataReadbackCollection(BinaryDataStorage binaryDataStorage)
         {
-            AssetDataStorage = assetDataStorage;
+            BinaryDataStorage = binaryDataStorage;
             _data0 = default;
             _data1 = default;
             _data2 = default;

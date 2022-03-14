@@ -260,8 +260,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             }
 
             GeometryInstructionUtility.AddAdditionalData(ref instruction, CurrentCombinerDepth,
-                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor,
-                localAssetIndex);
+                CurrentCombiner.Operation, CurrentCombiner.BlendValue, CurrentTransformation, CurrentColor);
             _geometryInstructionBuffer.Add(instruction);
         }
 

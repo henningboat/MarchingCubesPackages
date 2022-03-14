@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
@@ -15,11 +16,10 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(4)] [DefaultValue(0.1f, 0.1f, 0.1f)]
         public float3 scale;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, AssetDataStorage assetData,
-            GeometryInstruction instruction)
+        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+            in GeometryInstruction instruction)
         {
-            positionOS *= 1/scale;
-            return Voronoi(positionOS)*scale.x + new PackedFloat(valueOffset);
+            return Voronoi( positionOS * (1f/scale))*scale.x + new PackedFloat(valueOffset);
         }
 
         public ShapeType Type => ShapeType.Voronoi;

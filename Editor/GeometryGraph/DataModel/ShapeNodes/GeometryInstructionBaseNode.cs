@@ -33,10 +33,20 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
 
             foreach (var propertyDefinition in GeometryTypeCache.GetPropertiesForType(_typeEnumValue))
             {
-                var dataInputPort =
-                    this.AddDataInputPort(propertyDefinition.Item2, GetTypeHandle(propertyDefinition.Item1), null,
+                IPortModel dataInputPort;
+                if (propertyDefinition.Item1 == GeometryPropertyType.SDF2D)
+                {
+                    dataInputPort = this.AddDataInputPort(propertyDefinition.Item2,
+                        GetTypeHandle(propertyDefinition.Item1), null,
+                        PortOrientation.Horizontal, PortModelOptions.NoEmbeddedConstant);
+                }
+                else
+                {
+                    dataInputPort = this.AddDataInputPort(propertyDefinition.Item2,
+                        GetTypeHandle(propertyDefinition.Item1), null,
                         PortOrientation.Horizontal, PortModelOptions.Default,
                         constant => { FloatArrayToObject(propertyDefinition.Item3); });
+                }
 
                 _properties.Add(dataInputPort);
                 _typePerInputPort.Add(propertyDefinition.Item1);
@@ -65,16 +75,14 @@ namespace Editor.GeometryGraph.DataModel.ShapeNodes
             {
                 case GeometryPropertyType.Float:
                     return TypeHandle.Float;
-                    break;
                 case GeometryPropertyType.Float3:
                     return TypeHandle.Vector3;
-                    break;
                 case GeometryPropertyType.Float4X4:
                     return TypeHandleHelpers.GenerateTypeHandle<Matrix4x4>();
-                    break;
                 case GeometryPropertyType.Color32:
                     return TypeHandleHelpers.GenerateTypeHandle<Color>();
-                    break;
+                case GeometryPropertyType.SDF2D:
+                    return TypeHandleHelpers.GenerateTypeHandle<Texture2D>();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(propertyDefinitionItem1), propertyDefinitionItem1,
                         null);

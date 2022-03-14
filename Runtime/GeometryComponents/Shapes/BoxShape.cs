@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
 using SIMDMath;
@@ -13,11 +14,11 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(0)] [DefaultValue(8, 8, 8)]
         public float3 Extends;
 
-        public PackedFloat GetSurfaceDistance(PackedFloat3 positionWS, AssetDataStorage assetData,
-            GeometryInstruction instruction)
+        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+            in GeometryInstruction instruction)
         {
             var extends = Extends;
-            var q = abs(positionWS) - extends;
+            var q = abs(positionOS) - extends;
             return length(max(q, 0.0f)) + min(max(q.x, max(q.y, q.z)), 0.0f);
         }
 
