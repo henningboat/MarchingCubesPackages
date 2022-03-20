@@ -1,6 +1,6 @@
-﻿#include "Includes/DistanceFieldTriangulation.hlsl"
+﻿float4 _Time;
+#include "Includes/DistanceFieldTriangulation.hlsl"
 
-float4 _Time;
 #pragma kernel ResetSubChunkTriangleCount
 #pragma kernel GetTrianglePositions
 #pragma kernel BuildIndexBuffer

@@ -28,6 +28,7 @@
     "com.unity.burst": "1.6.0",
     "com.unity.graphtools.foundation": "0.11.2-preview",
     "com.unity.collections": "1.0.0-pre.6",
-    "com.unity.visualeffectgraph": "12.1.0"
+    "com.unity.visualeffectgraph": "12.1.0",
+    "com.unity.shadergraph": "12.1.0"
   }
 }

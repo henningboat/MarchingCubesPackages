@@ -85,10 +85,10 @@ float4 unpackVertexColor(uint i)
 {
     float4 unpack;
 
-    unpack.x = float((i & uint(0xff000000)) >> 24);
-    unpack.y = float((i & uint(0x00ff0000)) >> 16);
-    unpack.z = float((i & uint(0x0000ff00)) >> 8);
-    unpack.w = float((i & uint(0x000000ff)) >> 0);
+    unpack.w = float((i & uint(0xff000000)) >> 24);
+    unpack.z = float((i & uint(0x00ff0000)) >> 16);
+    unpack.y = float((i & uint(0x0000ff00)) >> 8);
+    unpack.x = float((i & uint(0x000000ff)) >> 0);
 
     return unpack;
 }
@@ -190,7 +190,7 @@ float3 CalculateNormalForPosition(int3 localPosition)
                 }
             }
 
-    return normalize(combinedNormal);
+    return (combinedNormal);
 }
 
 
@@ -223,7 +223,7 @@ float3 interpolateMaterial(uint a, uint b, float t)
 
     //todo check if saturate is actually needed here
 
-    float4 blended = lerp(aUnpacked, bUnpacked, saturate(t));
+    float4 blended = lerp(aUnpacked, bUnpacked, saturate(t))/255;
 
     return blended.rgb;
 }
@@ -232,9 +232,57 @@ int _PositionInClusterX;
 int _PositionInClusterY;
 int _PositionInClusterZ;
 
+float DoRay(float3 positionWS, float3 normalWS)
+{
+    positionWS+=normalWS*2;
+    const int iterations = 10;
+    for(int i=1;i<iterations;i++)
+    {
+        float distance = GetPointPosition(round(positionWS)).w;
+        if(distance<0)
+        {
+            return i/iterations;
+        }
+        positionWS+=normalWS*i;
+    }
+    return 1;
+}
+
+
+float random (float2 st) {
+   // st+=_Time.x;
+    return frac(sin(dot(st.xy,
+                         float2(12.9898,78.233)))*
+        43758.5453123);
+}
+
+
+float3 RandomDirection(int i, int3 positionWs, float3 direction)
+{
+    float f = i*i*3.59230+2389.4324;
+    float g = positionWs.x+positionWs.y*3.432+positionWs.z*8.34234;
+    return (float3(random(float2(g,f)),random(float2(g,f+3)),random(float2(float2(g,f+5))))-0.5f);
+   // return (float3(random(float2(positionWs.xy+f)),random(positionWs.yz*f),random(float2(positionWs.zx*f)))-0.5f).x;
+}
+
+float3 RayMarchAO(float3 normalWS, int3 positionWS)
+{
+    float3 directionSum = 0;
+    float ao=0;
+    const uint count = 10;
+    for (int i=0;i<count;i++){
+        const float3 direction = normalize(normalize(normalWS)+0.7*normalize(RandomDirection(i, positionWS, normalWS)));
+        directionSum+=direction;
+        ao += DoRay(positionWS, direction);
+    }
+    //return normalize(directionSum)/count;
+    return ao/count;
+}
+
 void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
                                    out float3 normal,
-                                   out float3 color)
+                                   out float3 color,
+                                   out float occlusion)
 {
     int triangleTypeIndex;
 
@@ -277,6 +325,17 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
         CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
     };
 
+    const float3 aoCube[8] = {
+        RayMarchAO(cubeNormals[0],(int3(positionWS.x, positionWS.y, positionWS.z))),
+        RayMarchAO(cubeNormals[1],(int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+        RayMarchAO(cubeNormals[2],(int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+        RayMarchAO(cubeNormals[3],(int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+        RayMarchAO(cubeNormals[4],(int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+        RayMarchAO(cubeNormals[5],(int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+        RayMarchAO(cubeNormals[6],(int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+        RayMarchAO(cubeNormals[7],(int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
+
     float tA;
 
 
@@ -291,4 +350,5 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
     normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
 
     color = interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0], tA);
+    occlusion = lerp(aoCube[a0].x, aoCube[b0].x, tA);
 }

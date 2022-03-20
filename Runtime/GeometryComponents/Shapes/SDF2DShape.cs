@@ -21,12 +21,13 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            var scaledPosition = positionOS * scale;
             PackedFloat result = default;
             //todo figure out how to get the binary asset without copying the struct
             var binaryDataStorage = assetData;
             binaryDataStorage.GetBinaryAsset(sdf.AssetIndex, out SDF2DHeader header,
                 out NativeSlice<float> sdfData);
+
+            var scaledPosition = (positionOS + (new PackedFloat3(new float3((float2) header.Size, 1f)) * scale));
 
             for (int i = 0; i < 4; i++)
             {

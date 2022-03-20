@@ -9,7 +9,9 @@ namespace henningboat.CubeMarching.Runtime.BinaryAssets
         public int DataIndex { get; set; }
         public int DataLength { get; set; }
         public int AssetInstanceID { get; set; }
-        
+
+        public int2 Size => _size;
+
         private int2 _size;
 
         public float Sample(float2 uv, NativeSlice<float> data)
