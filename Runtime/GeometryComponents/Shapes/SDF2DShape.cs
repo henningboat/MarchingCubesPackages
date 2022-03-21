@@ -16,7 +16,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(0)] [DefaultValue(1f)] public float scale;
         [FieldOffset(4)] [DefaultValue(0f)] public float offset;
         [FieldOffset(8)] [DefaultValue(10)] public float distanceScale;
-        [FieldOffset(12)] public SDF2DAssetReference sdf;
+        [FieldOffset(12)] public SDF2DAssetReference sdf;        
+        [FieldOffset(16)] [DefaultValue(50f)] public float thickness;
+
 
         public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
@@ -27,7 +29,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             binaryDataStorage.GetBinaryAsset(sdf.AssetIndex, out SDF2DHeader header,
                 out NativeSlice<float> sdfData);
 
-            var scaledPosition = (positionOS + (new PackedFloat3(new float3((float2) header.Size*0.5f, 1f)) * scale));
+            var scaledPosition = (positionOS* scale+new PackedFloat3(new float3((float2) header.Size * 0.5f, 1)));
 
             for (int i = 0; i < 4; i++)
             {
@@ -35,7 +37,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
                 result.PackedValues[i] = (header.Sample(uv, sdfData)) * distanceScale - offset;
             }
 
-            return result;
+            result = SimdMath.max(SimdMath.abs(positionOS.z )- thickness, result);
+            
+            return result/scale;
         }
 
         public ShapeType Type => ShapeType.SDF2D;

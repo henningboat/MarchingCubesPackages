@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometryComponents.DistanceModifications;
+using henningboat.CubeMarching.Runtime.GeometryComponents.PositionModifications;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
+using henningboat.CubeMarching.Runtime.GeometryListGeneration.PrimitiveDecorators;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
+using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
@@ -35,7 +40,7 @@ namespace Editor.GeometryGraph
             GUILayout.Space(10);
 
             serializedObject.ApplyModifiedProperties();
-            if (GUI.changed)
+            //if (GUI.changed)
             {
                 Undo.RecordObject(target, "changed overwrite");
 
@@ -64,11 +69,74 @@ namespace Editor.GeometryGraph
                         property.Item2, property.Item1, defaultValue));
                 }
 
+
+                var hasColorDecorator = TryGetDecorator(out ColorDecorator colorDecorator);
+                var hasInflation = TryGetDecorator(out InflationDecorator inflation);
+                var hasRepetition = TryGetDecorator(out RepetitionDecorator repetition);
+                var hasOnion = TryGetDecorator(out OnionDecorator onion);
+
+                var color = Color.white;
+                if (hasColorDecorator)
+                {
+                    color = colorDecorator.Color;
+                }
+
+                GeometryGraphProperty colorFloat3Property =
+                    context.CreateProperty(new Vector3(color.r, color.g, color.b));
+                context.AddMathInstruction(MathOperatorType.Float3ToColor32, GeometryPropertyType.Color32,
+                    colorFloat3Property, context.ZeroFloatProperty, out GeometryGraphProperty colorProperty);
+
+                context.PushColor(colorProperty);
+
+
+                if (hasRepetition)
+                {
+                    context.PushCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
+                    context.PushTransformation(context.ZeroTransformation, false);
+                    float3 offset = repetition.Size * 0.5f;
+                   //  context.PushTransformation(context.CreateProperty(Matrix4x4.Translate(offset)), true);
+                    context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
+                        GeometryInstructionType.PositionModification, (int) PositionModificationType.Repetition,
+                        new List<GeometryGraphProperty>()
+                        {
+                            context.CreateProperty(repetition.Size),
+                        }));
+                }
+
                 var shapeInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape,
                     _shapeType.enumValueIndex, exposedProperties);
                 context.WriteInstruction(shapeInstruction);
+
+
+                if (hasInflation)
+                {
+                    context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
+                        GeometryInstructionType.DistanceModification, (int) DistanceModificationType.Inflation,
+                        new List<GeometryGraphProperty>() {context.CreateProperty(inflation.Inflation)}));
+                }
+                if (hasOnion)
+                {
+                    context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
+                        GeometryInstructionType.DistanceModification, (int) DistanceModificationType.Onion,
+                        new List<GeometryGraphProperty>() {context.CreateProperty(onion.Thickness)}));
+                }
+
+                if (hasRepetition)
+                {
+                    context.PopTransformation();
+                    context.PopCombiner();
+                }
+
+                context.PopColor();
+
                 target.Initialize(context.GetGeometryGraphData());
             }
+        }
+
+        private bool TryGetDecorator<T>(out T decorator) where T : Component
+        {
+            decorator = ((MonoBehaviour) target).gameObject.GetComponent<T>();
+            return decorator != null;
         }
     }
 }
