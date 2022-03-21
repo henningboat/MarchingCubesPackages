@@ -27,7 +27,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             binaryDataStorage.GetBinaryAsset(sdf.AssetIndex, out SDF2DHeader header,
                 out NativeSlice<float> sdfData);
 
-            var scaledPosition = (positionOS + (new PackedFloat3(new float3((float2) header.Size, 1f)) * scale));
+            var scaledPosition = (positionOS + (new PackedFloat3(new float3((float2) header.Size*0.5f, 1f)) * scale));
 
             for (int i = 0; i < 4; i++)
             {
