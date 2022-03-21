@@ -14,7 +14,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     public struct SDF2DShape : IGeometryShape
     {
         [FieldOffset(0)] [DefaultValue(1f)] public float scale;
-        [FieldOffset(4)] [DefaultValue(0.5f)] public float offset;
+        [FieldOffset(4)] [DefaultValue(0f)] public float offset;
         [FieldOffset(8)] [DefaultValue(10)] public float distanceScale;
         [FieldOffset(12)] public SDF2DAssetReference sdf;
 
@@ -32,7 +32,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             for (int i = 0; i < 4; i++)
             {
                 float2 uv = new float2(scaledPosition.x.PackedValues[i], scaledPosition.y.PackedValues[i]);
-                result.PackedValues[i] = header.Sample(uv, sdfData) * distanceScale;
+                result.PackedValues[i] = (header.Sample(uv, sdfData)) * distanceScale - offset;
             }
 
             return result;
