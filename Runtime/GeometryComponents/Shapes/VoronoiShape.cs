@@ -11,9 +11,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct VoronoiShape : IGeometryShape
     {
-        [FieldOffset(0)] [DefaultValue(0.3f)] public float valueOffset;
+        [FieldOffset(0)] [DefaultValue(5f)] public float valueOffset;
 
-        [FieldOffset(4)] [DefaultValue(0.1f, 0.1f, 0.1f)]
+        [FieldOffset(4)] [DefaultValue(30, 30, 30)]
         public float3 scale;
 
         public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,

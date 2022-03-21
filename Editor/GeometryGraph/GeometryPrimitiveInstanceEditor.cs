@@ -74,6 +74,8 @@ namespace Editor.GeometryGraph
                 var hasInflation = TryGetDecorator(out InflationDecorator inflation);
                 var hasRepetition = TryGetDecorator(out RepetitionDecorator repetition);
                 var hasOnion = TryGetDecorator(out OnionDecorator onion);
+                var hasInversion = TryGetDecorator(out InversionDecorator _);
+                var hasTwist = TryGetDecorator(out TwistDecorator twist);
 
                 var color = Color.white;
                 if (hasColorDecorator)
@@ -92,7 +94,6 @@ namespace Editor.GeometryGraph
                 if (hasRepetition)
                 {
                     context.PushCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
-                    context.PushTransformation(context.ZeroTransformation, false);
                     float3 offset = repetition.Size * 0.5f;
                    //  context.PushTransformation(context.CreateProperty(Matrix4x4.Translate(offset)), true);
                     context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
@@ -101,6 +102,20 @@ namespace Editor.GeometryGraph
                         {
                             context.CreateProperty(repetition.Size),
                         }));
+                    context.PushTransformation(context.ZeroTransformation, false);
+                }
+
+                if (hasTwist)
+                {   
+                    context.PushCombiner(CombinerOperation.Min, context.ZeroFloatProperty);
+                    context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
+                    GeometryInstructionType.PositionModification, (int) PositionModificationType.Twist,
+                    new List<GeometryGraphProperty>()
+                    {
+                        context.CreateProperty(twist.Twist),
+                    }));
+                    
+                    context.PushTransformation(context.ZeroTransformation, false);
                 }
 
                 var shapeInstruction = GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape,
@@ -121,12 +136,25 @@ namespace Editor.GeometryGraph
                         new List<GeometryGraphProperty>() {context.CreateProperty(onion.Thickness)}));
                 }
 
+                if (hasInversion)
+                {
+                    context.WriteInstruction(GeometryInstructionUtility.CreateInstruction(
+                        GeometryInstructionType.DistanceModification, (int) DistanceModificationType.Inversion, new List<GeometryGraphProperty>()));
+                }
+
+                if (hasTwist)
+                {
+                    context.PopTransformation();
+                    context.PopCombiner();
+                }
+                
                 if (hasRepetition)
                 {
                     context.PopTransformation();
                     context.PopCombiner();
                 }
 
+                
                 context.PopColor();
 
                 target.Initialize(context.GetGeometryGraphData());
