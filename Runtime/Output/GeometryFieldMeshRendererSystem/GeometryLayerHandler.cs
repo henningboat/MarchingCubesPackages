@@ -12,6 +12,7 @@ using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem
@@ -66,7 +67,8 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             if (outputLayerInstructionLists == null) return jobHandle;
 
-            if (!GeometryLayer.ClearEveryFrame && !forceClear)
+            //todo placeholder
+            if (Application.isPlaying)
                 _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
 
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)

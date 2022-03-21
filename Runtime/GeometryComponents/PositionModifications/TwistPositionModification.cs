@@ -19,8 +19,8 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.PositionModificati
             var c = SimdMath.cos(twistAmount * positionWS.y);
             var s = SimdMath.sin(twistAmount * positionWS.y);
 
-            return new PackedFloat3(c * positionWS.x - s * positionWS.z, positionWS.x * s + positionWS.z * c,
-                positionWS.y);
+            return new PackedFloat3(c * positionWS.x - s * positionWS.z, 
+                positionWS.y, positionWS.x * s + positionWS.z * c);
         }
     }
 }

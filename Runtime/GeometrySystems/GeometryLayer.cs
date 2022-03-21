@@ -8,7 +8,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     [Serializable]
     public struct GeometryLayer
     {
-        public static readonly GeometryLayer OutputLayer = new("OutputLayer", default, true, true);
+        public static readonly GeometryLayer OutputLayer = new("OutputLayer", default, true, false);
 
         public bool Equals(GeometryLayer other)
         {
