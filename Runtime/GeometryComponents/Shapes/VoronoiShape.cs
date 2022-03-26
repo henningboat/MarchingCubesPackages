@@ -16,10 +16,16 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(4)] [DefaultValue(30, 30, 30)]
         public float3 scale;
 
-        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            return Voronoi( positionOS * (1f/scale))*scale.x + new PackedFloat(valueOffset);
+            for (var i = 0; i < iterator.BufferLength; i++)
+            {
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out var _);
+                var surfaceDistance = Voronoi(positionOS * (1f / (scale))) * scale.x + new PackedFloat(valueOffset);
+                ;
+                iterator.WriteDistanceField(i, surfaceDistance, instruction);
+            }
         }
 
         public ShapeType Type => ShapeType.Voronoi;

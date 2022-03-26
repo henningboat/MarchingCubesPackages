@@ -9,7 +9,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     public interface IGeometryShape
     {
         [UsedImplicitly]
-        PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction);
 
         ShapeType Type { get; }

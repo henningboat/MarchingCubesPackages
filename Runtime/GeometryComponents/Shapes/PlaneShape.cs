@@ -9,10 +9,17 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     [StructLayout(LayoutKind.Explicit, Size = 4 * 16)]
     public struct PlaneShape : IGeometryShape
     {
-        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            return positionOS.y;
+            for (int i = 0; i < iterator.BufferLength; i++)
+            {
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                
+                var surfaceDistance = positionOS.y;
+                
+                iterator.WriteDistanceField(i, surfaceDistance, instruction);
+            }
         }
 
         public ShapeType Type => ShapeType.Plane;

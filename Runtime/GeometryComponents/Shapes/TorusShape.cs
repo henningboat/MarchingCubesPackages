@@ -20,10 +20,16 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             return SimdMath.length(q) - thickness;
         }
 
-        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            return sdTorus(positionOS, radius, thickness);
+            for (var i = 0; i < iterator.BufferLength; i++)
+            {
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out _);
+                var surfaceDistance = sdTorus(positionOS, radius, thickness);
+                ;
+                iterator.WriteDistanceField(i, surfaceDistance, instruction);
+            }
         }
 
         public ShapeType Type => ShapeType.Torus;

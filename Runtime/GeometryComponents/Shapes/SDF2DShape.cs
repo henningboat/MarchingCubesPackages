@@ -20,16 +20,26 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         [FieldOffset(16)] [DefaultValue(50f)] public float thickness;
 
 
-        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            PackedFloat result = default;
-            //todo figure out how to get the binary asset without copying the struct
             var binaryDataStorage = assetData;
             binaryDataStorage.GetBinaryAsset(sdf.AssetIndex, out SDF2DHeader header,
                 out NativeSlice<float> sdfData);
+            
+            for (int i = 0; i < iterator.BufferLength; i++)
+            {
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                var surfaceDistance = GetSurfaceDistance(positionOS, header, sdfData);
+                iterator.WriteDistanceField(i, surfaceDistance, instruction);
+            }
+        }
 
-            var scaledPosition = (positionOS* scale+new PackedFloat3(new float3((float2) header.Size * 0.5f, 1)));
+        private PackedFloat GetSurfaceDistance(PackedFloat3 positionOS, SDF2DHeader header, NativeSlice<float> sdfData)
+        {
+            PackedFloat result = default;
+
+            var scaledPosition = (positionOS * scale + new PackedFloat3(new float3((float2) header.Size * 0.5f, 1)));
 
             for (int i = 0; i < 4; i++)
             {
@@ -37,9 +47,9 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
                 result.PackedValues[i] = (header.Sample(uv, sdfData)) * distanceScale - offset;
             }
 
-            result = SimdMath.max(SimdMath.abs(positionOS.z )- thickness, result);
-            
-            return result/scale;
+            result = SimdMath.max(SimdMath.abs(positionOS.z) - thickness, result);
+
+            return result / scale;
         }
 
         public ShapeType Type => ShapeType.SDF2D;

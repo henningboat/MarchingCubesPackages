@@ -3,6 +3,7 @@ using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace henningboat.CubeMarching.Runtime.Rendering
 {
@@ -65,7 +66,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
             NativeSlice<CTriangulationInstruction> triangulationInstructions,
             NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices,
             int materialIDFilter,
-            CClusterParameters clusterParameters, Material defaultMaterial)
+            CClusterParameters clusterParameters, Material defaultMaterial, int layer)
         {
             if (cSubChunkWithTrianglesIndices.Length == 0) return;
 
@@ -160,7 +161,7 @@ namespace henningboat.CubeMarching.Runtime.Rendering
 
 
             Graphics.DrawProceduralIndirect(defaultMaterial, new Bounds(Vector3.zero, Vector3.one * 10000),
-                MeshTopology.Triangles, _indexBufferCounter, 0, null, _propertyBlock);
+                MeshTopology.Triangles, _indexBufferCounter, 0, null, _propertyBlock,ShadowCastingMode.On,true,layer);
         }
 
 

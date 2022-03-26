@@ -40,10 +40,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
 
             #region ITerrainModifierShape Members
 
-            public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+            public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
                 in GeometryInstruction instruction)
             {
-                return ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
+                for (int i = 0; i < iterator.BufferLength; i++)
+                {
+                    var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                    var surfaceDistance = ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
+                    iterator.WriteDistanceField(i, surfaceDistance, instruction);
+                }
             }
 
             public ShapeType Type => ShapeType.BoundingBox;

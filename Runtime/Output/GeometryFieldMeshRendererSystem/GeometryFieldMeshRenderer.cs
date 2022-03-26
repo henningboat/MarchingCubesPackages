@@ -13,6 +13,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
     {
         [SerializeField] private GeometryLayerAsset _geometryLayerAsset;
         [SerializeField] private Material _defaultMaterial;
+        [SerializeField] private int _layer;
+        
         private NativeList<int> _chunksModifiedThisFrame;
 
         private ComputeBuffer _distanceFieldComputeBuffer;
@@ -76,7 +78,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
-                    clusterParameters, _defaultMaterial);
+                    clusterParameters, _defaultMaterial,_layer);
             }
         }
 

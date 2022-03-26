@@ -14,10 +14,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
     {
         [FieldOffset(0)] [DefaultValue(8.0f)] public float radius;
 
-        public PackedFloat GetSurfaceDistance(in PackedFloat3 positionOS, in BinaryDataStorage assetData,
+        public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            return length(positionOS) - radius;
+            for (int i = 0; i < iterator.BufferLength; i++)
+            {
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                var surfaceDistance = length(positionOS) - radius;
+                iterator.WriteDistanceField(i, surfaceDistance, instruction);
+            }
         }
 
         public ShapeType Type => ShapeType.Sphere;

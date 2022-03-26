@@ -67,7 +67,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                     var distance = iterator.CurrentInstructionSurfaceDistanceReadback[i].PackedValues;
 
                     //todo turn back to 10
-                    const int prepassDistance = 12;
+                    const int prepassDistance = 4;
 
                     var isWriting = (distance < prepassDistance) & (distance > -prepassDistance);
                     for (var k = 0; k < 4; k++)
