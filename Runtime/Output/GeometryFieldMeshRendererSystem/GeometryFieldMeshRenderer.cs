@@ -5,6 +5,7 @@ using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
@@ -85,6 +86,16 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
                     clusterParameters, _defaultMaterial,_layer);
+
+                DebugDraw(subChunksWithTriangles);
+            }
+        }
+
+        private void DebugDraw(NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices)
+        {
+            foreach (var trianglesIndex in cSubChunkWithTrianglesIndices)
+            {
+                Debug.DrawRay(((Vector3) (float3) trianglesIndex.ChunkPositionGS), Vector3.one, Color.white);
             }
         }
 

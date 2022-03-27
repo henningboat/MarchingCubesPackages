@@ -67,9 +67,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                     var distance = iterator.CurrentInstructionSurfaceDistanceReadback[i].PackedValues;
 
                     //todo turn back to 10
-                    const int prepassDistance = 4;
+                    const int prepassDistance = 12;
 
-                    var isWriting = (distance < prepassDistance) & (distance > -prepassDistance);
+                    var isWriting = (distance < prepassDistance) & (distance > -prepassDistance) &
+                                    currentGeometryInstruction.WritesToDistanceField;
                     for (var k = 0; k < 4; k++)
                         if (isWriting[k])
                         {
@@ -79,20 +80,20 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
                             Hash128 hashOfInstruction;
                             if (currentGeometryInstruction.GeometryInstructionType == GeometryInstructionType.CopyLayer)
                             {
-                                var readbackCluster = _data[currentGeometryInstruction.GeometryInstructionSubType]
-                                    .GetCluster(clusterIndex);
-                                if (readbackCluster.Parameters.WriteMask[chunkIndex] == false) continue;
-
-                                hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
-
-                                //only if we don't currently read from our own layer, we want to add the current hash of the
-                                //read content to the mix. Else, we would get a new has everytime
-                                if (i != 0 || geometryFieldData.GeometryLayer.ClearEveryFrame)
-                                {
-                                    var currentHashOnReadbackLayer = readbackCluster.GetChunk(chunkIndex).Parameters
-                                        .CurrentGeometryInstructionsHash;
-                                    hashOfInstruction.Append(ref currentHashOnReadbackLayer);
-                                }
+                                 var readbackCluster = _data[currentGeometryInstruction.GeometryInstructionSubType]
+                                     .GetCluster(clusterIndex);
+                                 if (readbackCluster.Parameters.WriteMask[chunkIndex] == false) continue;
+                                
+                                 hashOfInstruction = currentGeometryInstruction.GeometryInstructionHash;
+                                
+                                 //only if we don't currently read from our own layer, we want to add the current hash of the
+                                 //read content to the mix. Else, we would get a new has everytime
+                                 if (i != 0 || geometryFieldData.GeometryLayer.ClearEveryFrame)
+                                 {
+                                     var currentHashOnReadbackLayer = readbackCluster.GetChunk(chunkIndex).Parameters
+                                         .CurrentGeometryInstructionsHash;
+                                     hashOfInstruction.Append(ref currentHashOnReadbackLayer);
+                                 }
                             }
                             else
                             {
@@ -110,7 +111,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGenerati
             for (var chunkIndex = 0; chunkIndex < 512; chunkIndex++)
             {
                 var newInstructionHash = hashPerChunk[chunkIndex];
-                var writeMaskValue = newInstructionHash != default;
+                var writeMaskValue = newInstructionHash != defaultHash;
 
 
                 clusterParameters.WriteMask[chunkIndex] = writeMaskValue;

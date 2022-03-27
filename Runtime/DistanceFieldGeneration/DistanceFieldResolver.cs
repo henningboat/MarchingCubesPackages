@@ -31,6 +31,17 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 {
                     chunk[i] = new PackedDistanceFieldData() {SurfaceDistance = 10};
                 }
+                
+                chunkParameters.InnerDataMask = 0;
+                chunkParameters.ChunkInsideTerrain = 0;
+                chunk.Parameters = chunkParameters;
+                return;
+            }
+
+            if (chunkParameters.PositionWS.z < 24 || chunkParameters.PositionWS.z > 32)
+            {
+                chunkParameters.InnerDataMask = 0;
+                chunkParameters.ChunkInsideTerrain = 0;
                 return;
             }
             
