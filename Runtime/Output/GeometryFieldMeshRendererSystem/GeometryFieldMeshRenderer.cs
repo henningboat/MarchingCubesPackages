@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 {
-    internal class GeometryFieldMeshRenderer : MonoBehaviour, IGeometryFieldReceiver
+    public class GeometryFieldMeshRenderer : MonoBehaviour, IGeometryFieldReceiver
     {
         [SerializeField] private GeometryLayerAsset _geometryLayerAsset;
         [SerializeField] private Material _defaultMaterial;
@@ -29,6 +29,12 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         private NativeArray<CSubChunkWithTrianglesIndex> _subChunksWithTrianglesData;
         private NativeArray<CTriangulationInstruction> _triangulationInstructions;
         private NativeArray<int> _vertexCountPerSubChunk;
+
+        public Material DefaultMaterial
+        {
+            get => _defaultMaterial;
+            set => _defaultMaterial = value;
+        }
 
         private void OnDisable()
         {
