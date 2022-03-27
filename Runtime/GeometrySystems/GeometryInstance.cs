@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
-using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometryGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.GraphToolsFoundation.Overdrive;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
@@ -74,12 +73,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
                 if (variable.IsAsset)
                 {
-                    int index = geometryFieldManager.EnsureAssetIsRegistered(overwrite.ObjectValue);
-                    _instructionListBuffer.ValueBuffer.Write((float)index, variable.Index);
+                    var index = geometryFieldManager.EnsureAssetIsRegistered(overwrite.ObjectValue);
+                    _instructionListBuffer.ValueBuffer.Write((float) index, variable.Index);
                 }
                 else
                 {
-
                     for (var i = 0; i < variable.GetSizeInBuffer(); i++)
                         _instructionListBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
                 }
@@ -105,6 +103,24 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public void SetOverwrite(int propertyIndex, float32 value)
         {
             _overwrites[propertyIndex].Value = value;
+        }
+
+        public void SetOverwrite(string propertyName, float32 value)
+        {
+            var variable = GeometryInstructionList.GetIndexOfProperty(propertyName);
+            SetOverwrite(variable.ID, value);
+        }
+
+        private void SetOverwrite(SerializableGUID propertyGuid, float32 value)
+        {
+            foreach (var propertyOverwrite in _overwrites)
+                if (propertyOverwrite.PropertyGUID == propertyGuid)
+                {
+                    propertyOverwrite.Value = value;
+                    return;
+                }
+
+            _overwrites.Add(new GeometryGraphPropertyOverwrite(propertyGuid) {Value = value});
         }
 
         public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result,

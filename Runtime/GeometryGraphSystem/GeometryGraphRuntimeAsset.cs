@@ -65,6 +65,10 @@ namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
         {
             return _variables.FirstOrDefault(variable => variable.ID == overwritePropertyGuid);
         }
+        public GeometryGraphProperty GetIndexOfProperty(string overwritePropertyName)
+        {
+            return _variables.FirstOrDefault(variable => variable.Name == overwritePropertyName);
+        }
     }
 
     public class GeometryGraphRuntimeAsset : ScriptableObject
