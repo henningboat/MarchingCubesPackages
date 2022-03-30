@@ -31,18 +31,17 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         public ShapeType Type => ShapeType.Voronoi;
 
 
-        public PackedFloat3 Hash(PackedFloat3 x)
+        public static PackedFloat3 Hash(PackedFloat3 p3)
         {
-            x = new PackedFloat3(
-                dot(x, new PackedFloat3(new PackedFloat(127.1f), new PackedFloat(311.7f), new PackedFloat(74.7f))),
-                dot(x, new PackedFloat3(new PackedFloat(269.5f), new PackedFloat(183.3f), new PackedFloat(246.1f))),
-                dot(x, new PackedFloat3(new PackedFloat(113.5f), new PackedFloat(271.9f), new PackedFloat(124.6f))));
-
-            return frac(sin(x) * 43758.5453123f);
+            p3 = frac(p3 * new PackedFloat3(0.1031f, 0.1030f, (PackedFloat)0.0973f));
+            p3 += dot(p3, new PackedFloat3(p3.y,p3.x,p3.z)+33.33f);
+            return frac((new PackedFloat3(p3.x, p3.y, p3.y) + new PackedFloat3(p3.y, p3.x, p3.x)) *
+                        new PackedFloat3(p3.z, p3.y, p3.x));
         }
-
+        
+        
         //from https://www.shadertoy.com/view/ldl3Dl
-        public PackedFloat Voronoi(PackedFloat3 x)
+        public static PackedFloat Voronoi(PackedFloat3 x)
         {
             var p = floor(x);
             var f = frac(x);
