@@ -4,6 +4,7 @@ using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
+using henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype;
 using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -75,8 +76,15 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             }
 
             foreach (var geometryFieldHandler in _geometryLayerHandlers)
+            {
                 jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers,
-                    allGeometryLayers, _geometryLayerHandlers.ToList(),forceClear, binaryDataStorage);
+                    allGeometryLayers, _geometryLayerHandlers.ToList(), forceClear, binaryDataStorage);
+                
+                //todo placeholder test
+                JRecursivelyResolveDistanceField job = new JRecursivelyResolveDistanceField();
+                job.GeometryFieldBuffer = geometryFieldHandler.GeometryFieldData.GeometryBuffer;
+                jobHandle = job.Schedule(jobHandle);
+            }
 
             return jobHandle;
         }

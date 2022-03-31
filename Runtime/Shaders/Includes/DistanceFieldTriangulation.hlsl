@@ -142,19 +142,7 @@ int GetPointPositionInIndexMap(uint3 position)
 
 float4 GetPointPosition(uint3 position)
 {
-    const uint positionInIndexMap = GetPointPositionInIndexMap(position);
-    const uint terrainChunkCapacity = 512;
-    int chunkIndex = _GlobalTerrainIndexMap[positionInIndexMap];
-    // chunkIndex=2+8;
-    const uint baseIndexOfTerrainChunk = chunkIndex * terrainChunkCapacity;
-
-    const uint3 positionWithinTerrainChunk = position % 8;
-
-    const int subChunkIndex = indexFromCoordAndGridSize(positionWithinTerrainChunk / 4, 2);
-
-    const uint indexWithinSubChunk = indexFromCoordAndGridSize(position % 4, 4);
-    const uint indexInTerrainBuffer = baseIndexOfTerrainChunk + subChunkIndex * 64 + indexWithinSubChunk;
-
+    const uint indexInTerrainBuffer = indexFromCoordAndGridSize(position,int3(_TerrainMapSizeX, _TerrainMapSizeY,_TerrainMapSizeZ) * 8);
 
     float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
 

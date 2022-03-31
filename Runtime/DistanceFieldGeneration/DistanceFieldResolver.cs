@@ -37,13 +37,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 chunk.Parameters = chunkParameters;
                 return;
             }
-
-            if (chunkParameters.PositionWS.z < 24 || chunkParameters.PositionWS.z > 32)
-            {
-                chunkParameters.InnerDataMask = 0;
-                chunkParameters.ChunkInsideTerrain = 0;
-                return;
-            }
             
             // var positionsToCheck = new NativeArray<PackedFloat3>(2, Allocator.Temp);
             // var currentDistanceValue = new NativeArray<PackedDistanceFieldData>(2, Allocator.Temp);
