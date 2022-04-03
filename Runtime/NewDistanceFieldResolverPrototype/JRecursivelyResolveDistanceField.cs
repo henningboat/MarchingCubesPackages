@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
@@ -25,6 +26,8 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 new PackedFloat(-0.5f, -0.5f, +0.5f, +0.5f),
                 new PackedFloat(+0.5f, +0.5f, +0.5f, +0.5f));
 
+        public float Time;
+
         public void Execute()
         {
             var center = new PackedFloat3(32);
@@ -43,8 +46,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 newPositions.Clear();
                 for (var i = 0; i < previousPositions.Length; i++)
                 {
-                    var position = previousPositions[i];
-                    AddChildPositions(newPositions, position, extends);
+                    CheckAddChildPositions(newPositions, previousPositions[i], extends);
                 }
 
                 (previousPositions, newPositions) = (newPositions, previousPositions);
@@ -72,6 +74,20 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
             WriteToBufferPS(position,distance);
         }
 
+        private void WriteBiggerBlockToBuffer(float3 position, float extends, float distanceValue)
+        {
+            for (float x = -extends; x < extends; x++)
+            {
+                for (float y = -extends; y < extends; y++)
+                {
+                    for (float z = -extends; z < extends; z++)
+                    {
+                        WriteToBufferSS(position + new float3(x, y, z), distanceValue);
+                    }
+                }
+            }
+        }
+
         private void WriteToBufferPS(PackedFloat3 position, PackedFloat distance)
         {
             for (int i = 0; i < 4; i++)
@@ -94,7 +110,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
 
         private PackedFloat ComputeDistance(PackedFloat3 position)
         {
-            return SimdMath.length(SimdMath.mod(position,new PackedFloat3(12f))) - 8;
+            return SimdMath.length(position-32) - 28;
         }
 
         [BurstDiscard]
@@ -114,16 +130,27 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
         }
 
 
-        private static void AddChildPositions(NativeList<PackedFloat3> positionsToResolve, PackedFloat3 center,
+        private  void CheckAddChildPositions(NativeList<PackedFloat3> positionsToResolve, PackedFloat3 center,
             float extends)
         {
+            //the *2 is placeholder
+            var distanceAbs = (ComputeDistance(center));
+
             for (int i = 0; i < 4; i++)
             {
-                var pos = new PackedFloat3(new float3(center.x.PackedValues[i], center.y.PackedValues[i],
-                    center.z.PackedValues[i]));
-                
-                positionsToResolve.Add(pos + extends * SubBlockOffsetKernelA);
-                positionsToResolve.Add(pos + extends * SubBlockOffsetKernelB);
+                var centerOfBlock = new float3(center.x.PackedValues[i], center.y.PackedValues[i],
+                    center.z.PackedValues[i]);
+                if (math.abs(distanceAbs.PackedValues[i]) < extends * 2.5f)
+                {
+                    var pos = new PackedFloat3(centerOfBlock);
+
+                    positionsToResolve.Add(pos + extends * SubBlockOffsetKernelA);
+                    positionsToResolve.Add(pos + extends * SubBlockOffsetKernelB);
+                }
+                else
+                {
+                    WriteBiggerBlockToBuffer(centerOfBlock, extends, distanceAbs.PackedValues[i]);
+                }
             }
         }
 
