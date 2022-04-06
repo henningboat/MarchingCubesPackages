@@ -78,7 +78,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
             MortonCoordinate childMortonNumber, MortonCellLayer layer, float distancePackedValue)
         {
             var distanceFieldData = new PackedDistanceFieldData(distancePackedValue);
-            for (int i = 0; i < layer.CellPackedBufferSize / 4; i++)
+            for (int i = 0; i < layer.CellPackedBufferSize / 8; i++)
             {
                 buffer[(int) (childMortonNumber.MortonNumber / 4 + i)] = distanceFieldData;
             }
@@ -99,10 +99,15 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 var positionWS = layer.GetMortonCellChildPositions(cellToResolve, secondRow);
                 var distance = ComputeDistancePS(positionWS);
 
-                var packedIndex = (int) cellToResolve.MortonNumber;
+                var packedIndex = (int) cellToResolve.MortonNumber/4;
                 if (secondRow)
                 {
                     packedIndex++;
+                }
+
+                if (packedIndex >= packedDistanceFieldDatas.Length)
+                {
+                    return;
                 }
 
                 packedDistanceFieldDatas[packedIndex] = new PackedDistanceFieldData(distance);               
@@ -111,7 +116,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
 
         private static PackedFloat ComputeDistancePS(PackedFloat3 position)
         {
-            return SimdMath.length(position) - 20.5f;
+            return SimdMath.length(position) - 40.5f;
         }
 
         [BurstDiscard]
