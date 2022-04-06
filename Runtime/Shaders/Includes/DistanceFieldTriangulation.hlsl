@@ -1,4 +1,5 @@
 ﻿#include "MarchTables.compute"
+#include "MortonNumbers.hlsl"
 
 int3 IndexToPositionWS(int i, int3 size)
 {
@@ -142,7 +143,7 @@ int GetPointPositionInIndexMap(uint3 position)
 
 float4 GetPointPosition(uint3 position)
 {
-    const uint indexInTerrainBuffer = indexFromCoordAndGridSize(position,int3(_TerrainMapSizeX, _TerrainMapSizeY,_TerrainMapSizeZ) * 8);
+    const uint indexInTerrainBuffer = EncodeMorton3(position);
 
     float surfaceDistance = _GlobalTerrainBuffer[indexInTerrainBuffer / 4].surfaceDistance[indexInTerrainBuffer % 4];
 

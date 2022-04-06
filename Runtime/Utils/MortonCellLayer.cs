@@ -1,0 +1,74 @@
+﻿using System;
+using SIMDMath;
+using Unity.Mathematics;
+using UnityEngine;
+
+namespace henningboat.CubeMarching.Runtime.Utils
+{
+    public struct MortonCellLayer
+    {
+        public readonly uint CellPackedBufferSize;
+        private readonly uint _childCellSize;
+        private readonly uint _cellLength;
+
+        private static readonly PackedFloat3 childOffsetsXY = new(
+            new float3(0.0f, 0.0f, 0),
+            new float3(0.5f, 0.0f, 0),
+            new float3(0.0f, 0.5f, 0),
+            new float3(0.5f, 0.5f, 0));
+        
+        private static readonly PackedFloat3 childOffsetsXYZ = new(
+            new float3(0.0f, 0.0f, 0.5f),
+            new float3(0.5f, 0.0f, 0.5f),
+            new float3(0.0f, 0.5f, 0.5f),
+            new float3(0.5f, 0.5f, 0.5f));
+
+        public MortonCellLayer(uint cellLength)
+        {
+            _cellLength = cellLength;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            if (!math.ispow2(cellLength))
+                throw new ArgumentOutOfRangeException(nameof(cellLength), cellLength, "Length must be a power of two");
+#endif
+
+            CellLength = cellLength;
+
+            CellPackedBufferSize = CellLength * CellLength * CellLength / 4;
+            _childCellSize = CellPackedBufferSize / 2;
+        }
+
+        public uint CellLength { get; set; }
+
+        public MortonCoordinate GetChildCell(MortonCoordinate mortonCoordinate, uint childCellIndex)
+        {
+            return new MortonCoordinate(mortonCoordinate.MortonNumber + _childCellSize * childCellIndex);
+        }
+
+        public PackedFloat3 GetMortonCellChildPositions(MortonCoordinate mortonCoordinate, bool secondRow)
+        {
+            PackedFloat3 childPositions = mortonCoordinate.GetPositionFloat3();
+
+            if (secondRow)
+            {
+                childPositions += childOffsetsXYZ * _cellLength;
+            }
+            else
+            {
+                childPositions += childOffsetsXY * _cellLength;
+            }
+
+            return childPositions;
+        }
+
+        public void DrawGizmos(MortonCoordinate mortonCoordinate)
+        {
+            Vector3 minPos = mortonCoordinate.GetPositionFloat3();
+            Gizmos.DrawWireCube(minPos + Vector3.one * (0.5f * CellLength), Vector3.one * CellLength);
+        }
+
+        public MortonCellLayer GetChildLayer()
+        {
+            return new MortonCellLayer(_cellLength / 2);
+        }
+    }
+}

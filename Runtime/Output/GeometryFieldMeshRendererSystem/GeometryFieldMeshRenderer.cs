@@ -93,10 +93,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
         private void DebugDraw(NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices)
         {
-            foreach (var trianglesIndex in cSubChunkWithTrianglesIndices)
-            {
-                Debug.DrawRay(((Vector3) (float3) trianglesIndex.ChunkPositionGS), Vector3.one, Color.white);
-            }
+            // foreach (var trianglesIndex in cSubChunkWithTrianglesIndices)
+            // {
+            //     Debug.DrawRay(((Vector3) (float3) trianglesIndex.ChunkPositionGS), Vector3.one, Color.white);
+            // }
         }
 
         public GeometryLayer RequestedLayer()

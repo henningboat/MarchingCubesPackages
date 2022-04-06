@@ -1,5 +1,6 @@
 ﻿float4 _Time;
 #include "Includes/DistanceFieldTriangulation.hlsl"
+#include "Includes/MortonNumbers.hlsl"
 
 #pragma kernel ResetSubChunkTriangleCount
 #pragma kernel GetTrianglePositions
