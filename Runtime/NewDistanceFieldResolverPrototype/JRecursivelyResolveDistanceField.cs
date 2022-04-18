@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GluonGui.Dialog;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
@@ -16,6 +18,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
     public struct JRecursivelyResolveDistanceField : IJob
     {
         public NativeArray<PackedDistanceFieldData> GeometryFieldBuffer;
+        public NativeArray<GeometryInstruction> Instructions;
 
         public float Time;
 
@@ -34,12 +37,14 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)
                 {
                     var parentPosition = previousPositions[parentCellIndex];
-                    
+
+                    NativeArray<GeometryInstruction> instructions = Instructions;
+
                     void ResolveChildCells(bool secondRow,
                         NativeArray<PackedDistanceFieldData> buffer)
                     {
                         var childPositions = layer.GetMortonCellChildPositions(parentPosition, secondRow);
-                        var distance = ComputeDistancePS(childPositions);
+                        var distance = ComputeDistancePS(childPositions,instructions);
                         bool4 distanceInRange = SimdMath.abs(distance).PackedValues < (layer.CellLength * 1.25F);
 
                         for (uint i = 0; i < 4; i++)
@@ -91,13 +96,15 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 throw new ArgumentOutOfRangeException(nameof(layer));
             }
 
+            NativeArray<GeometryInstruction> instructions = Instructions;
             WriteRow(false, GeometryFieldBuffer);
             WriteRow(true, GeometryFieldBuffer);
+
 
             void WriteRow(bool secondRow, NativeArray<PackedDistanceFieldData> packedDistanceFieldDatas)
             {
                 var positionWS = layer.GetMortonCellChildPositions(cellToResolve, secondRow);
-                var distance = ComputeDistancePS(positionWS);
+                var distance = ComputeDistancePS(positionWS, instructions);
 
                 var packedIndex = (int) cellToResolve.MortonNumber/4;
                 if (secondRow)
@@ -114,27 +121,22 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
             }
         }
 
-        private static PackedFloat ComputeDistancePS(PackedFloat3 position)
+        private static PackedFloat ComputeDistancePS(PackedFloat3 position, NativeArray<GeometryInstruction> instructions)
         {
-            return SimdMath.length(position) - 40.5f;
+            NativeArray<PackedFloat3> positions = new NativeArray<PackedFloat3>(1, Allocator.Temp);
+            NativeArray<PackedDistanceFieldData> resultBuffer = new NativeArray<PackedDistanceFieldData>(1, Allocator.Temp);
+            positions[0] = position;
+            GeometryInstructionIterator distanceFieldResolver =
+                new GeometryInstructionIterator(positions, resultBuffer, instructions, default);
+            distanceFieldResolver.CalculateAllTerrainData();
+
+            var result = distanceFieldResolver._terrainDataBuffer[0].SurfaceDistance;
+
+            positions.Dispose();
+            resultBuffer.Dispose();
+            
+            return result;
         }
-
-        [BurstDiscard]
-        private static void Log(NativeList<PackedFloat3> previousPositions)
-        {
-            var allContained = new List<float3>();
-            foreach (PackedFloat3 position in previousPositions)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    allContained.Add(new float3(position.x.PackedValues[i],position.y.PackedValues[i],position.z.PackedValues[i]));
-                }
-            }
-            Debug.Log(allContained.Count);
-
-            Debug.Log(allContained.Distinct().ToList().Count.ToString());
-        }
-
         
         private static void WriteToBufferSS(float3 position, float distancePackedValue, NativeArray<PackedDistanceFieldData> buffer)
         {

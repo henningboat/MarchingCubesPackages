@@ -9,6 +9,7 @@ using henningboat.CubeMarching.Runtime.GeometrySystems.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
+using henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -85,9 +86,9 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
                     readbackCollection[i] = new GeometryFieldData(0, default, Allocator.TempJob);
 
             var geometryLayerIndex = GetLayerIndex(GeometryFieldData.GeometryLayer);
-            var prepassJob =
-                new JExecuteDistanceFieldPrepass(readbackCollection, geometryLayerIndex, geometryInstructions);
-            jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
+            // var prepassJob =
+            //     new JExecuteDistanceFieldPrepass(readbackCollection, geometryLayerIndex, geometryInstructions);
+            // jobHandle = prepassJob.Schedule(GeometryFieldData.ClusterCount, 1, jobHandle);
 
             var calculateDistanceFieldJob = new JCalculateDistanceField(geometryLayerIndex,
                 geometryInstructions, readbackCollection);
@@ -97,7 +98,6 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
                 if (i >= allLayerHandlers.Count)
                     jobHandle = readbackCollection[i].Dispose(jobHandle);
 
-            jobHandle = _allGeometryInstructionsList.Dispose(jobHandle);
 
 
             var getChunksWithModificationsJob = new JGetChunksWithModifications
@@ -108,6 +108,20 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             jobHandle = getChunksWithModificationsJob.Schedule(GeometryFieldData.TotalChunkCount, 256, jobHandle);
 
+            //todo remove this
+            jobHandle.Complete();
+            
+            //todo placeholder test
+            JRecursivelyResolveDistanceField job = new JRecursivelyResolveDistanceField
+            {
+                GeometryFieldBuffer = GeometryFieldData.GeometryBuffer,
+                Instructions = _allGeometryInstructionsList,
+            };
+            
+            jobHandle = job.Schedule(jobHandle);
+            
+            jobHandle = _allGeometryInstructionsList.Dispose(jobHandle);
+            
             //todo remove this
             jobHandle.Complete();
 

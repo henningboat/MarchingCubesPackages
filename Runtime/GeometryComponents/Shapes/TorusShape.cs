@@ -25,7 +25,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         {
             for (var i = 0; i < iterator.BufferLength; i++)
             {
-                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out _);
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
                 var surfaceDistance = sdTorus(positionOS, radius, thickness);
                 ;
                 iterator.WriteDistanceField(i, surfaceDistance, instruction);

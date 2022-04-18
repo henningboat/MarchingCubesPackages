@@ -5,7 +5,6 @@ using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
-using henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype;
 using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
 using Unity.Collections;
 using Unity.Jobs;

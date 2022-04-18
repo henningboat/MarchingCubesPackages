@@ -12,7 +12,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup
         public int InstructionChangeTimeStamp;
 
         public Hash128 CurrentGeometryInstructionsHash;
-        public bool InstructionsChangedSinceLastFrame;
+        public const bool InstructionsChangedSinceLastFrame=true;
         public int IndexInCluster;
         public int3 PositionWS;
     }

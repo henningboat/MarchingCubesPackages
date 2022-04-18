@@ -45,7 +45,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             {
                 for (int i = 0; i < iterator.BufferLength; i++)
                 {
-                    var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                    var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
                     var surfaceDistance = ComputeBoundingBoxDistance(positionOS, extends, boundWidth);
                     iterator.WriteDistanceField(i, surfaceDistance, instruction);
                 }

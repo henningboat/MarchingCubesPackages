@@ -46,13 +46,13 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
 
                 // var currentHash = dynamicData.DistanceFieldChunkData.CurrentGeometryInstructionsHash;
 
-                if (!cluster.Parameters.WriteMask[chunkIndex]) continue;
+                if (!cluster.Parameters.WriteMask[chunkIndex] && false) continue;
 
                 for (var i = 0; i < 8; i++)
                 {
                     var subChunkIndex = chunkIndex * 8 + i;
 
-                    if (chunkParameters.InnerDataMask.GetBit(i))
+                    if (chunkParameters.InnerDataMask.GetBit(i) || true)
                     {
                         var subChunkOffset = Runtime.DistanceFieldGeneration.Utils.IndexToPositionWS(i, 2) * 4;
 
@@ -60,7 +60,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                         const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
 
                         //todo re-add checking for this 
-                        if (chunkParameters.InstructionsChangedSinceLastFrame)
+                        if (GeometryChunkParameters.InstructionsChangedSinceLastFrame)
                         {
                             triangulationInstructions.Add(
                                 new CTriangulationInstruction(positionOfChunkWS + subChunkOffset, subChunkIndex));

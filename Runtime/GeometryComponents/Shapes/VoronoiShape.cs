@@ -21,7 +21,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         {
             for (var i = 0; i < iterator.BufferLength; i++)
             {
-                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out var _);
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
                 var surfaceDistance = Voronoi(positionOS * (1f / (scale))) * scale.x + new PackedFloat(valueOffset);
                 ;
                 iterator.WriteDistanceField(i, surfaceDistance, instruction);

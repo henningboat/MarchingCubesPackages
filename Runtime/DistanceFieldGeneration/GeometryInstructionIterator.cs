@@ -31,27 +31,19 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         private int _lastCombinerDepth;
 
         private DistanceDataReadbackCollection _readbackLayers;
-        private NativeArray<int> _inicesInCluster;
-
-        public NativeArray<PackedFloat> CurrentInstructionSurfaceDistanceReadback;
-        private readonly bool _allowPerInstructionReadback;
-        private readonly int _clusterIndex;
+        
         public int StackBaseOffset;
 
         #endregion
 
         #region Constructors
 
-        public GeometryInstructionIterator(GeometryCluster cluster, NativeArray<int> indicesInCluster,
-            NativeArray<GeometryInstruction> combinerInstructions, bool allowPerInstructionReadback,
+        public GeometryInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<PackedDistanceFieldData> distanceFieldDatas,
+            NativeArray<GeometryInstruction> combinerInstructions,
             DistanceDataReadbackCollection readbackLayers)
         {
-            _inicesInCluster = indicesInCluster;
             _readbackLayers = readbackLayers;
 
-            _clusterIndex = cluster.Parameters.ClusterIndex;
-
-            _allowPerInstructionReadback = allowPerInstructionReadback;
             _combinerInstructions = combinerInstructions.AsReadOnly();
             //todo cache this between pre-pass and actual pass
             _combinerStackSize = 0;
@@ -61,48 +53,14 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             //todo workaround. Remove this and see the exceptions
             _combinerStackSize++;
 
-            _postionsWS = new NativeArray<PackedFloat3>(indicesInCluster.Length / 4, Allocator.Temp);
-
-            for (var i = 0; i < _postionsWS.Length; i++)
-            {
-                PackedFloat3 positions = default;
-                for (var j = 0; j < 4; j++)
-                {
-                    var index = _inicesInCluster[i * 4 + j];
-                    var chunkIndex = index / Constants.chunkVolume;
-                    var chunk = cluster.GetChunk(chunkIndex);
-                    var subChunkVolume = Constants.chunkVolume / Constants.subChunksPerChunk;
-                    var subChunkIndex = index % Constants.chunkVolume /
-                                        subChunkVolume;
-
-                    var subChunkOffset = Utils.IndexToPositionWS(subChunkIndex, 2) * Constants.subChunkLength;
-
-                    var positionInSubChunk = Utils.IndexToPositionWS(index % subChunkVolume, 4);
-
-                    float3 positionWS = chunk.Parameters.PositionWS + subChunkOffset + positionInSubChunk;
-
-                    positions.x.PackedValues[j] = positionWS.x;
-                    positions.y.PackedValues[j] = positionWS.y;
-                    positions.z.PackedValues[j] = positionWS.z;
-                }
-
-                _postionsWS[i] = positions;
-            }
-
-            _terrainDataBuffer =
-                new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
+            _postionsWS = positions;
+            
+            _terrainDataBuffer = new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);
 
             _hasWrittenToCurrentCombiner = new NativeArray<bool>(_combinerStackSize, Allocator.Temp);
 
             _lastCombinerDepth = -1;
-
-            if (allowPerInstructionReadback)
-                CurrentInstructionSurfaceDistanceReadback =
-                    new NativeArray<PackedFloat>(_postionsWS.Length, Allocator.Temp);
-            else
-                CurrentInstructionSurfaceDistanceReadback = default;
-
             StackBaseOffset = 0;
         }
 
@@ -129,9 +87,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _postionStack.Dispose();
             _hasWrittenToCurrentCombiner.Dispose();
             _postionsWS.Dispose();
-
-            if (CurrentInstructionSurfaceDistanceReadback.IsCreated)
-                CurrentInstructionSurfaceDistanceReadback.Dispose();
         }
 
         #endregion
@@ -194,37 +149,37 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-
-                        for (var i = 0; i < _postionsWS.Length; i++)
-                        {
-                            PackedFloat readbackSurfaceDistance = default;
-                            PackedTerrainMaterial readbackPackedMaterialData = default;
-
-                            for (var j = 0; j < 4; j++)
-                            {
-                                var indexInCluster = _inicesInCluster[i * 4 + j] +
-                                                     Constants.clusterVolume * _clusterIndex;
-                                var readback =
-                                    _readbackLayers[geometryInstruction.GeometryInstructionSubType]
-                                        .GeometryBuffer[indexInCluster / 4];
-
-                                readbackSurfaceDistance.PackedValues[j] =
-                                    readback.SurfaceDistance.PackedValues[indexInCluster % 4];
-                                readbackPackedMaterialData[j] = readback.TerrainMaterial[indexInCluster % 4];
-                            }
-
-                            distanceFieldData =
-                                new PackedDistanceFieldData(readbackSurfaceDistance, readbackPackedMaterialData);
-
-
-                            var existingData = _terrainDataBuffer[StackBaseOffset + i];
-                            var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
-                                geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
-                                distanceFieldData, existingData);
-                            _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
-                        }
-
-                        break;
+                        throw new NotImplementedException();
+                        // for (var i = 0; i < _postionsWS.Length; i++)
+                        // {
+                        //     PackedFloat readbackSurfaceDistance = default;
+                        //     PackedTerrainMaterial readbackPackedMaterialData = default;
+                        //
+                        //     for (var j = 0; j < 4; j++)
+                        //     {
+                        //         var indexInCluster = _inicesInCluster[i * 4 + j] +
+                        //                              Constants.clusterVolume * _clusterIndex;
+                        //         var readback =
+                        //             _readbackLayers[geometryInstruction.GeometryInstructionSubType]
+                        //                 .GeometryBuffer[indexInCluster / 4];
+                        //
+                        //         readbackSurfaceDistance.PackedValues[j] =
+                        //             readback.SurfaceDistance.PackedValues[indexInCluster % 4];
+                        //         readbackPackedMaterialData[j] = readback.TerrainMaterial[indexInCluster % 4];
+                        //     }
+                        //
+                        //     distanceFieldData =
+                        //         new PackedDistanceFieldData(readbackSurfaceDistance, readbackPackedMaterialData);
+                        //
+                        //
+                        //     var existingData = _terrainDataBuffer[StackBaseOffset + i];
+                        //     var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
+                        //         geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
+                        //         distanceFieldData, existingData);
+                        //     _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
+                        // }
+                        //
+                        // break;
                     case GeometryInstructionType.Shape:
                         var shape = geometryInstruction.GetShapeInstruction();
                         shape.WriteShape(this, in _readbackLayers.BinaryDataStorage, geometryInstruction);
@@ -249,7 +204,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
                         for (var i = 0; i < _postionsWS.Length; i++)
                         {
-                            var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i, out var _);
+                            var positionOS = CalculatePositionWSFromInstruction(geometryInstruction, i);
                             _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i] =
                                 geometryInstruction
                                     .GetTerrainTransformation().TransformPosition(positionOS);
@@ -271,8 +226,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             var packedMaterialData = new PackedTerrainMaterial(materialData);
 
             PackedDistanceFieldData distanceFieldData;
-            if (_allowPerInstructionReadback)
-                CurrentInstructionSurfaceDistanceReadback[i] = surfaceDistance;
 
             distanceFieldData = new PackedDistanceFieldData(surfaceDistance, packedMaterialData);
 
@@ -286,12 +239,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _terrainDataBuffer[indexInGeometryField] = combinedResult;
         }
 
-        public PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i,
-            out float inverseUniformScale)
+        public PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i)
         {
             var transformation = geometryInstruction.GetTransformation();
-
-            inverseUniformScale = transformation[0][0];
 
             PackedFloat3 positionOS = default;
 

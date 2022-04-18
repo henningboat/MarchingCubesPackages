@@ -71,7 +71,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 _distanceFieldComputeBuffer.EndWrite<PackedDistanceFieldData>(_geometryFieldData.GeometryBuffer.Length);
             }
             
-            
             for (var clusterIndex = 0; clusterIndex < _gpuDataPerCluster.Length; clusterIndex++)
             {
                 var clusterParameters = _geometryFieldData.ClusterParameters[clusterIndex];
@@ -86,17 +85,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
                 gpuBuffers.UpdateWithSurfaceData(_distanceFieldComputeBuffer, _indexMapComputeBuffer,
                     triangulationInstructions, subChunksWithTriangles, 0,
                     clusterParameters, _defaultMaterial,_layer);
-
-                DebugDraw(subChunksWithTriangles);
             }
-        }
-
-        private void DebugDraw(NativeSlice<CSubChunkWithTrianglesIndex> cSubChunkWithTrianglesIndices)
-        {
-            // foreach (var trianglesIndex in cSubChunkWithTrianglesIndices)
-            // {
-            //     Debug.DrawRay(((Vector3) (float3) trianglesIndex.ChunkPositionGS), Vector3.one, Color.white);
-            // }
         }
 
         public GeometryLayer RequestedLayer()
@@ -185,7 +174,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem
         public void Execute(int chunkIndex)
         {
             var chunk = GeometryField.GetChunk(chunkIndex);
-            if (chunk.Parameters.InstructionsChangedSinceLastFrame)
+            if (GeometryChunkParameters.InstructionsChangedSinceLastFrame)
                 ChunksWithModifiedIndices.AddNoResize(chunkIndex);
         }
     }

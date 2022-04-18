@@ -22,7 +22,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         {
             for (int i = 0; i < iterator.BufferLength; i++)
             {
-                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
                 
                 
                 var h = SimdMath.clamp(SimdMath.dot(positionOS, direction) / SimdMath.dot(direction, direction), 0.0f,

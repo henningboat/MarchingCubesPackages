@@ -29,7 +29,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             
             for (int i = 0; i < iterator.BufferLength; i++)
             {
-                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i, out float _);
+                var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
                 var surfaceDistance = GetSurfaceDistance(positionOS, header, sdfData);
                 iterator.WriteDistanceField(i, surfaceDistance, instruction);
             }

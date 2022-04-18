@@ -80,10 +80,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
                 jobHandle = geometryFieldHandler.Update(jobHandle, _geometryPerLayer, _storedGeometryLayers,
                     allGeometryLayers, _geometryLayerHandlers.ToList(), forceClear, binaryDataStorage);
                 
-                //todo placeholder test
-                JRecursivelyResolveDistanceField job = new JRecursivelyResolveDistanceField();
-                job.GeometryFieldBuffer = geometryFieldHandler.GeometryFieldData.GeometryBuffer;
-                jobHandle = job.Schedule(jobHandle);
             }
 
             return jobHandle;
