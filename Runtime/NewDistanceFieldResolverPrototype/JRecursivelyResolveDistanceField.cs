@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GluonGui.Dialog;
-using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
-using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
 {
@@ -22,158 +16,111 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
 
         public float Time;
 
+        private const int positionListCapacityEstimate = 4096;
+
         public void Execute()
         {
-            var newPositions = new NativeList<MortonCoordinate>(Allocator.Temp);
-            var previousPositions = new NativeList<MortonCoordinate>(Allocator.Temp);
+            var newPositions = new NativeList<MortonCoordinate>(positionListCapacityEstimate, Allocator.Temp);
+            var previousPositions = new NativeList<MortonCoordinate>(positionListCapacityEstimate, Allocator.Temp);
+
+            var positions = new NativeList<PackedFloat3>(positionListCapacityEstimate, Allocator.Temp);
+            var results = new NativeList<PackedDistanceFieldData>(positionListCapacityEstimate, Allocator.Temp);
 
             previousPositions.Add(new MortonCoordinate(0));
-            
-            MortonCellLayer layer = new MortonCellLayer(64);
-            
+
+            var layer = new MortonCellLayer(64);
+
+            GeometryInstructionIterator distanceFieldResolver;
             while (layer.CellLength > 2)
             {
                 newPositions.Clear();
+
+                FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
+                results.ResizeUninitialized(positions.Length);
+
+                distanceFieldResolver = new GeometryInstructionIterator(positions, results, Instructions, default);
+                distanceFieldResolver.CalculateAllTerrainData();
+
+
                 for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)
                 {
                     var parentPosition = previousPositions[parentCellIndex];
 
-                    NativeArray<GeometryInstruction> instructions = Instructions;
+                    ResolveChildCells(false, GeometryFieldBuffer);
+                    ResolveChildCells(true, GeometryFieldBuffer);
 
                     void ResolveChildCells(bool secondRow,
                         NativeArray<PackedDistanceFieldData> buffer)
                     {
-                        var childPositions = layer.GetMortonCellChildPositions(parentPosition, secondRow);
-                        var distance = ComputeDistancePS(childPositions,instructions);
-                        bool4 distanceInRange = SimdMath.abs(distance).PackedValues < (layer.CellLength * 1.25F);
+                        var distance = distanceFieldResolver._terrainDataBuffer[parentCellIndex * 2 + (secondRow ? 1 : 0)].SurfaceDistance;
+                        var distanceInRange = SimdMath.abs(distance).PackedValues < layer.CellLength * 1.25F;
 
                         for (uint i = 0; i < 4; i++)
                         {
                             var childMortonNumber = layer.GetChildCell(parentPosition, secondRow ? i + 4 : i);
-                            if (distanceInRange[(int)i])
-                            {
+                            if (distanceInRange[(int) i])
                                 newPositions.Add(childMortonNumber);
-                            }
                             else
-                            {
-                                WriteDistanceToCellInBuffer(buffer, childMortonNumber, layer, distance.PackedValues[(int)i]);
-                            }
+                                WriteDistanceToCellInBuffer(buffer, childMortonNumber, layer,
+                                    distance.PackedValues[(int) i]);
                         }
                     }
-
-                    ResolveChildCells(false,GeometryFieldBuffer);
-                    ResolveChildCells(true,GeometryFieldBuffer);
                 }
 
+                distanceFieldResolver.Dispose();
                 layer = layer.GetChildLayer();
 
                 (previousPositions, newPositions) = (newPositions, previousPositions);
             }
+            
+            
+            
+            
+            
+            FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
+            results.ResizeUninitialized(positions.Length);
 
-            foreach (MortonCoordinate position in previousPositions)
+            distanceFieldResolver = new GeometryInstructionIterator(positions, results, Instructions, default);
+            distanceFieldResolver.CalculateAllTerrainData();
+
+
+            for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)
             {
-                ComputeDistanceAndWriteToBuffer(layer, position);
+                var parentPosition = previousPositions[parentCellIndex];
+
+                var index = parentPosition.MortonNumber / 4;
+                GeometryFieldBuffer[(int) index + 0] =
+                    distanceFieldResolver._terrainDataBuffer[parentCellIndex * 2 + 0];
+                GeometryFieldBuffer[(int) index + 1] =
+                    distanceFieldResolver._terrainDataBuffer[parentCellIndex * 2 + 1];
             }
 
+
+            distanceFieldResolver.Dispose();
+            
             newPositions.Dispose();
             previousPositions.Dispose();
+            positions.Dispose();
+            results.Dispose();
+        }
+
+        private void FillPositionsIntoPositionBuffer(NativeList<MortonCoordinate> previousPositions,
+            MortonCellLayer mortonLayer, NativeList<PackedFloat3> positions)
+        {
+            positions.Clear();
+            for (int i = 0; i < previousPositions.Length; i++)
+            {
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], false));
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], true));
+            }
         }
 
         private static void WriteDistanceToCellInBuffer(NativeArray<PackedDistanceFieldData> buffer,
             MortonCoordinate childMortonNumber, MortonCellLayer layer, float distancePackedValue)
         {
             var distanceFieldData = new PackedDistanceFieldData(distancePackedValue);
-            for (int i = 0; i < layer.CellPackedBufferSize / 8; i++)
-            {
+            for (var i = 0; i < layer.CellPackedBufferSize / 8; i++)
                 buffer[(int) (childMortonNumber.MortonNumber / 4 + i)] = distanceFieldData;
-            }
-        }
-
-        private void ComputeDistanceAndWriteToBuffer(MortonCellLayer layer, MortonCoordinate cellToResolve)
-        {
-            if (layer.CellLength != 2)
-            {
-                throw new ArgumentOutOfRangeException(nameof(layer));
-            }
-
-            NativeArray<GeometryInstruction> instructions = Instructions;
-            WriteRow(false, GeometryFieldBuffer);
-            WriteRow(true, GeometryFieldBuffer);
-
-
-            void WriteRow(bool secondRow, NativeArray<PackedDistanceFieldData> packedDistanceFieldDatas)
-            {
-                var positionWS = layer.GetMortonCellChildPositions(cellToResolve, secondRow);
-                var distance = ComputeDistancePS(positionWS, instructions);
-
-                var packedIndex = (int) cellToResolve.MortonNumber/4;
-                if (secondRow)
-                {
-                    packedIndex++;
-                }
-
-                if (packedIndex >= packedDistanceFieldDatas.Length)
-                {
-                    return;
-                }
-
-                packedDistanceFieldDatas[packedIndex] = new PackedDistanceFieldData(distance);               
-            }
-        }
-
-        private static PackedFloat ComputeDistancePS(PackedFloat3 position, NativeArray<GeometryInstruction> instructions)
-        {
-            NativeArray<PackedFloat3> positions = new NativeArray<PackedFloat3>(1, Allocator.Temp);
-            NativeArray<PackedDistanceFieldData> resultBuffer = new NativeArray<PackedDistanceFieldData>(1, Allocator.Temp);
-            positions[0] = position;
-            GeometryInstructionIterator distanceFieldResolver =
-                new GeometryInstructionIterator(positions, resultBuffer, instructions, default);
-            distanceFieldResolver.CalculateAllTerrainData();
-
-            var result = distanceFieldResolver._terrainDataBuffer[0].SurfaceDistance;
-
-            positions.Dispose();
-            resultBuffer.Dispose();
-            
-            return result;
-        }
-        
-        private static void WriteToBufferSS(float3 position, float distancePackedValue, NativeArray<PackedDistanceFieldData> buffer)
-        {
-            int3 positionFloored = (int3) math.floor(position);
-            int index = DistanceFieldGeneration.Utils.PositionToIndex(positionFloored, Constants.clusterLength);
-            var surfaceDistancePackedValues = buffer[index / 4];
-            var surfaceDistance = surfaceDistancePackedValues.SurfaceDistance;
-            surfaceDistance.PackedValues[index % 4] = distancePackedValue;
-            buffer[index / 4] = new PackedDistanceFieldData() {SurfaceDistance = surfaceDistance};
-        }
-
-        // private  void CheckAddChildPositions(NativeList<PackedFloat3> positionsToResolve, PackedFloat3 center,
-        //     float extends)
-        // {
-        //     //the *2 is placeholder
-        //     var distanceAbs = (ComputeDistance(center));
-        //
-        //     for (int i = 0; i < 4; i++)
-        //     {
-        //         var centerOfBlock = new float3(center.x.PackedValues[i], center.y.PackedValues[i],
-        //             center.z.PackedValues[i]);
-        //         if (math.abs(distanceAbs.PackedValues[i]) < extends * 2.5f)
-        //         {
-        //             var pos = new PackedFloat3(centerOfBlock);
-        //
-        //             positionsToResolve.Add(pos + extends * SubBlockOffsetKernelA);
-        //             positionsToResolve.Add(pos + extends * SubBlockOffsetKernelB);
-        //         }
-        //         else
-        //         {
-        //             WriteBiggerBlockToBuffer(centerOfBlock, extends, distanceAbs.PackedValues[i]);
-        //         }
-        //     }
-        //}
-
-        private void Resolve(float3 position, float width, NativeList<PackedFloat3> positionsToResolve)
-        {
         }
     }
 }

@@ -17,7 +17,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
     {
         #region Public Fields
 
-        public NativeArray<PackedDistanceFieldData> _terrainDataBuffer;
+        [NativeDisableParallelForRestriction]public NativeArray<PackedDistanceFieldData> _terrainDataBuffer;
 
         #endregion
 
@@ -72,7 +72,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public void CalculateAllTerrainData()
         {
-            for (var i = 0; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
+            for (var i = 1; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
 
             //In case we did not write any data to the terrain, we fill it with a dummy value
             if (_hasWrittenToCurrentCombiner[0] == false)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using SIMDMath;
 using Unity.Mathematics;
 using UnityEngine;
@@ -44,6 +45,7 @@ namespace henningboat.CubeMarching.Runtime.Utils
             return new MortonCoordinate(mortonCoordinate.MortonNumber + _childCellSize * childCellIndex);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PackedFloat3 GetMortonCellChildPositions(MortonCoordinate mortonCoordinate, bool secondRow)
         {
             PackedFloat3 childPositions = mortonCoordinate.GetPositionFloat3();
