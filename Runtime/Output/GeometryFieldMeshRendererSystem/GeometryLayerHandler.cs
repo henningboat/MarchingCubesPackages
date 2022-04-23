@@ -68,10 +68,6 @@ namespace henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSyste
 
             if (outputLayerInstructionLists == null) return jobHandle;
 
-            //todo placeholder
-            if (Application.isPlaying)
-                _allGeometryInstructionsList.Add(CreateLayerCopyInstruction(GeometryLayer, 0));
-
             foreach (var outputLayerInstructionList in outputLayerInstructionLists)
                 AddInstructionListToMainGraph(outputLayerInstructionList, 0);
 

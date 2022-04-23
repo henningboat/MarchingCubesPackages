@@ -1,6 +1,5 @@
 ﻿using System;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
-using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
 using henningboat.CubeMarching.Runtime.GeometrySystems.MeshGenerationSystem;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
@@ -38,7 +37,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         #region Constructors
 
-        public GeometryInstructionIterator(NativeArray<PackedFloat3> positions, NativeArray<PackedDistanceFieldData> distanceFieldDatas,
+        public GeometryInstructionIterator(NativeArray<PackedFloat3> positions,
             NativeArray<GeometryInstruction> combinerInstructions,
             DistanceDataReadbackCollection readbackLayers)
         {
@@ -72,7 +71,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public void CalculateAllTerrainData()
         {
-            for (var i = 1; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
+            for (var i = 0; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
 
             //In case we did not write any data to the terrain, we fill it with a dummy value
             if (_hasWrittenToCurrentCombiner[0] == false)

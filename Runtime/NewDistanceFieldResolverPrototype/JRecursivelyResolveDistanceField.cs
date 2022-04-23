@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
@@ -8,6 +9,12 @@ using Unity.Jobs;
 
 namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
 {
+    public struct GeometryChunk
+    {
+        private const int length = 16;
+        public NativeSlice<PackedDistanceFieldData> GeometryFieldBuffer;
+        public NativeSlice<ulong> CoverageMask;
+    }
     [BurstCompile]
     public struct JRecursivelyResolveDistanceField : IJob
     {
@@ -38,7 +45,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
                 FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
                 results.ResizeUninitialized(positions.Length);
 
-                distanceFieldResolver = new GeometryInstructionIterator(positions, results, Instructions, default);
+                distanceFieldResolver = new GeometryInstructionIterator(positions, Instructions, default);
                 distanceFieldResolver.CalculateAllTerrainData();
 
 
@@ -80,7 +87,7 @@ namespace henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype
             FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
             results.ResizeUninitialized(positions.Length);
 
-            distanceFieldResolver = new GeometryInstructionIterator(positions, results, Instructions, default);
+            distanceFieldResolver = new GeometryInstructionIterator(positions, Instructions, default);
             distanceFieldResolver.CalculateAllTerrainData();
 
 

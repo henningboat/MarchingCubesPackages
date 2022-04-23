@@ -80,7 +80,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 hash.Append(ref ResolvedPropertyValues);
             }
 
-            GeometryInstructionHash = hash;
+            GeometryInstructionHash = new GeometryInstructionHash(hash);
         }
 
         #region Public Fields
@@ -99,7 +99,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public CombinerOperation CombinerBlendOperation;
         public float CombinerBlendFactor => ResolvedPropertyValues[15];
 
-        public Hash128 GeometryInstructionHash;
+        public GeometryInstructionHash GeometryInstructionHash;
 
         [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")]
         public SerializableGUID ReferenceGUID;
