@@ -2,11 +2,12 @@
 using System.Runtime.InteropServices;
 using SIMDMath;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 
 namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct PackedDistanceFieldData
+    public struct PackedDistanceFieldData : IBufferElementData
     {
         public PackedFloat SurfaceDistance;
         public PackedTerrainMaterial TerrainMaterial;

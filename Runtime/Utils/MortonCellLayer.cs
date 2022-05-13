@@ -12,13 +12,13 @@ namespace henningboat.CubeMarching.Runtime.Utils
         private readonly uint _childCellSize;
         private readonly uint _cellLength;
 
-        private static readonly PackedFloat3 childOffsetsXY = new(
+        private static readonly PackedFloat3 childOffsetsXY = new PackedFloat3(
             new float3(0.0f, 0.0f, 0),
             new float3(0.5f, 0.0f, 0),
             new float3(0.0f, 0.5f, 0),
             new float3(0.5f, 0.5f, 0));
         
-        private static readonly PackedFloat3 childOffsetsXYZ = new(
+        private static readonly PackedFloat3 childOffsetsXYZ = new PackedFloat3(
             new float3(0.0f, 0.0f, 0.5f),
             new float3(0.5f, 0.0f, 0.5f),
             new float3(0.0f, 0.5f, 0.5f),

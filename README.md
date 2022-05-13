@@ -9,10 +9,10 @@ This package automatically renames game objects
 
 - [How to use](#how-to-use)
 - [Install](#install)
-  - [via npm](#via-npm)
-  - [via OpenUPM](#via-openupm)
-  - [via Git URL](#via-git-url)
-  - [Tests](#tests)
+    - [via npm](#via-npm)
+    - [via OpenUPM](#via-openupm)
+    - [via Git URL](#via-git-url)
+    - [Tests](#tests)
 - [Configuration](#configuration)
 
 <!-- toc -->
@@ -25,7 +25,9 @@ This package automatically renames game objects
 
 ### via npm
 
-Open `Packages/manifest.json` with your favorite text editor. Add a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html) and following line to dependencies block:
+Open `Packages/manifest.json` with your favorite text editor. Add
+a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html) and following line to dependencies block:
+
 ```json
 {
   "scopedRegistries": [
@@ -42,11 +44,14 @@ Open `Packages/manifest.json` with your favorite text editor. Add a [scoped regi
   }
 }
 ```
+
 Package should now appear in package manager.
 
 ### via OpenUPM
 
-The package is also available on the [openupm registry](https://openupm.com/packages/com.henningboat.autonamegameobjects). You can install it eg. via [openupm-cli](https://github.com/openupm/openupm-cli).
+The package is also available on
+the [openupm registry](https://openupm.com/packages/com.henningboat.autonamegameobjects). You can install it eg.
+via [openupm-cli](https://github.com/openupm/openupm-cli).
 
 ```
 openupm add com.henningboat.autonamegameobjects
@@ -55,6 +60,7 @@ openupm add com.henningboat.autonamegameobjects
 ### via Git URL
 
 Open `Packages/manifest.json` with your favorite text editor. Add following line to the dependencies block:
+
 ```json
 {
   "dependencies": {
@@ -65,10 +71,11 @@ Open `Packages/manifest.json` with your favorite text editor. Add following line
 
 ### Tests
 
-The package can optionally be set as *testable*.
-In practice this means that tests in the package will be visible in the [Unity Test Runner](https://docs.unity3d.com/2017.4/Documentation/Manual/testing-editortestsrunner.html).
+The package can optionally be set as *testable*. In practice this means that tests in the package will be visible in
+the [Unity Test Runner](https://docs.unity3d.com/2017.4/Documentation/Manual/testing-editortestsrunner.html).
 
 Open `Packages/manifest.json` with your favorite text editor. Add following line **after** the dependencies block:
+
 ```json
 {
   "dependencies": {

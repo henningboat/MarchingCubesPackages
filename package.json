@@ -2,7 +2,7 @@
   "name": "com.henningboat.marchingcubes",
   "displayName": "Henningboat - MarchingCubes",
   "version": "0.1.0",
-  "unity": "2021.2",
+  "unity": "2020.3",
   "description": "Experimental DOTS Package for the generation of procedural geometry using distance fileds",
   "keywords": [
     "unity",
@@ -28,7 +28,6 @@
     "com.unity.burst": "1.6.0",
     "com.unity.graphtools.foundation": "0.11.2-preview",
     "com.unity.collections": "1.0.0-pre.6",
-    "com.unity.visualeffectgraph": "12.1.0",
-    "com.unity.shadergraph": "12.1.0"
+    "com.unity.entities": "0.50.1-preview.2"
   }
 }

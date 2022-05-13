@@ -6,15 +6,16 @@ using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils.Containers;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
+using Hash128 = UnityEngine.Hash128;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     [Serializable]
-    public struct GeometryInstruction
+    public struct GeometryInstruction : IBufferElementData
     {
         public void AddValueBufferOffset(int valueBufferOffset)
         {
