@@ -8,17 +8,17 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
-            dstManager.AddComponentData(entity, new CGeometryLayer());
+            dstManager.AddComponentData(entity, new CGeometryLayerTag());
             dstManager.AddBuffer<GeometryInstruction>(entity);
         }
     }
 
-    public struct CGeometryLayer : IComponentData
+    public struct CGeometryLayerTag : IComponentData
     {
         
     }
 
-    public struct CGeometryLayerChild : ISystemStateBufferElementData
+    public struct CGeometryLayerChild : IBufferElementData
     {
         public Entity ClusterEntity;
     }

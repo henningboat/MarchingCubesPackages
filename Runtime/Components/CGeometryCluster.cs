@@ -6,5 +6,6 @@ namespace henningboat.CubeMarching.Runtime.Components
     public struct CGeometryCluster:IComponentData
     {
         public int3 PositionWS;
+        public Entity LayerEntity;
     }
 }

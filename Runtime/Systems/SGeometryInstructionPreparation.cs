@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.Runtime.Components;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using Unity.Entities;
 using UnityEngine;
@@ -6,31 +7,46 @@ using UnityEngine;
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [ExecuteAlways]
+    [UpdateAfter(typeof(SSetupGeometryLayers))]
     public partial class SGeometryInstructionPreparation : SystemBase
     {
+        private List<GeometryLayerReference> geometryLayerReferences = new List<GeometryLayerReference>();
+
+        private SSetupGeometryLayers _setupSystem;
+
+        protected override void OnCreate()
+        {
+            _setupSystem = EntityManager.World.GetOrCreateSystem<SSetupGeometryLayers>();
+        }
+
         protected override void OnUpdate()
         {
-            var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>(false);
+            var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>();
 
-            Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayer _) =>
+            Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayerTag _) =>
                 {
                     instructions.Clear();
                 })
                 .ScheduleParallel(Dependency);
 
-            Dependency = Entities.WithAll<GeometryInstruction, GeometryLayerReference>().ForEach(
-                    (Entity entity, in GeometryLayerReference geometryLayerReference) =>
-                    {
-                        var newElems = getGeometryInstructionBuffer[entity];
-
-                        for (int i = 0; i < newElems.Length; i++)
+            foreach (var layerReference in _setupSystem.ExistingGeometryLayers)
+            {
+                var layerEntity = _setupSystem.GetGeometryLayerSingleton(layerReference);
+               
+                Dependency = Entities.WithSharedComponentFilter(layerReference)
+                    .WithAll<GeometryInstruction, CGeometryInstructionSourceTag>().ForEach(
+                        (Entity entity) =>
                         {
-                            getGeometryInstructionBuffer[geometryLayerReference.LayerEntity]
-                                .Add(newElems[i]);
-                        }
-
-                    }).WithNativeDisableParallelForRestriction(getGeometryInstructionBuffer)
-                .Schedule(Dependency);
+                            var newElems = getGeometryInstructionBuffer[entity];
+            
+                            for (int i = 0; i < newElems.Length; i++)
+                            {
+                                getGeometryInstructionBuffer[layerEntity].Add(newElems[i]);
+                            }
+            
+                        })
+                    .Schedule(Dependency);
+            }
         }
     }
 }
