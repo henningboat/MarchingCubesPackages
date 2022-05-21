@@ -36,7 +36,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 newPositions.Clear();
 
-                FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
+                FillPositionsIntoPositionBuffer(previousPositions, layer, positions, clusterParameters);
                 results.ResizeUninitialized(positions.Length);
 
                 distanceFieldResolver = new GeometryInstructionIterator(positions, instructions, default);
@@ -76,7 +76,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
 
 
-            FillPositionsIntoPositionBuffer(previousPositions, layer, positions);
+            FillPositionsIntoPositionBuffer(previousPositions, layer, positions, clusterParameters);
             results.ResizeUninitialized(positions.Length);
 
             distanceFieldResolver = new GeometryInstructionIterator(positions, instructions, default);
@@ -104,13 +104,13 @@ namespace henningboat.CubeMarching.Runtime.Systems
         }
 
         private void FillPositionsIntoPositionBuffer(NativeList<MortonCoordinate> previousPositions,
-            MortonCellLayer mortonLayer, NativeList<PackedFloat3> positions)
+            MortonCellLayer mortonLayer, NativeList<PackedFloat3> positions, CGeometryCluster geometryCluster)
         {
             positions.Clear();
             for (var i = 0; i < previousPositions.Length; i++)
             {
-                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], false));
-                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], true));
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], false)+geometryCluster.PositionWS);
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], true) + geometryCluster.PositionWS);
             }
         }
 

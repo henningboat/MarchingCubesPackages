@@ -6,6 +6,7 @@ using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.Systems
@@ -135,6 +136,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
                                Constants.chunkLength;
 
                 var clusterEntity = clusterEntities[i];
+
+                EntityManager.AddComponentData(clusterEntity, new Parent {Value = layerEntity});
+                
                 EntityManager.SetName(clusterEntity, $"Cluster {position.ToString()}");
                 EntityManager.SetComponentData(clusterEntity,
                     new CGeometryCluster {PositionWS = position, LayerEntity = layerEntity});
