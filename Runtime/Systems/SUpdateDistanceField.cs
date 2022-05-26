@@ -7,6 +7,7 @@ using UnityEngine;
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [ExecuteAlways]
+    [AlwaysUpdateSystem]
     [UpdateAfter(typeof(SSetupGeometryLayers))]
     public partial class SUpdateDistanceField : SystemBase
     {
@@ -14,7 +15,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         protected override void OnCreate()
         {
-            _clusterQuery = GetEntityQuery(typeof(CGeometryCluster), typeof(PackedDistanceFieldData));
+            _clusterQuery = GetEntityQuery(typeof(CGeometryChunk), typeof(PackedDistanceFieldData));
         }
 
         protected override void OnUpdate()

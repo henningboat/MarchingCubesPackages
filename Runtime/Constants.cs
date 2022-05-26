@@ -14,5 +14,6 @@
         public const int chunkLengthPerCluster = 8;
         public const int PackedCapacity = 4;
         public const int maxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
+        public const int DistanceFieldDataInBytes = 2*4;
     }
 }

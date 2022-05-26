@@ -7,7 +7,7 @@ using UnityEngine;
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [ExecuteAlways]
-    [UpdateAfter(typeof(SSetupGeometryLayers))]
+    [AlwaysUpdateSystem]
     public partial class SGeometryInstructionPreparation : SystemBase
     {
         private List<GeometryLayerReference> geometryLayerReferences = new List<GeometryLayerReference>();

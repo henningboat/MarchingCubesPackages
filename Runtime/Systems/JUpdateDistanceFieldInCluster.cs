@@ -3,21 +3,23 @@ using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
 namespace henningboat.CubeMarching.Runtime.Systems
 {
+    [BurstCompile]
     public partial struct JUpdateDistanceFieldInCluster : IJobEntity
     {
         public const int CellLength = Constants.chunkLength;
         private const int PositionListCapacityEstimate = 4096;
         [ReadOnly] public BufferFromEntity<GeometryInstruction> GetInstructionsFromEntity;
 
-        public void Execute(in CGeometryCluster clusterParameters,
+        public void Execute(in CGeometryChunk chunkParameters,
             DynamicBuffer<PackedDistanceFieldData> distanceFieldDynamicBuffer)
         {
-            var instructions = GetInstructionsFromEntity[clusterParameters.LayerEntity].AsNativeArray();
+            var instructions = GetInstructionsFromEntity[chunkParameters.LayerEntity].AsNativeArray();
 
             var distanceFieldData = distanceFieldDynamicBuffer.AsNativeArray();
 
@@ -36,7 +38,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 newPositions.Clear();
 
-                FillPositionsIntoPositionBuffer(previousPositions, layer, positions, clusterParameters);
+                FillPositionsIntoPositionBuffer(previousPositions, layer, positions, chunkParameters);
                 results.ResizeUninitialized(positions.Length);
 
                 distanceFieldResolver = new GeometryInstructionIterator(positions, instructions, default);
@@ -76,7 +78,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
 
 
-            FillPositionsIntoPositionBuffer(previousPositions, layer, positions, clusterParameters);
+            FillPositionsIntoPositionBuffer(previousPositions, layer, positions, chunkParameters);
             results.ResizeUninitialized(positions.Length);
 
             distanceFieldResolver = new GeometryInstructionIterator(positions, instructions, default);
@@ -104,13 +106,13 @@ namespace henningboat.CubeMarching.Runtime.Systems
         }
 
         private void FillPositionsIntoPositionBuffer(NativeList<MortonCoordinate> previousPositions,
-            MortonCellLayer mortonLayer, NativeList<PackedFloat3> positions, CGeometryCluster geometryCluster)
+            MortonCellLayer mortonLayer, NativeList<PackedFloat3> positions, CGeometryChunk geometryChunk)
         {
             positions.Clear();
             for (var i = 0; i < previousPositions.Length; i++)
             {
-                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], false)+geometryCluster.PositionWS);
-                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], true) + geometryCluster.PositionWS);
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], false)+geometryChunk.PositionWS);
+                positions.Add(mortonLayer.GetMortonCellChildPositions(previousPositions[i], true) + geometryChunk.PositionWS);
             }
         }
 

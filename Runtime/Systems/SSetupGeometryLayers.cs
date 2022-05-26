@@ -12,6 +12,8 @@ using UnityEngine;
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [ExecuteAlways]
+    [AlwaysUpdateSystem]
+    [UpdateAfter(typeof(SGeometryInstructionPreparation))]
     public partial class SSetupGeometryLayers : SystemBase
     {
         private EntityArchetype _entityClusterArchetype;
@@ -29,7 +31,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override void OnCreate()
         {
             _entityClusterArchetype =
-                EntityManager.CreateArchetype(typeof(CGeometryCluster), typeof(PackedDistanceFieldData));
+                EntityManager.CreateArchetype(typeof(CGeometryChunk), typeof(PackedDistanceFieldData),
+                    typeof(GeometryLayerReference));
             _geometryLayerArchetype =
                 EntityManager.CreateArchetype(typeof(GeometryInstruction), typeof(CGeometryLayerTag),
                     typeof(CGeometryLayerChild), typeof(GeometryLayerReference));
@@ -85,33 +88,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     _existingGeometryLayers.Add(geometryLayerReference);
                 }
             }
-
-
-            // foreach (var existingLayer in _layerEntityPerLayer)
-            // {
-            //     if (!_geometryLayerReferencesList.Contains(existingLayer.Key))
-            //     {
-            //         DestroyLayerAndChildEntities(existingLayer);
-            //         break;
-            //     }
-            // }
-            //
-            // foreach (var reference in _geometryLayerReferencesList)
-            // {
-            //     if (reference.LayerAsset == null) continue;
-            //
-            //     if (!_layerEntityPerLayer.ContainsKey(reference))
-            //     {
-            //         SpawnLayerAndChildren(reference);
-            //         Debug.Log("no reference for " + reference.LayerAsset);
-            //     }
-            // }
         }
 
         private void DestroyLayerAndChildEntities(Entity layerEntity)
         {
             var layerChildren = EntityManager.GetBuffer<CGeometryLayerChild>(layerEntity);
             EntityManager.DestroyEntity(layerChildren.Reinterpret<Entity>().AsNativeArray());
+
+            if (EntityManager.HasComponent<CGeometryLayerGPUBuffer>(layerEntity))
+                EntityManager.GetSharedComponentData<CGeometryLayerGPUBuffer>(layerEntity).Dispose();
+
+            if (EntityManager.HasComponent<CLayerMeshData>(layerEntity))
+                EntityManager.GetSharedComponentData<CLayerMeshData>(layerEntity).Dispose();
+
             EntityManager.DestroyEntity(layerEntity);
         }
 
@@ -126,6 +115,74 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             var clusterCount = Settings.ClusterCounts.Volume();
 
+            var chunks = SpawnChunks(clusterCount, layerEntity,reference);
+
+            if (reference.LayerAsset.render)
+            {
+                CGeometryLayerGPUBuffer geometryLayerGPUBuffer = new CGeometryLayerGPUBuffer()
+                {
+                    Value = new GeometryLayerGPUBuffer(Settings.ClusterCounts)
+                };
+                AddAllChunksToGPUBuffers(chunks,  geometryLayerGPUBuffer.Value);
+
+                CLayerMeshData renderer = new CLayerMeshData()
+                {
+                    Value = new LayerMeshData()
+                };
+
+                InitializeLayerMeshData(renderer.Value, chunks.Length);
+
+                EntityManager.AddSharedComponentData(layerEntity, geometryLayerGPUBuffer);
+                EntityManager.AddSharedComponentData(layerEntity, renderer);
+            }
+
+            chunks.Dispose();
+        }
+
+        private void InitializeLayerMeshData(LayerMeshData meshBuilder, int chunkCount)
+        {
+            meshBuilder.ArgsBuffer = new ComputeBuffer(4, 4);
+            meshBuilder.ArgsBuffer.SetData(new[] {3, 0, 0, 0});
+
+
+            meshBuilder.TrianglePositionCountBuffer =
+                new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
+
+            meshBuilder.TriangleCountPerSubChunk = new ComputeBuffer(chunkCount, 4);
+
+            meshBuilder.ChunksToTriangulize =
+                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
+            meshBuilder.ChunksToTriangulize =
+                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
+            meshBuilder.IndexBufferCounter = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
+
+            meshBuilder.TriangleCountPerSubChunk.SetData(new[] {meshBuilder.TriangleCountPerSubChunk.count});
+
+            var triangleCapacity = chunkCount * Constants.chunkVolume * 5;
+
+            // meshBuilder._triangulationIndices = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Structured);
+            // meshBuilder._triangleBuffer = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Append);
+            //
+            // meshBuilder._clusterCounts = geometryFieldData.ClusterCounts;
+            // meshBuilder._chunkCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;
+            // meshBuilder._voxelCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster *
+            //                            Constants.chunkLength;
+            // meshBuilder._propertyBlock = new MaterialPropertyBlock();
+        }
+
+        //it would be nicer to spawn the entities with the correct archetype
+        private void AddAllChunksToGPUBuffers(NativeArray<Entity> chunks, GeometryLayerGPUBuffer geometryLayerGPUBuffer)
+        {
+            foreach (var chunkEntity in chunks)
+            {
+                var chunkGPUBufferIndices = geometryLayerGPUBuffer.RegisterChunkEntity(chunkEntity);
+                EntityManager.AddComponentData<CGeometryChunkGPUIndices>(chunkEntity, chunkGPUBufferIndices);
+            }
+        }
+
+        private NativeArray<Entity> SpawnChunks(int clusterCount, Entity layerEntity,
+            GeometryLayerReference geometryLayerReference)
+        {
             var clusterEntities = EntityManager.CreateEntity(_entityClusterArchetype, clusterCount, Allocator.Temp);
             var childBuffer = EntityManager.GetBuffer<CGeometryLayerChild>(layerEntity);
             childBuffer.AddRange(clusterEntities.Reinterpret<CGeometryLayerChild>());
@@ -138,13 +195,16 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 var clusterEntity = clusterEntities[i];
 
                 EntityManager.AddComponentData(clusterEntity, new Parent {Value = layerEntity});
-                
+
                 EntityManager.SetName(clusterEntity, $"Cluster {position.ToString()}");
                 EntityManager.SetComponentData(clusterEntity,
-                    new CGeometryCluster {PositionWS = position, LayerEntity = layerEntity});
+                    new CGeometryChunk {PositionWS = position, IndexInIndexMap = i, LayerEntity = layerEntity});
+                EntityManager.SetSharedComponentData(clusterEntity, geometryLayerReference);
                 var distanceFieldDatas = EntityManager.GetBuffer<PackedDistanceFieldData>(clusterEntity);
-                distanceFieldDatas.Length = Constants.chunkVolume;
+                distanceFieldDatas.Length = Constants.chunkVolume / Constants.PackedCapacity;
             }
+
+            return clusterEntities;
         }
 
         public Entity GetGeometryLayerSingleton(GeometryLayerReference layerReference)
@@ -156,6 +216,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             throw new ArgumentOutOfRangeException(nameof(layerReference), layerReference.ToString(),
                 "Layer singleton does not exist");
+        }
+
+        public T GetLayer<T>(GeometryLayerReference geometryLayerReference) where T : struct, ISharedComponentData
+        {
+            return EntityManager.GetSharedComponentData<T>(GetGeometryLayerSingleton(geometryLayerReference));
         }
     }
 }

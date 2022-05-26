@@ -1,5 +1,4 @@
-﻿using Unity.Entities;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
 
@@ -15,9 +14,17 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         [SerializeField] private bool _clearOnUpdate = true;
 
+        [SerializeField] private Material _material;
+
+        [SerializeField] private bool _render;
+        
         public bool StoreResults => _storeResults;
 
         public GeometryLayer GeometryLayer => new(name, _geometryLayerID, StoreResults, _clearOnUpdate);
+
+        public Material material => _material;
+
+        public bool render => _render;
 
         private void Awake()
         {

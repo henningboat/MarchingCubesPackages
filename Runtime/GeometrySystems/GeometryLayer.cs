@@ -6,25 +6,11 @@ using UnityEngine.GraphToolsFoundation.Overdrive;
 namespace henningboat.CubeMarching.Runtime.GeometrySystems
 {
     [Serializable]
-    public struct GeometryLayer
+    public struct GeometryLayer : IEquatable<GeometryLayer>
     {
         public static readonly GeometryLayer OutputLayer = new("OutputLayer", default, true, false);
 
-        public bool Equals(GeometryLayer other)
-        {
-            return _id.Equals(other._id);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is GeometryLayer other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            return _id.GetHashCode();
-        }
-
+      
         [SerializeField] private FixedString32Bytes _name;
         [SerializeField] private SerializableGUID _id;
         [SerializeField] private bool _stored;
@@ -54,6 +40,28 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public static bool operator !=(GeometryLayer a, GeometryLayer b)
         {
             return !(a == b);
+        }
+
+        public bool Equals(GeometryLayer other)
+        {
+            return _name.Equals(other._name) && _id.Equals(other._id) && _stored == other._stored && _clearEveryFrame == other._clearEveryFrame;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is GeometryLayer other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = _name.GetHashCode();
+                hashCode = (hashCode * 397) ^ _id.GetHashCode();
+                hashCode = (hashCode * 397) ^ _stored.GetHashCode();
+                hashCode = (hashCode * 397) ^ _clearEveryFrame.GetHashCode();
+                return hashCode;
+            }
         }
     }
 }

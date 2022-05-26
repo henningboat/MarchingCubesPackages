@@ -3,9 +3,8 @@ using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.Runtime.Components
 {
-    public struct CGeometryCluster:IComponentData
+    public struct CGeometryChunkGPUIndices : IComponentData
     {
-        public float3 PositionWS;
-        public Entity LayerEntity;
+        public int DistanceFieldBufferOffset;
     }
 }
