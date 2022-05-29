@@ -1,21 +1,22 @@
 ﻿float4 _Time;
 #include "Includes/DistanceFieldTriangulation.hlsl"
+#include "Includes/DistanceField.hlsl"
 #include "Includes/MortonNumbers.hlsl"
+#include "Includes/MarchTables.compute"
 
 #pragma kernel ResetSubChunkTriangleCount
-//#pragma kernel GetTrianglePositions
+#pragma kernel GetTrianglePositions
 //#pragma kernel BuildIndexBuffer
 
 StructuredBuffer<float4> _NormalBuffer;
 
-StructuredBuffer<int> _ChunksToTriangulate;
+StructuredBuffer<float4> _ChunksToTriangulate;
 
 #include "Includes/GlobalDistanceField.hlsl"
 
 RWStructuredBuffer<ClusterTriangle> _TriangleIndices;
-RWStructuredBuffer<int> _TriangleCountPerSubChunk;
+RWStructuredBuffer<int> _TriangleCountPerChunk;
 StructuredBuffer<int> _TriangleCountPerSubChunkResult;
-StructuredBuffer<int> _IndexMap;
 
 uint triangleWriteIndex = 0;
 
@@ -25,66 +26,66 @@ groupshared int groupTriangleCount = 0;
 [numthreads(1,1,1)]
 void ResetSubChunkTriangleCount(uint3 id : SV_DispatchThreadID)
 {
-    _TriangleCountPerSubChunk[_ChunksToTriangulate[id.x]] = 0;
+    int chunkIndex = GetChunkIndexFromPosition(_ChunksToTriangulate[id.x].xyz);
+    _TriangleCountPerChunk[chunkIndex] = 0;
 }
 
 [numthreads(8,8,8)]
 void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex,
                           uint3 groupThreadID:SV_GroupThreadID)
 {
-    const uint chunkIndex = id.x / 8;
-    const int3 terrainChunkBasePosition = _ChunksToTriangulate[chunkIndex];
+    const int3 terrainChunkBasePosition = _ChunksToTriangulate[id.x / 8];
 
-    // int3 positionWS = groupThreadID + terrainChunkBasePosition;
-    //
-    // float4 cubeCorners[8] = {
-    //     GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
-    //     GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
-    //     GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
-    //     GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
-    //     GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
-    //     GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
-    //     GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
-    //     GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
-    // };
-    //
-    // // Calculate unique index for each cube configuration.
-    // // There are 256 possible values
-    // // A value of 0 means cube is entirely inside surface; 255 entirely outside.
-    // // The value is used to look up the edge table, which indicates which edges of the cube are cut by the isosurface.
-    // const float isoLevel = 0;
-    //
-    // int cubeIndex = 0;
-    // if (cubeCorners[0].w > isoLevel) cubeIndex |= 1;
-    // if (cubeCorners[1].w > isoLevel) cubeIndex |= 2;
-    // if (cubeCorners[2].w > isoLevel) cubeIndex |= 4;
-    // if (cubeCorners[3].w > isoLevel) cubeIndex |= 8;
-    // if (cubeCorners[4].w > isoLevel) cubeIndex |= 16;
-    // if (cubeCorners[5].w > isoLevel) cubeIndex |= 32;
-    // if (cubeCorners[6].w > isoLevel) cubeIndex |= 64;
-    // if (cubeCorners[7].w > isoLevel) cubeIndex |= 128;
-    //
-    // const int subChunkIndexInCluster = GetSubChunkIndexFromPosition(positionWS);
-    //
-    // if (cubeIndex == 0 || cubeIndex == 255)
-    //     return;
-    //
-    // const int triangleCount = vertexCountPerCubeIndex[cubeIndex] / 3;
-    //
-    // int offsetInSubChunk;
-    //
-    // InterlockedAdd(_TriangleCountPerSubChunk[subChunkIndexInCluster], triangleCount, offsetInSubChunk);
-    //
-    // const int maxTrianglesPerSubChunk = 4 * 4 * 4 * 5;
-    //
-    // int3 positionInsideCluster = positionWS - _ClusterPositionWS;
-    //
-    // int baseIndex = maxTrianglesPerSubChunk * subChunkIndexInCluster + offsetInSubChunk;
-    //
-    // for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
-    // {
-    //     _TriangleIndices[baseIndex + i / 3] = PackTriangle(positionInsideCluster, cubeIndex, i / 3);
-    // }
+    int3 positionWS = terrainChunkBasePosition + groupThreadID;
+    
+    float4 cubeCorners[8] = {
+        GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
+        GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+        GetPointPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+        GetPointPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+        GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+        GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+        GetPointPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+        GetPointPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
+    
+    // Calculate unique index for each cube configuration.
+    // There are 256 possible values
+    // A value of 0 means cube is entirely inside surface; 255 entirely outside.
+    // The value is used to look up the edge table, which indicates which edges of the cube are cut by the isosurface.
+    const float isoLevel = 0;
+    
+    int cubeIndex = 0;
+    if (cubeCorners[0].w > isoLevel) cubeIndex |= 1;
+    if (cubeCorners[1].w > isoLevel) cubeIndex |= 2;
+    if (cubeCorners[2].w > isoLevel) cubeIndex |= 4;
+    if (cubeCorners[3].w > isoLevel) cubeIndex |= 8;
+    if (cubeCorners[4].w > isoLevel) cubeIndex |= 16;
+    if (cubeCorners[5].w > isoLevel) cubeIndex |= 32;
+    if (cubeCorners[6].w > isoLevel) cubeIndex |= 64;
+    if (cubeCorners[7].w > isoLevel) cubeIndex |= 128;
+    
+    const int chunkIndex = GetChunkIndexFromPosition(positionWS);
+    
+    if (cubeIndex == 0 || cubeIndex == 255)
+        return;
+    
+    const int triangleCount = vertexCountPerCubeIndex[cubeIndex] / 3;
+    
+    int offsetInSubChunk;
+    
+    InterlockedAdd(_TriangleCountPerChunk[chunkIndex], triangleCount, offsetInSubChunk);
+    
+    const int maxTrianglesPerChunk = k_MaxTrianglesPerChunk * 5;
+    
+    int3 positionInsideChunk = positionWS % k_ChunkLength;
+    
+    int baseIndex = maxTrianglesPerChunk * chunkIndex + offsetInSubChunk;
+    
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
+    {
+        _TriangleIndices[baseIndex + i / 3] = PackTriangle(positionInsideChunk, cubeIndex, i / 3);
+    }
 }
 
 RWStructuredBuffer<int> _ArgsBuffer;

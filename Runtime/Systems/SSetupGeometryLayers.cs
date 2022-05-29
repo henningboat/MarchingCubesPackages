@@ -150,15 +150,17 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             meshBuilder.TriangleCountPerSubChunk = new ComputeBuffer(chunkCount, 4);
 
-            meshBuilder.ChunksToTriangulize =
-                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
-            meshBuilder.ChunksToTriangulize =
-                new ComputeBuffer(Constants.subChunksPerCluster, 4 * 4, ComputeBufferType.Default);
+            meshBuilder.ChunksToTriangulate =
+                new ComputeBuffer(chunkCount, 4 * 4, ComputeBufferType.Default);
             meshBuilder.IndexBufferCounter = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
+
+            meshBuilder.TriangulationIndices = new ComputeBuffer(chunkCount * Constants.maxTrianglesPerChunk, 4 * 2);
 
             meshBuilder.TriangleCountPerSubChunk.SetData(new[] {meshBuilder.TriangleCountPerSubChunk.count});
 
             var triangleCapacity = chunkCount * Constants.chunkVolume * 5;
+
+            meshBuilder.PropertyBlock = new MaterialPropertyBlock();
 
             // meshBuilder._triangulationIndices = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Structured);
             // meshBuilder._triangleBuffer = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Append);

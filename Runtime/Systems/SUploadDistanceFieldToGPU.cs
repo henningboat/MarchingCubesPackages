@@ -42,7 +42,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
                             writableBuffer.Slice(chunkGPUIndices.DistanceFieldBufferOffset * packedChunkLength,
                                     packedChunkLength)
                                 .CopyFrom(distanceFieldBuffer.AsNativeArray());
-                        }).WithBurst().WithNativeDisableParallelForRestriction(writableBuffer)
+                        }).WithBurst().
+                    WithNativeDisableParallelForRestriction(writableBuffer).
+                    WithNativeDisableParallelForRestriction(writableIndexMap)
                     .ScheduleParallel(Dependency);
                 jobHandle.Complete();
 

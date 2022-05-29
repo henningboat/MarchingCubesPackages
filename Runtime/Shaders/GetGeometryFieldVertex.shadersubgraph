@@ -1,15 +1,9 @@
 {
-    "m_SGVersion": 3,
+    "m_SGVersion": 2,
     "m_Type": "UnityEditor.ShaderGraph.GraphData",
     "m_ObjectId": "6a7d4f56610e4ddbaa146e5702f1738a",
     "m_Properties": [],
     "m_Keywords": [],
-    "m_Dropdowns": [],
-    "m_CategoryData": [
-        {
-            "m_Id": "fb084373faf244bfac130204db4864ac"
-        }
-    ],
     "m_Nodes": [
         {
             "m_Id": "db2787cdfa614c7091a58e458868f010"
@@ -117,11 +111,10 @@
         "serializedMesh": {
             "m_SerializedMesh": "{\"mesh\":{\"instanceID\":0}}",
             "m_Guid": ""
-        },
-        "preventRotation": false
+        }
     },
     "m_Path": "Sub Graphs",
-    "m_GraphPrecision": 1,
+    "m_ConcretePrecision": 0,
     "m_PreviewMode": 2,
     "m_OutputNode": {
         "m_Id": "db2787cdfa614c7091a58e458868f010"

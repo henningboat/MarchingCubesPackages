@@ -3,7 +3,9 @@ using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.Rendering;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace henningboat.CubeMarching.Runtime.Systems
 {
@@ -43,16 +45,31 @@ namespace henningboat.CubeMarching.Runtime.Systems
             query.SetSharedComponentFilter(geometryLayerReference);
             var entitiesToUpdate = query.ToEntityArray(Allocator.Temp);
 
-            var indices = new NativeArray<int>(entitiesToUpdate.Length, Allocator.Temp);
+            var chunksToTriangulate = new NativeList<float4>(Allocator.Temp);
+
             for (var i = 0; i < entitiesToUpdate.Length; i++)
             {
-                indices[i] = EntityManager.GetComponentData<CGeometryChunkGPUIndices>(entitiesToUpdate[i])
-                    .DistanceFieldBufferOffset;
+                chunksToTriangulate.Add(
+                    EntityManager.GetComponentData<CGeometryChunk>(entitiesToUpdate[i]).PositionWS.xyzz);
             }
+            
+            _computeShaderHandler.TriangulizeChunks(chunksToTriangulate, gpuBuffers, gpuRenderer);
 
-            _computeShaderHandler.TriangulizeChunks(indices, gpuBuffers, gpuRenderer);
+            var propertyBlock = gpuRenderer.PropertyBlock;
 
-            indices.Dispose();
+            _computeShaderHandler.SetupGeometryLayerMaterialData(propertyBlock, gpuBuffers);
+
+            propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) 0);
+            propertyBlock.SetBuffer("_TriangleIndeces", gpuRenderer.TriangulationIndices);
+
+            
+            gpuRenderer.IndexBufferCounter.SetData(new uint[] {1200, 1, 0, 0});
+            
+            Graphics.DrawProceduralIndirect(geometryLayerReference.LayerAsset.material, new Bounds(Vector3.zero, Vector3.one * 10000),
+                MeshTopology.Triangles, gpuRenderer.IndexBufferCounter, 0, null, propertyBlock, ShadowCastingMode.On, true,
+                0);
+            
+            chunksToTriangulate.Dispose();
             entitiesToUpdate.Dispose();
         }
     }

@@ -1,5 +1,5 @@
-﻿#if !defined(MortonNumbersIncluded)
-#define MortonNumbersIncluded
+﻿#ifndef MORTON_NUMBERS_INCLUDED
+#define MORTON_NUMBERS_INCLUDED
 
         // "Insert" a 0 bit after each of the 16 low bits of x
 

@@ -78,9 +78,9 @@ namespace henningboat.CubeMarching.Runtime.Components
                    GeometryInstructionUtility.CreateInstruction(GeometryInstructionType.Shape, (int) ShapeType.Sphere,
                        new List<GeometryGraphProperty>());
 
-               var identity = float4x4.identity;
+               var identity = (float4x4)sphere.transform.worldToLocalMatrix;
                var properties = new float32();
-               properties[0] = 3;
+               properties[0] = 3f;
                for (int i = 0; i < 16; i++)
                {
                    properties[16 + i] = identity[i / 4][i % 4];

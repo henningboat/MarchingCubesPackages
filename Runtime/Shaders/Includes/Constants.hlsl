@@ -1,5 +1,9 @@
-﻿const int k_ChunkVolume = 8 * 8 * 8;
-const int k_ChunkLength = 8;
-const int k_ChunkLengthPerCluster = 8;
-const int k_PackedCapacity = 4;
-const int k_MaxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
+﻿#ifndef CONSTANTS_INCLUDED
+#define CONSTANTS_INCLUDED
+
+static const int k_ChunkLength = 8;
+static const int k_ChunkVolume =  k_ChunkLength*k_ChunkLength*k_ChunkLength;
+static const int k_PackedCapacity =4;
+static const int k_MaxTrianglesPerChunk = k_ChunkVolume*5;
+
+#endif

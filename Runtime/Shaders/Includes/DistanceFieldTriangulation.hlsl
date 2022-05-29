@@ -1,12 +1,10 @@
-﻿#include "MarchTables.compute"
-#include "MortonNumbers.hlsl"
+﻿#ifndef DISTANCE_FIELD_TRIANGULATION_INCLUDED
+#define DISTANCE_FIELD_TRIANGULATION_INCLUDED
+
+#include "MarchTables.compute"
+#include "DistanceField.hlsl"
 #include "Constants.hlsl"
 
-uint _ChunkCountsX;
-uint _ChunkCountsY;
-uint _ChunkCountsZ;
-
-StructuredBuffer<int> _ChunkOffsetInDistanceField;
 
 int3 IndexToPositionWS(int i, int3 size)
 {
@@ -28,13 +26,14 @@ int PositionToIndex(int3 position, int3 size)
 struct ClusterTriangle
 {
     uint value;
+    uint chunkIndex;
 
     #define PositionPartBitmask 0x3FFFF;
 
-    int3 GetPositionInCluster()
+    int3 GetPositionWS()
     {
         int positionIndex = value & PositionPartBitmask;
-        return IndexToPositionWS(positionIndex, 64);
+        return IndexToPositionWS(positionIndex, 8);
     }
 
     int GetCubeIndex()
@@ -44,16 +43,17 @@ struct ClusterTriangle
     }
 };
 
-ClusterTriangle PackTriangle(int3 positionInCluster, int cubeIndex, int offsetInsideCube)
+ClusterTriangle PackTriangle(int3 positionWS, int cubeIndex, int offsetInsideCube)
 {
-    int3 cluserSize = 64;
-    uint positionIndex = PositionToIndex(positionInCluster, cluserSize);
+    uint positionIndex = PositionToIndex(positionWS%k_ChunkLength, k_ChunkLength);
 
     uint combinedCubeIndex = cubeIndex * 5 + offsetInsideCube;
 
     ClusterTriangle clusterTriangle;
     clusterTriangle.value = positionIndex;
     clusterTriangle.value |= combinedCubeIndex << 18;
+    clusterTriangle.chunkIndex = GetChunkIndexFromPosition(positionWS);
+
     return clusterTriangle;
 }
 
@@ -74,9 +74,6 @@ struct TerrainData4
     float4 surfaceDistance;
     PackedTerrainMaterial terrainMaterial;
 };
-
-StructuredBuffer<TerrainData4> _GlobalTerrainBuffer;
-StructuredBuffer<int> _GlobalTerrainIndexMap;
 
 static const int terrainChunkLength = 8;
 
@@ -115,35 +112,14 @@ float4 interpolateColors(float4 v1, float4 v2, float t)
     return v1 + t * (v2 - v1);
 }
 
-int indexFromCoordAndGridSize(int3 position, int3 gridSize)
-{
-    return position.z * gridSize.y * gridSize.x + position.y * gridSize.x + position.x;
-}
-
-int indexFromCoord(int x, int y, int z)
-{
-    return z * numPointsPerAxis * numPointsPerAxis + y * numPointsPerAxis + x;
-}
-
-
-uint PositionToIndexInDistanceFieldBuffer(uint3 position)
-{
-    int3 chunkCounts = int3(_ChunkCountsX,_ChunkCountsY,_ChunkCountsZ);
-    uint3 chunkPosition = clamp(position/k_ChunkLength, 0, chunkCounts);
-    uint chunkIndex = indexFromCoordAndGridSize(chunkPosition,chunkCounts);
-    
-    uint baseIndexInDistanceFieldBuffer = _ChunkOffsetInDistanceField[chunkIndex];
-    
-    return baseIndexInDistanceFieldBuffer + EncodeMorton3(position);
-}
 
 float4 GetPointPosition(uint3 position)
 {
-    uint index = PositionToIndexInDistanceFieldBuffer(position);
-
-    float surfaceDistance = _GlobalTerrainBuffer[index / 4].surfaceDistance[index % 4];
-
-    if(any(position<1||position> int3(_ChunkCountsX,_ChunkCountsY,_ChunkCountsZ)*k_ChunkLength-1))
+    uint index = DistanceFieldIndexFromPositionWS(position);
+    
+    float surfaceDistance = _DistanceField[index / 4].surfaceDistance[index % 4];
+    
+    if(any(position<1||position> GetChunkCounts()*k_ChunkLength-1))
     {
         surfaceDistance=0.1;
     }
@@ -263,7 +239,7 @@ float3 RayMarchAO(float3 normalWS, int3 positionWS)
     //return normalize(directionSum)/count;
     return ao/count;
 }
-
+//
 void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
                                    out float3 normal,
                                    out float3 color,
@@ -271,7 +247,7 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
 {
     int triangleTypeIndex;
 
-    int3 positionInCluster = clusterTriangle.GetPositionInCluster();
+    int3 positionInCluster = clusterTriangle.GetPositionWS();
 
     int3 positionWS = positionInCluster + int3(_PositionInClusterX,_PositionInClusterY,_PositionInClusterZ);
     
@@ -299,16 +275,16 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
     //     GetCubeMaterialData((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
     // };
     //
-    // float3 cubeNormals[8] = {
-    //     CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
-    //     CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
-    //     CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
-    //     CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
-    //     CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
-    //     CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
-    //     CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
-    //     CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
-    // };
+    float3 cubeNormals[8] = {
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z))),
+        CalculateNormalForPosition((int3(positionWS.x + 1, positionWS.y + 1, positionWS.z + 1))),
+        CalculateNormalForPosition((int3(positionWS.x, positionWS.y + 1, positionWS.z + 1)))
+    };
     //
     // const float3 aoCube[8] = {
     //     RayMarchAO(cubeNormals[0],(int3(positionWS.x, positionWS.y, positionWS.z))),
@@ -332,8 +308,10 @@ void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIn
     int b0 = cornerIndexBFromEdge[indexIndex];
 
     vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA);
-    normal =0;// = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
+    normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
 
     color =0;//= interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0], tA);
     occlusion = 0;//lerp(aoCube[a0].x, aoCube[b0].x, tA);
 }
+
+#endif

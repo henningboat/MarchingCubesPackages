@@ -1,5 +1,5 @@
-﻿
-#include "Packages/com.henningboat.marchingcubes/Runtime/Shaders/Includes/DistanceFieldTriangulation.hlsl"
+﻿#include "Packages/com.henningboat.marchingcubes/Runtime/Shaders/Includes/DistanceFieldTriangulation.hlsl"
+
 StructuredBuffer<ClusterTriangle> _TriangleIndeces;
 
 void GetVertexData_float(in int vertexID, out float3 positionWS, out float3 normalWS, out float3 color, out float occlusion)

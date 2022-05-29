@@ -48,7 +48,6 @@ namespace henningboat.CubeMarching.Runtime.Components
                 ComputeBufferMode.SubUpdates);
             RegisteredChunksCount = 0;
             ChunkCounts = clusterCounts;
-            IndexMapDirty = false;
         }
 
         public void Dispose()

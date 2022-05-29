@@ -36,7 +36,7 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public ComputeBuffer ArgsBuffer;
         public ComputeBuffer TrianglePositionCountBuffer;
-        public ComputeBuffer ChunksToTriangulize;
+        public ComputeBuffer ChunksToTriangulate;
         public ComputeBuffer ChunksWithTriangles;
         public ComputeBuffer TriangleCountPerSubChunk;
         public ComputeBuffer IndexBufferCounter;
@@ -47,13 +47,13 @@ namespace henningboat.CubeMarching.Runtime.Components
 
         public void Dispose()
         {
-            ArgsBuffer.Dispose();
-            ChunksToTriangulize.Dispose();
-            TriangleCountPerSubChunk.Dispose();
-            IndexBufferCounter.Dispose();
-            TriangleBuffer.Dispose();
-            TriangulationIndices.Dispose();
-            ChunksWithTriangles.Dispose();
+            if (ArgsBuffer != null) ArgsBuffer.Dispose();
+            if (ChunksToTriangulate != null) ChunksToTriangulate.Dispose();
+            if (TriangleCountPerSubChunk != null) TriangleCountPerSubChunk.Dispose();
+            if (IndexBufferCounter != null) IndexBufferCounter.Dispose();
+            if (TriangleBuffer != null) TriangleBuffer.Dispose();
+            if (TriangulationIndices != null) TriangulationIndices.Dispose();
+            if (ChunksWithTriangles != null) ChunksWithTriangles.Dispose();
         }
     }
-}
+} 

@@ -1,4 +1,7 @@
-﻿// Values from http://paulbourke.net/geometry/polygonise/
+﻿#ifndef MARCH_TABLES_INCLUDED
+#define MARCH_TABLES_INCLUDED
+
+// Values from http://paulbourke.net/geometry/polygonise/
 
 static const int edges[256] = {
     0x0,
@@ -806,3 +809,5 @@ static const int vertexCountPerCubeIndex[256]={
     3,
     0
 };
+
+#endif
