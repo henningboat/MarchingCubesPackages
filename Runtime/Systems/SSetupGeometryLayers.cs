@@ -19,7 +19,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private EntityArchetype _entityClusterArchetype;
 
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(2, 2, 2)};
+            {ClusterCounts = new int3(1, 1, 1)};
 
         private readonly List<GeometryLayerReference> _geometryLayerReferencesList = new List<GeometryLayerReference>();
         private EntityArchetype _geometryLayerArchetype;
@@ -148,22 +148,23 @@ namespace henningboat.CubeMarching.Runtime.Systems
             meshBuilder.TrianglePositionCountBuffer =
                 new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
 
-            meshBuilder.TriangleCountPerSubChunk = new ComputeBuffer(chunkCount, 4);
+            meshBuilder.ChunkTriangleCount = new ComputeBuffer(chunkCount, 4);
 
             meshBuilder.ChunksToTriangulate =
                 new ComputeBuffer(chunkCount, 4 * 4, ComputeBufferType.Default);
             meshBuilder.IndexBufferCounter = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
 
-            meshBuilder.TriangulationIndices = new ComputeBuffer(chunkCount * Constants.maxTrianglesPerChunk, 4 * 2);
+            meshBuilder.TriangulationIndices = new ComputeBuffer(chunkCount * Constants.maxTrianglesPerChunk, 4 );
 
-            meshBuilder.TriangleCountPerSubChunk.SetData(new[] {meshBuilder.TriangleCountPerSubChunk.count});
+            meshBuilder.ChunkTriangleCount.SetData(new[] {meshBuilder.ChunkTriangleCount.count});
 
             var triangleCapacity = chunkCount * Constants.chunkVolume * 5;
 
             meshBuilder.PropertyBlock = new MaterialPropertyBlock();
 
             // meshBuilder._triangulationIndices = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Structured);
-            // meshBuilder._triangleBuffer = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Append);
+            meshBuilder.TriangleBuffer = new ComputeBuffer(triangleCapacity, 4);
+            meshBuilder.TrianglesToRenderBuffer = new ComputeBuffer(triangleCapacity, 4);
             //
             // meshBuilder._clusterCounts = geometryFieldData.ClusterCounts;
             // meshBuilder._chunkCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;

@@ -35,6 +35,7 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public ComputeBuffer DistanceFieldBuffer;
         public ComputeBuffer IndexMapBuffer;
+        public ComputeBuffer ChunkBasePositions;
         public int3 ChunkCounts;
 
         //placeholder
@@ -45,6 +46,8 @@ namespace henningboat.CubeMarching.Runtime.Components
             DistanceFieldBuffer = new ComputeBuffer(clusterCounts.Volume() * Constants.chunkVolume / 4, 4 * 4 * 2,
                 ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
             IndexMapBuffer = new ComputeBuffer(clusterCounts.Volume(), 4, ComputeBufferType.Structured,
+                ComputeBufferMode.SubUpdates); 
+            ChunkBasePositions = new ComputeBuffer(clusterCounts.Volume(), 4, ComputeBufferType.Structured,
                 ComputeBufferMode.SubUpdates);
             RegisteredChunksCount = 0;
             ChunkCounts = clusterCounts;
@@ -56,6 +59,8 @@ namespace henningboat.CubeMarching.Runtime.Components
             DistanceFieldBuffer = null;
             IndexMapBuffer?.Dispose();
             IndexMapBuffer = null;
+            ChunkBasePositions?.Dispose();
+            ChunkBasePositions = null;
         }
 
         public CGeometryChunkGPUIndices RegisterChunkEntity(Entity chunkEntity)

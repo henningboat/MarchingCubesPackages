@@ -11,6 +11,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         private int _kernelResetTriangulation;
         private int _getPositionKernel;
+        private int _indexBufferKernel;
 
         public ComputeShaderHandler(ComputeShader computeShader)
         {
@@ -19,6 +20,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             _kernelResetTriangulation = _computeShader.FindKernel("ResetSubChunkTriangleCount");
             _getPositionKernel = _computeShader.FindKernel("GetTrianglePositions");
+            _indexBufferKernel = _computeShader.FindKernel("BuildIndexBuffer");
         }
 
         public void TriangulizeChunks(NativeList<float4> chunksToTriangulate, GeometryLayerGPUBuffer gpuBuffer ,LayerMeshData layerMeshData)
@@ -31,8 +33,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 _computeShader.SetBuffer(_kernelResetTriangulation, "_ChunksToTriangulate",
                     layerMeshData.ChunksToTriangulate);
-                _computeShader.SetBuffer(_kernelResetTriangulation, "_TriangleCountPerChunk",
-                    layerMeshData.TriangleCountPerSubChunk);
+                _computeShader.SetBuffer(_kernelResetTriangulation, "_ChunkTriangleCount",
+                    layerMeshData.ChunkTriangleCount);
                 _computeShader.Dispatch(_kernelResetTriangulation, chunksToTriangulate.Length, 1, 1);
             }
 
@@ -41,12 +43,30 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 
                 _computeShader.SetBuffer(_getPositionKernel, "_ChunksToTriangulate",
                     layerMeshData.ChunksToTriangulate);
-                _computeShader.SetBuffer(_getPositionKernel, "_TriangleCountPerChunk",
-                    layerMeshData.TriangleCountPerSubChunk);
+                _computeShader.SetBuffer(_getPositionKernel, "_ChunkTriangleCount",
+                    layerMeshData.ChunkTriangleCount);
                 _computeShader.SetBuffer(_getPositionKernel, "_TriangleIndices",
                     layerMeshData.TriangulationIndices);
 
                 _computeShader.Dispatch(_getPositionKernel, chunksToTriangulate.Length, 1, 1);
+            }
+
+            {
+                SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
+
+                layerMeshData.TrianglesToRenderBuffer.SetData(new uint[layerMeshData.TrianglesToRenderBuffer.count]);
+                
+                layerMeshData.IndexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
+                _computeShader.SetBuffer(_indexBufferKernel, "_ChunkTriangleCount",
+                    layerMeshData.ChunkTriangleCount);;
+                _computeShader.SetBuffer(_indexBufferKernel, "_ChunksToTriangulate",
+                    layerMeshData.ChunksToTriangulate);
+                _computeShader.SetBuffer(_indexBufferKernel, "_IndexBufferCounter",
+                    layerMeshData.IndexBufferCounter);
+                _computeShader.SetBuffer(_indexBufferKernel, "_TriangleIndices", layerMeshData.TriangulationIndices);
+                _computeShader.SetBuffer(_indexBufferKernel, "_TrianglesToRenderBuffer", layerMeshData.TrianglesToRenderBuffer);
+                
+                _computeShader.Dispatch(_indexBufferKernel, chunksToTriangulate.Length, 1, 1);
             }
         }
 
@@ -58,6 +78,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             _computeShader.SetBuffer(kernel, "_DistanceField", gpuBuffer.DistanceFieldBuffer);
             _computeShader.SetBuffer(kernel, "_IndexMap", gpuBuffer.IndexMapBuffer);
+            _computeShader.SetBuffer(kernel, "_ChunkBasePositions", gpuBuffer.IndexMapBuffer);
         }
 
         public void SetupGeometryLayerMaterialData(MaterialPropertyBlock block, GeometryLayerGPUBuffer gpuBuffer)

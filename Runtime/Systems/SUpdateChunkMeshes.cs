@@ -61,9 +61,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) 0);
             propertyBlock.SetBuffer("_TriangleIndeces", gpuRenderer.TriangulationIndices);
-
             
-            gpuRenderer.IndexBufferCounter.SetData(new uint[] {1200, 1, 0, 0});
             
             Graphics.DrawProceduralIndirect(geometryLayerReference.LayerAsset.material, new Bounds(Vector3.zero, Vector3.one * 10000),
                 MeshTopology.Triangles, gpuRenderer.IndexBufferCounter, 0, null, propertyBlock, ShadowCastingMode.On, true,

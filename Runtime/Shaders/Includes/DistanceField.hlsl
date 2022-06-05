@@ -29,6 +29,8 @@ uint3 GetChunkCounts()
 
 StructuredBuffer<int> _IndexMap;
 StructuredBuffer<PackedDistanceFieldData4> _DistanceField;
+//todo should this be a float4 instead?
+StructuredBuffer<float3> _ChunkPositions;
 
 uint GetChunkIndexFromPosition(float3 position)
 {
