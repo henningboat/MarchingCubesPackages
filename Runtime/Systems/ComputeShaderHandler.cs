@@ -50,24 +50,32 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 _computeShader.Dispatch(_getPositionKernel, chunksToTriangulate.Length, 1, 1);
             }
+        }
 
-            {
-                SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
+        public void CollectRenderTriangles(NativeList<float4> chunksToRender, GeometryLayerGPUBuffer gpuBuffer,
+            LayerMeshData layerMeshData)
+        {
+            layerMeshData.ChunkBasePositionIndex.SetData(chunksToRender.AsArray());
 
-                layerMeshData.TrianglesToRenderBuffer.SetData(new uint[layerMeshData.TrianglesToRenderBuffer.count]);
-                
-                layerMeshData.IndexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
-                _computeShader.SetBuffer(_indexBufferKernel, "_ChunkTriangleCount",
-                    layerMeshData.ChunkTriangleCount);;
-                _computeShader.SetBuffer(_indexBufferKernel, "_ChunksToTriangulate",
-                    layerMeshData.ChunksToTriangulate);
-                _computeShader.SetBuffer(_indexBufferKernel, "_IndexBufferCounter",
-                    layerMeshData.IndexBufferCounter);
-                _computeShader.SetBuffer(_indexBufferKernel, "_TriangleIndices", layerMeshData.TriangulationIndices);
-                _computeShader.SetBuffer(_indexBufferKernel, "_TrianglesToRenderBuffer", layerMeshData.TrianglesToRenderBuffer);
-                
-                _computeShader.Dispatch(_indexBufferKernel, chunksToTriangulate.Length, 1, 1);
-            }
+            SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
+
+            layerMeshData.TrianglesToRenderBuffer.SetData(new uint[layerMeshData.TrianglesToRenderBuffer.count]);
+
+            layerMeshData.IndexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
+            _computeShader.SetBuffer(_indexBufferKernel, "_ChunkTriangleCount",
+                layerMeshData.ChunkTriangleCount);
+            ;
+            _computeShader.SetBuffer(_indexBufferKernel, "_ChunksToTriangulate",
+                layerMeshData.ChunksToTriangulate);
+            _computeShader.SetBuffer(_indexBufferKernel, "_IndexBufferCounter",
+                layerMeshData.IndexBufferCounter);
+            _computeShader.SetBuffer(_indexBufferKernel, "_TriangleIndices", layerMeshData.TriangulationIndices);
+            _computeShader.SetBuffer(_indexBufferKernel, "_TrianglesToRenderBuffer",
+                layerMeshData.TrianglesToRenderBuffer);
+            _computeShader.SetBuffer(_indexBufferKernel, "_ChunkBasePositionIndex",
+                layerMeshData.ChunkBasePositionIndex);
+
+            _computeShader.Dispatch(_indexBufferKernel, chunksToRender.Length, 1, 1);
         }
 
         private void SetupGeometryLayerProperties(int kernel, GeometryLayerGPUBuffer gpuBuffer)

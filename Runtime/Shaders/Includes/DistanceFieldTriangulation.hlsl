@@ -23,39 +23,48 @@ int PositionToIndex(int3 position, int3 size)
 }
 
 //Cluster Triangle
-struct ClusterTriangle
+struct PackedTriangle
 {
     uint value;
-    uint chunkIndex;
 
-    #define PositionPartBitmask 0x3FFFF;
+    #define k_CubeIndexBitMask 0x7FF;
+    #define k_PositionInChunkBitMask 0x1FF;
 
-    int3 GetPositionWS()
+    static const uint k_ChunkPositionBitOffset = 11;
+    static const uint k_ChunkBasePositionOffset = 20;
+
+    float3 GetPositionWS()
     {
-        int positionIndex = value & PositionPartBitmask;
-        return IndexToPositionWS(positionIndex, 8);
+        int positionInChunkIndex = value >> k_ChunkPositionBitOffset & k_PositionInChunkBitMask;
+        float3 positionInChunk = IndexToPositionWS(positionInChunkIndex, 8);
+
+        int chunkPositionIndex = value >> k_ChunkBasePositionOffset;
+        positionInChunk+=_ChunkPositions[chunkPositionIndex];
+        
+        return positionInChunk;
     }
 
+    
     int GetCubeIndex()
     {
-        int cubeIndex = value >> 18;
-        return cubeIndex;
+        return value & k_CubeIndexBitMask;
+    }
+
+    void Initialize(int3 positionWS, int cubeIndex, int offsetInsideCube)
+    {
+        uint positionIndex = PositionToIndex(positionWS%k_ChunkLength, k_ChunkLength);
+
+        uint combinedCubeIndex = cubeIndex * 5 + offsetInsideCube;
+
+         value = combinedCubeIndex;
+         value |= positionIndex << k_ChunkPositionBitOffset;
+    }
+
+    void SetChunkBasePositionIndex(uint chunkBasePositionIndex)
+    {
+         value |= chunkBasePositionIndex << k_ChunkBasePositionOffset;
     }
 };
-
-ClusterTriangle PackTriangle(int3 positionWS, int cubeIndex, int offsetInsideCube)
-{
-    uint positionIndex = PositionToIndex(positionWS%k_ChunkLength, k_ChunkLength);
-
-    uint combinedCubeIndex = cubeIndex * 5 + offsetInsideCube;
-
-    ClusterTriangle clusterTriangle;
-    clusterTriangle.value = positionIndex;
-    clusterTriangle.value |= combinedCubeIndex << 18;
-    clusterTriangle.chunkIndex = GetChunkIndexFromPosition(positionWS);
-
-    return clusterTriangle;
-}
 
 //--Cluster Triangle
 
@@ -240,7 +249,7 @@ float3 RayMarchAO(float3 normalWS, int3 positionWS)
     return ao/count;
 }
 //
-void GetVertexDataFromPackedVertex(ClusterTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
+void GetVertexDataFromPackedVertex(PackedTriangle clusterTriangle, int vertexIndexInCluster, out float3 vertexPosition,
                                    out float3 normal,
                                    out float3 color,
                                    out float occlusion)

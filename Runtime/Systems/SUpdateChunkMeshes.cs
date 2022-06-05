@@ -17,7 +17,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private SSetupGeometryLayers _setupLayer;
         private ComputeShader _computeShader;
         private ComputeShaderHandler _computeShaderHandler;
-        
+
 
         protected override void OnCreate()
         {
@@ -52,21 +52,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 chunksToTriangulate.Add(
                     EntityManager.GetComponentData<CGeometryChunk>(entitiesToUpdate[i]).PositionWS.xyzz);
             }
-            
+
             _computeShaderHandler.TriangulizeChunks(chunksToTriangulate, gpuBuffers, gpuRenderer);
 
-            var propertyBlock = gpuRenderer.PropertyBlock;
 
-            _computeShaderHandler.SetupGeometryLayerMaterialData(propertyBlock, gpuBuffers);
-
-            propertyBlock.SetVector("_ClusterPositionWS", (Vector3) (float3) 0);
-            propertyBlock.SetBuffer("_TriangleIndeces", gpuRenderer.TriangulationIndices);
-            
-            
-            Graphics.DrawProceduralIndirect(geometryLayerReference.LayerAsset.material, new Bounds(Vector3.zero, Vector3.one * 10000),
-                MeshTopology.Triangles, gpuRenderer.IndexBufferCounter, 0, null, propertyBlock, ShadowCastingMode.On, true,
-                0);
-            
             chunksToTriangulate.Dispose();
             entitiesToUpdate.Dispose();
         }

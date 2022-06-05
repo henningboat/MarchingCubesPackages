@@ -14,7 +14,7 @@ StructuredBuffer<float4> _ChunksToTriangulate;
 
 #include "Includes/GlobalDistanceField.hlsl"
 
-RWStructuredBuffer<ClusterTriangle> _TriangleIndices;
+RWStructuredBuffer<PackedTriangle> _TriangleIndices;
 RWStructuredBuffer<int> _ChunkTriangleCount;
 StructuredBuffer<int> _TriangleCountPerSubChunkResult;
 
@@ -34,7 +34,7 @@ void ResetSubChunkTriangleCount(uint3 id : SV_DispatchThreadID)
 void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex,
                           uint3 groupThreadID:SV_GroupThreadID)
 {
-    const int3 terrainChunkBasePosition = _ChunksToTriangulate[id.x / 8];
+    const float3 terrainChunkBasePosition = _ChunksToTriangulate[id.x / 8].xyz;
 
     int3 positionWS = terrainChunkBasePosition + groupThreadID;
     
@@ -65,7 +65,7 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
     if (cubeCorners[6].w > isoLevel) cubeIndex |= 64;
     if (cubeCorners[7].w > isoLevel) cubeIndex |= 128;
     
-    const int chunkIndex = GetChunkIndexFromPosition(positionWS);
+     int chunkIndex = GetChunkIndexFromPosition(positionWS);
     
     if (cubeIndex == 0 || cubeIndex == 255)
         return;
@@ -73,10 +73,10 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
     const int triangleCount = vertexCountPerCubeIndex[cubeIndex] / 3;
     
     int offsetInSubChunk;
-    
+
     InterlockedAdd(_ChunkTriangleCount[chunkIndex], triangleCount, offsetInSubChunk);
     
-    const int maxTrianglesPerChunk = k_MaxTrianglesPerChunk * 5;
+    const int maxTrianglesPerChunk = k_MaxTrianglesPerChunk;
 
     const int3 positionInsideChunk = positionWS % k_ChunkLength;
 
@@ -84,7 +84,10 @@ void GetTrianglePositions(uint3 id : SV_DispatchThreadID, uint groupIndex : SV_G
     
     for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
     {
-        _TriangleIndices[baseIndex + i / 3] = PackTriangle(positionInsideChunk, cubeIndex, i / 3);
+        PackedTriangle packedTriangle = (PackedTriangle)0;
+        packedTriangle.Initialize(positionInsideChunk, cubeIndex, i / 3);
+        
+        _TriangleIndices[baseIndex + i / 3] = packedTriangle;
     }
 }
 
@@ -110,7 +113,8 @@ RWStructuredBuffer<int> _ArgsBuffer;
 // }
 
 RWStructuredBuffer<uint> _IndexBufferCounter;
-RWStructuredBuffer<ClusterTriangle> _TrianglesToRenderBuffer;
+RWStructuredBuffer<PackedTriangle> _TrianglesToRenderBuffer;
+StructuredBuffer<uint> _ChunkBasePositionIndex;
 
 int _TriangulationSubChunkCount;
 int _IndexBufferSize;
@@ -127,14 +131,16 @@ void BuildIndexBuffer(uint3 id : SV_DispatchThreadID)
     int maxTrianglesPerSubChunk = 8 * 8 * 8 * 5;
 
     int vertexOffset = maxTrianglesPerSubChunk * chunkIndex;
-
+    
     AllMemoryBarrier();
 
     for (int i = 0; i < maxTrianglesPerSubChunk; i++)
     {
         if (i < vertexCountOfChunk)
         {
-            _TrianglesToRenderBuffer[indexBufferOffset / 3 + i] = _TriangleIndices[vertexOffset + i];
+            PackedTriangle packedTriangle = _TriangleIndices[vertexOffset + i];
+            packedTriangle.SetChunkBasePositionIndex(id.x);
+            _TrianglesToRenderBuffer[indexBufferOffset / 3 + i] = packedTriangle;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private EntityArchetype _entityClusterArchetype;
 
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(1, 1, 1)};
+            {ClusterCounts = new int3(8, 8, 8)};
 
         private readonly List<GeometryLayerReference> _geometryLayerReferencesList = new List<GeometryLayerReference>();
         private EntityArchetype _geometryLayerArchetype;
@@ -152,6 +152,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             meshBuilder.ChunksToTriangulate =
                 new ComputeBuffer(chunkCount, 4 * 4, ComputeBufferType.Default);
+            
+            meshBuilder.ChunkBasePositionIndex =
+                new ComputeBuffer(chunkCount, 4 * 4, ComputeBufferType.Default);
+            
             meshBuilder.IndexBufferCounter = new ComputeBuffer(4, 4, ComputeBufferType.IndirectArguments);
 
             meshBuilder.TriangulationIndices = new ComputeBuffer(chunkCount * Constants.maxTrianglesPerChunk, 4 );

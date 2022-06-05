@@ -29,8 +29,7 @@ uint3 GetChunkCounts()
 
 StructuredBuffer<int> _IndexMap;
 StructuredBuffer<PackedDistanceFieldData4> _DistanceField;
-//todo should this be a float4 instead?
-StructuredBuffer<float3> _ChunkPositions;
+StructuredBuffer<float4> _ChunkPositions;
 
 uint GetChunkIndexFromPosition(float3 position)
 {
@@ -41,7 +40,7 @@ uint GetChunkIndexFromPosition(float3 position)
 uint DistanceFieldIndexFromPositionWS(uint3 position)
 {
     const uint chunkIndex = GetChunkIndexFromPosition(position);
-    const uint baseIndexInDistanceFieldBuffer = _IndexMap[chunkIndex];
+    const uint baseIndexInDistanceFieldBuffer = _IndexMap[chunkIndex] * k_ChunkVolume;
     
     return baseIndexInDistanceFieldBuffer + EncodeMorton3(position%k_ChunkLength);
 }
