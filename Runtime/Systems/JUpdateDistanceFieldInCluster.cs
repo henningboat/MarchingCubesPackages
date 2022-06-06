@@ -10,25 +10,57 @@ using Unity.Entities;
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [BurstCompile]
-    public partial struct JUpdateDistanceFieldInCluster : IJobEntity
+    public partial struct JUpdateDistanceFieldInCluster : IJobEntityBatch
     {
         public const int CellLength = Constants.chunkLength;
         private const int PositionListCapacityEstimate = 4096;
         [ReadOnly] public BufferFromEntity<GeometryInstruction> GetInstructionsFromEntity;
+        [ReadOnly] public ComponentTypeHandle<CGeometryChunk> GeometryChunkTypeHandle;
+        [ReadOnly] public ComponentTypeHandle<CGeometryLayerReference> CGeometryLayerReferenceHandle;
+        public BufferTypeHandle<PackedDistanceFieldData> PackedDistanceFieldDataHandle;
 
-        public void Execute(in CGeometryChunk chunkParameters,
-            DynamicBuffer<PackedDistanceFieldData> distanceFieldDynamicBuffer)
+        public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
         {
-            var instructions = GetInstructionsFromEntity[chunkParameters.LayerEntity].AsNativeArray();
+            var layerEntity = batchInChunk.GetChunkComponentData<CGeometryLayerReference>(CGeometryLayerReferenceHandle)
+                .LayerEntity;
 
-            var distanceFieldData = distanceFieldDynamicBuffer.AsNativeArray();
+            var instructions = GetInstructionsFromEntity[layerEntity].AsNativeArray();
 
+            var distanceFieldAccessor = batchInChunk.GetBufferAccessor(PackedDistanceFieldDataHandle);
+
+            var chunkParameters = batchInChunk.GetNativeArray(GeometryChunkTypeHandle);
+            
             var newPositions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
             var previousPositions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
-
+            
             var positions = new NativeList<PackedFloat3>(PositionListCapacityEstimate, Allocator.Temp);
             var results = new NativeList<PackedDistanceFieldData>(PositionListCapacityEstimate, Allocator.Temp);
 
+
+
+            for (var i = 0; i < batchInChunk.Count; i++)
+            {
+                newPositions.Clear();
+                previousPositions.Clear();
+                positions.Clear();
+                results.Clear();
+                
+                var distanceFieldData = distanceFieldAccessor[i].AsNativeArray();
+                UpdateForEntity(chunkParameters[i], previousPositions, positions, results, instructions,
+                    distanceFieldData, newPositions);
+            }
+
+            newPositions.Dispose();
+            previousPositions.Dispose();
+            positions.Dispose();
+            results.Dispose();
+        }
+
+        private void UpdateForEntity(CGeometryChunk chunkParameters, NativeList<MortonCoordinate> previousPositions,
+            NativeList<PackedFloat3> positions,
+            NativeList<PackedDistanceFieldData> results, NativeArray<GeometryInstruction> instructions,
+            NativeArray<PackedDistanceFieldData> distanceFieldData, NativeList<MortonCoordinate> newPositions)
+        {
             previousPositions.Add(new MortonCoordinate(0));
 
             var layer = new MortonCellLayer(CellLength);
@@ -98,11 +130,6 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
 
             distanceFieldResolver.Dispose();
-
-            newPositions.Dispose();
-            previousPositions.Dispose();
-            positions.Dispose();
-            results.Dispose();
         }
 
         private void FillPositionsIntoPositionBuffer(NativeList<MortonCoordinate> previousPositions,

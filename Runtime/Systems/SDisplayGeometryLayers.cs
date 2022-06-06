@@ -33,7 +33,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
               
                 //todo actually filter which chunks contain data
-                var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerReference));
+                var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerAssetsReference));
                 query.SetSharedComponentFilter(geometryLayerReference);
                 var entitiesToUpdate = query.ToEntityArray(Allocator.Temp);
 

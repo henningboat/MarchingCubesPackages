@@ -89,16 +89,16 @@ namespace henningboat.CubeMarching.Runtime.Components
                    properties[16 + i] = identity[i / 4][i % 4];
                }
 
+
                instruction.ResolvedPropertyValues = properties;
-               
-                
+
                DstEntityManager.AddBuffer<GeometryInstruction>(entity).Add(instruction);
                DstEntityManager.AddComponent<CGeometryInstructionSourceTag>(entity);
 
                DstEntityManager.AddComponent<CTestComponent>(entity);
                DstEntityManager.SetComponentData(entity, new CTestComponent() {render = sphere.testTexture.imageContentsHash.GetHashCode()});
 
-               DstEntityManager.AddSharedComponentData(entity, new GeometryLayerReference(sphere.layer));
+               DstEntityManager.AddSharedComponentData(entity, new GeometryLayerAssetsReference(sphere.layer));
             });
             
             Entities.ForEach((GeometryLayerAsset asset) =>
@@ -120,16 +120,16 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
     }
 
-    public struct GeometryLayerReference : ISharedComponentData, IEquatable<GeometryLayerReference>
+    public struct GeometryLayerAssetsReference : ISharedComponentData, IEquatable<GeometryLayerAssetsReference>
     {
-        public bool Equals(GeometryLayerReference other)
+        public bool Equals(GeometryLayerAssetsReference other)
         {
             return other.LayerAsset == LayerAsset;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is GeometryLayerReference other && Equals(other);
+            return obj is GeometryLayerAssetsReference other && Equals(other);
         }
 
         public override int GetHashCode()
@@ -139,7 +139,7 @@ namespace henningboat.CubeMarching.Runtime.Components
 
         public GeometryLayerAsset LayerAsset;
 
-        public GeometryLayerReference(GeometryLayerAsset layerAsset)
+        public GeometryLayerAssetsReference(GeometryLayerAsset layerAsset)
         {
             LayerAsset = layerAsset;
         }

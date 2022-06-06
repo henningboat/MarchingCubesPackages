@@ -35,14 +35,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
         }
 
-        private void UpdateMesh(GeometryLayerReference geometryLayerReference)
+        private void UpdateMesh(GeometryLayerAssetsReference geometryLayerAssetsReference)
         {
-            var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(geometryLayerReference).Value;
-            var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(geometryLayerReference).Value;
+            var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(geometryLayerAssetsReference).Value;
+            var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(geometryLayerAssetsReference).Value;
 
             //todo actually filter
-            var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerReference));
-            query.SetSharedComponentFilter(geometryLayerReference);
+            var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerAssetsReference));
+            query.SetSharedComponentFilter(geometryLayerAssetsReference);
             var entitiesToUpdate = query.ToEntityArray(Allocator.Temp);
 
             var chunksToTriangulate = new NativeList<float4>(Allocator.Temp);

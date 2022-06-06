@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 using Unity.Mathematics;
 
 namespace henningboat.CubeMarching.Runtime.Components
@@ -7,6 +8,10 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public float3 PositionWS;
         public int IndexInIndexMap;
+    }
+
+    public struct CGeometryLayerReference : IComponentData
+    {
         public Entity LayerEntity;
     }
 }

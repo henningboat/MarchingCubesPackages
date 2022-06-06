@@ -10,7 +10,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [AlwaysUpdateSystem]
     public partial class SGeometryInstructionPreparation : SystemBase
     {
-        private List<GeometryLayerReference> geometryLayerReferences = new List<GeometryLayerReference>();
+        private List<GeometryLayerAssetsReference> geometryLayerReferences = new List<GeometryLayerAssetsReference>();
 
         private SSetupGeometryLayers _setupSystem;
 

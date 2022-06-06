@@ -21,28 +21,28 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
             {ClusterCounts = new int3(8, 8, 8)};
 
-        private readonly List<GeometryLayerReference> _geometryLayerReferencesList = new List<GeometryLayerReference>();
+        private readonly List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
         private EntityArchetype _geometryLayerArchetype;
 
-        private List<GeometryLayerReference> _existingGeometryLayers = new List<GeometryLayerReference>();
+        private List<GeometryLayerAssetsReference> _existingGeometryLayers = new List<GeometryLayerAssetsReference>();
 
-        public IReadOnlyList<GeometryLayerReference> ExistingGeometryLayers => _existingGeometryLayers;
+        public IReadOnlyList<GeometryLayerAssetsReference> ExistingGeometryLayers => _existingGeometryLayers;
 
         protected override void OnCreate()
         {
             _entityClusterArchetype =
                 EntityManager.CreateArchetype(typeof(CGeometryChunk), typeof(PackedDistanceFieldData),
-                    typeof(GeometryLayerReference));
+                    typeof(GeometryLayerAssetsReference),typeof(CGeometryChunkGPUIndices),ComponentType.ChunkComponent<CGeometryLayerReference>());
             _geometryLayerArchetype =
                 EntityManager.CreateArchetype(typeof(GeometryInstruction), typeof(CGeometryLayerTag),
-                    typeof(CGeometryLayerChild), typeof(GeometryLayerReference));
+                    typeof(CGeometryLayerChild), typeof(GeometryLayerAssetsReference));
         }
 
-        public bool TryGetGeometryLayerSingleton(GeometryLayerReference geometryLayerReference, out Entity entity)
+        public bool TryGetGeometryLayerSingleton(GeometryLayerAssetsReference geometryLayerAssetsReference, out Entity entity)
         {
             var layerQuery = EntityManager.CreateEntityQuery(typeof(GeometryInstruction),
-                typeof(GeometryLayerReference), typeof(CGeometryLayerTag));
-            layerQuery.AddSharedComponentFilter(geometryLayerReference);
+                typeof(GeometryLayerAssetsReference), typeof(CGeometryLayerTag));
+            layerQuery.AddSharedComponentFilter(geometryLayerAssetsReference);
             if (layerQuery.IsEmpty)
             {
                 entity = Entity.Null;
@@ -66,7 +66,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 if (geometryLayerReference.LayerAsset == null) continue;
 
                 var newQuery =
-                    EntityManager.CreateEntityQuery(typeof(GeometryInstruction), typeof(GeometryLayerReference),
+                    EntityManager.CreateEntityQuery(typeof(GeometryInstruction), typeof(GeometryLayerAssetsReference),
                         typeof(CGeometryInstructionSourceTag));
                 newQuery.AddSharedComponentFilter(geometryLayerReference);
                 var queryIsEmpty = newQuery.IsEmpty;
@@ -104,20 +104,20 @@ namespace henningboat.CubeMarching.Runtime.Systems
             EntityManager.DestroyEntity(layerEntity);
         }
 
-        private void SpawnLayerAndChildren(GeometryLayerReference reference)
+        private void SpawnLayerAndChildren(GeometryLayerAssetsReference assetsReference)
         {
-            if (reference.LayerAsset == null) throw new NullReferenceException();
+            if (assetsReference.LayerAsset == null) throw new NullReferenceException();
 
             var layerEntity = EntityManager.CreateEntity(_geometryLayerArchetype);
-            EntityManager.SetSharedComponentData(layerEntity, reference);
+            EntityManager.SetSharedComponentData(layerEntity, assetsReference);
 
-            EntityManager.SetName(layerEntity, "Layer " + reference.LayerAsset.name);
+            EntityManager.SetName(layerEntity, "Layer " + assetsReference.LayerAsset.name);
 
             var clusterCount = Settings.ClusterCounts.Volume();
 
-            var chunks = SpawnChunks(clusterCount, layerEntity,reference);
+            var chunks = SpawnChunks(clusterCount, layerEntity,assetsReference);
 
-            if (reference.LayerAsset.render)
+            if (assetsReference.LayerAsset.render)
             {
                 CGeometryLayerGPUBuffer geometryLayerGPUBuffer = new CGeometryLayerGPUBuffer()
                 {
@@ -183,14 +183,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
             foreach (var chunkEntity in chunks)
             {
                 var chunkGPUBufferIndices = geometryLayerGPUBuffer.RegisterChunkEntity(chunkEntity);
-                EntityManager.AddComponentData<CGeometryChunkGPUIndices>(chunkEntity, chunkGPUBufferIndices);
+                EntityManager.SetComponentData<CGeometryChunkGPUIndices>(chunkEntity, chunkGPUBufferIndices);
             }
         }
 
         private NativeArray<Entity> SpawnChunks(int clusterCount, Entity layerEntity,
-            GeometryLayerReference geometryLayerReference)
+            GeometryLayerAssetsReference geometryLayerAssetsReference)
         {
             var clusterEntities = EntityManager.CreateEntity(_entityClusterArchetype, clusterCount, Allocator.Temp);
+
             var childBuffer = EntityManager.GetBuffer<CGeometryLayerChild>(layerEntity);
             childBuffer.AddRange(clusterEntities.Reinterpret<CGeometryLayerChild>());
 
@@ -199,35 +200,55 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 var position = DistanceFieldGeneration.Utils.IndexToPositionWS(i, Settings.ClusterCounts) *
                                Constants.chunkLength;
 
-                var clusterEntity = clusterEntities[i];
+                Entity chunkEntity = clusterEntities[i];
 
-                EntityManager.AddComponentData(clusterEntity, new Parent {Value = layerEntity});
+                EntityManager.AddComponentData(chunkEntity, new Parent {Value = layerEntity});
 
-                EntityManager.SetName(clusterEntity, $"Cluster {position.ToString()}");
-                EntityManager.SetComponentData(clusterEntity,
-                    new CGeometryChunk {PositionWS = position, IndexInIndexMap = i, LayerEntity = layerEntity});
-                EntityManager.SetSharedComponentData(clusterEntity, geometryLayerReference);
-                var distanceFieldDatas = EntityManager.GetBuffer<PackedDistanceFieldData>(clusterEntity);
+                EntityManager.SetName(chunkEntity, $"Cluster {position.ToString()}");
+                EntityManager.SetComponentData(chunkEntity,
+                    new CGeometryChunk {PositionWS = position, IndexInIndexMap = i});
+                EntityManager.SetSharedComponentData(chunkEntity, geometryLayerAssetsReference);
+                var distanceFieldDatas = EntityManager.GetBuffer<PackedDistanceFieldData>(chunkEntity);
                 distanceFieldDatas.Length = Constants.chunkVolume / Constants.PackedCapacity;
+
+            }
+            var componentTypes = _entityClusterArchetype.GetComponentTypes(Allocator.Temp);
+            var query = GetEntityQuery(componentTypes);
+            NativeArray<ArchetypeChunk> chunks = query.CreateArchetypeChunkArray(Allocator.Temp);
+
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                EntityManager.SetChunkComponentData(chunks[i],
+                    new CGeometryLayerReference() {LayerEntity = layerEntity});
             }
 
+            //
+            // var componentTypes = _entityClusterArchetype.GetComponentTypes(Allocator.Temp);
+            // var query = GetEntityQuery(componentTypes);
+            // query.AddSharedComponentFilter(geometryLayerReference);
+            //
+            // EntityManager.AddChunkComponentData<CGeometryLayerReference>(query,
+            //     new CGeometryLayerReference() {LayerEntity = layerEntity});
+            // componentTypes.Dispose();
+            chunks.Dispose();
+                
             return clusterEntities;
         }
 
-        public Entity GetGeometryLayerSingleton(GeometryLayerReference layerReference)
+        public Entity GetGeometryLayerSingleton(GeometryLayerAssetsReference layerAssetsReference)
         {
-            if (TryGetGeometryLayerSingleton(layerReference, out Entity entity))
+            if (TryGetGeometryLayerSingleton(layerAssetsReference, out Entity entity))
             {
                 return entity;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(layerReference), layerReference.ToString(),
+            throw new ArgumentOutOfRangeException(nameof(layerAssetsReference), layerAssetsReference.ToString(),
                 "Layer singleton does not exist");
         }
 
-        public T GetLayer<T>(GeometryLayerReference geometryLayerReference) where T : struct, ISharedComponentData
+        public T GetLayer<T>(GeometryLayerAssetsReference geometryLayerAssetsReference) where T : struct, ISharedComponentData
         {
-            return EntityManager.GetSharedComponentData<T>(GetGeometryLayerSingleton(geometryLayerReference));
+            return EntityManager.GetSharedComponentData<T>(GetGeometryLayerSingleton(geometryLayerAssetsReference));
         }
     }
 }
