@@ -106,6 +106,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 distanceFieldResolver.Dispose();
                 layer = layer.GetChildLayer();
 
+                if (newPositions.Length == 0)
+                {
+                    return;
+                }
+                
                 (previousPositions, newPositions) = (newPositions, previousPositions);
             }
 
@@ -147,6 +152,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             MortonCoordinate childMortonNumber, MortonCellLayer layer, float distancePackedValue)
         {
             var distanceFieldData = new PackedDistanceFieldData(distancePackedValue);
+
             for (var i = 0; i < layer.CellPackedBufferSize / 8; i++)
                 buffer[(int) (childMortonNumber.MortonNumber / 4 + i)] = distanceFieldData;
         }

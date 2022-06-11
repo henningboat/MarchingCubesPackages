@@ -59,8 +59,6 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
 
-            layerMeshData.TrianglesToRenderBuffer.SetData(new uint[layerMeshData.TrianglesToRenderBuffer.count]);
-
             layerMeshData.IndexBufferCounter.SetData(new uint[] {0, 1, 0, 0});
             _computeShader.SetBuffer(_indexBufferKernel, "_ChunkTriangleCount",
                 layerMeshData.ChunkTriangleCount);
