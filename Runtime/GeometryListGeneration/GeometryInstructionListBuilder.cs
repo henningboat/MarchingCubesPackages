@@ -19,7 +19,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public int CurrentCombinerDepth => _combinerStack.Count - 1;
         private NativeList<float> _propertyValueBuffer;
         private NativeList<GeometryInstruction> _geometryInstructionBuffer;
-        private NativeList<MathInstruction> _mathInstructionsBuffer;
+        private NativeList<CMathInstruction> _mathInstructionsBuffer;
 
         private Stack<CombinerState> _combinerStack = new();
         public readonly GeometryGraphProperty ZeroFloatProperty;
@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
         public GeometryInstructionListBuilder()
         {
             _geometryInstructionBuffer = new NativeList<GeometryInstruction>(Allocator.Temp);
-            _mathInstructionsBuffer = new NativeList<MathInstruction>(Allocator.Temp);
+            _mathInstructionsBuffer = new NativeList<CMathInstruction>(Allocator.Temp);
             _propertyValueBuffer = new NativeList<float>(Allocator.Temp);
 
             _exposedVariables = new List<GeometryGraphProperty>();
@@ -334,7 +334,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryListGeneration
             GeometryGraphProperty a, GeometryGraphProperty b, out GeometryGraphProperty resultProperty)
         {
             resultProperty = CreateEmptyProperty(resultType, "Math Operation Result");
-            _mathInstructionsBuffer.Add(new MathInstruction(mathOperatorType, a, b, resultProperty));
+            _mathInstructionsBuffer.Add(new CMathInstruction(mathOperatorType, a, b, resultProperty));
         }
 
         public void PushTransformation(GeometryGraphProperty newTransformation, bool relativeToParent)

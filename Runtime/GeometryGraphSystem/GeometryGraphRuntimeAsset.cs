@@ -18,7 +18,7 @@ namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
         [SerializeField] private GeometryGraphProperty _mainTransformation;
 
         [SerializeField] private float[] _valueBuffer;
-        [SerializeField] private MathInstruction[] _mathInstructions;
+        [SerializeField] private CMathInstruction[] _mathInstructions;
         [SerializeField] private GeometryInstruction[] _geometryInstructions;
         [SerializeField] private GeometryGraphProperty[] _variables = new GeometryGraphProperty[0];
         [SerializeField]private List<Object> _assetDependencies;
@@ -30,11 +30,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
 
         public List<Object> AssetDependencies => _assetDependencies;
 
+        public GeometryInstruction[] geometryInstructions => _geometryInstructions;
+
+        public float[] valueBuffer => _valueBuffer;
+
         private GeometryInstructionList()
         {
         }
 
-        public static GeometryInstructionList InitializeData(float[] valueBuffer, MathInstruction[] mathInstructions,
+        public static GeometryInstructionList InitializeData(float[] valueBuffer, CMathInstruction[] mathInstructions,
             GeometryInstruction[] geometryInstructions, Hash128 contentHash, GeometryGraphProperty mainTransformation,
             GeometryGraphProperty[] variables, List<Object> assetDependencies)
         {
@@ -52,11 +56,11 @@ namespace henningboat.CubeMarching.Runtime.GeometryGraphSystem
         }
 
         public void AllocateNativeArrays(out NativeArray<float> values,
-            out NativeArray<MathInstruction> mathInstructions,
+            out NativeArray<CMathInstruction> mathInstructions,
             out NativeArray<GeometryInstruction> geometryInstructions)
         {
             values = new NativeArray<float>(_valueBuffer, Allocator.Persistent);
-            mathInstructions = new NativeArray<MathInstruction>(_mathInstructions, Allocator.Persistent);
+            mathInstructions = new NativeArray<CMathInstruction>(_mathInstructions, Allocator.Persistent);
             geometryInstructions =
                 new NativeArray<GeometryInstruction>(_geometryInstructions, Allocator.Persistent);
         }

@@ -12,7 +12,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem
     public struct GeometryInstructionListBuffers : IDisposable
     {
         [NativeDisableParallelForRestriction] public NativeArray<float> ValueBuffer;
-        [NativeDisableParallelForRestriction] public NativeArray<MathInstruction> MathInstructions;
+        [NativeDisableParallelForRestriction] public NativeArray<CMathInstruction> MathInstructions;
         [NativeDisableParallelForRestriction] public NativeArray<GeometryInstruction> GeometryInstructions;
 
         public Hash128 ContentHash;

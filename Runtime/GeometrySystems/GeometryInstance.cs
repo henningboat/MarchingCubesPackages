@@ -59,6 +59,11 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             }
         }
 
+        
+        public GeometryLayerAsset geometryLayerAsset => _geometryLayer;
+
+        public CombinerOperation combinerOperation => _combinerOperation;
+
         private void OnDisable()
         {
             TryDisposeGraphBuffers();

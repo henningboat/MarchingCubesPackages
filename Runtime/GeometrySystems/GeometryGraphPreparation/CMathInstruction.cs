@@ -3,13 +3,14 @@ using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryListGeneration;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation
 {
     [Serializable]
-    public struct MathInstruction
+    public struct CMathInstruction : IBufferElementData
     {
         public MathOperatorType MathOperationType;
         public int InputAIndex;
@@ -19,7 +20,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparat
         public int ResultIndex;
         public GeometryPropertyType ResultType;
 
-        public MathInstruction(MathOperatorType mathOperatorType,
+        public CMathInstruction(MathOperatorType mathOperatorType,
             GeometryGraphProperty a, GeometryGraphProperty b, GeometryGraphProperty result)
         {
             MathOperationType = mathOperatorType;

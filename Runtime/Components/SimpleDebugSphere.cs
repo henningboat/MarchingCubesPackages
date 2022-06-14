@@ -63,7 +63,8 @@ namespace henningboat.CubeMarching.Runtime.Components
             });
         }
     }
-    
+
+
     [ConverterVersion("Henning", 1)]
     public class SimpleDebugSphereConversionSystem : GameObjectConversionSystem
     {
@@ -95,9 +96,6 @@ namespace henningboat.CubeMarching.Runtime.Components
                DstEntityManager.AddBuffer<GeometryInstruction>(entity).Add(instruction);
                DstEntityManager.AddComponent<CGeometryInstructionSourceTag>(entity);
 
-               DstEntityManager.AddComponent<CTestComponent>(entity);
-               DstEntityManager.SetComponentData(entity, new CTestComponent() {render = sphere.testTexture.imageContentsHash.GetHashCode()});
-
                DstEntityManager.AddSharedComponentData(entity, new GeometryLayerAssetsReference(sphere.layer));
             });
             
@@ -108,11 +106,6 @@ namespace henningboat.CubeMarching.Runtime.Components
                 DstEntityManager.AddComponent<Translation>(layerEntityTest);
             });
         }
-    }
-
-    public struct CTestComponent:IComponentData
-    {
-        public int render;
     }
 
 

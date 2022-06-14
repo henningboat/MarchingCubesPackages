@@ -46,7 +46,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 }
                 
                 var propertyBlock = gpuRenderer.PropertyBlock;
-                
+
                 _computeShaderHandler.CollectRenderTriangles(chunkBasePositions, gpuBuffers, gpuRenderer);
                 _computeShaderHandler.SetupGeometryLayerMaterialData(propertyBlock, gpuBuffers);
                 

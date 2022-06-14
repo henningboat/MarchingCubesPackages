@@ -32,7 +32,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
             _entityClusterArchetype =
                 EntityManager.CreateArchetype(typeof(CGeometryChunk), typeof(PackedDistanceFieldData),
-                    typeof(GeometryLayerAssetsReference),typeof(CGeometryChunkGPUIndices),ComponentType.ChunkComponent<CGeometryLayerReference>());
+                    typeof(GeometryLayerAssetsReference),typeof(CGeometryChunkGPUIndices));
             _geometryLayerArchetype =
                 EntityManager.CreateArchetype(typeof(GeometryInstruction), typeof(CGeometryLayerTag),
                     typeof(CGeometryLayerChild), typeof(GeometryLayerAssetsReference));
@@ -130,16 +130,29 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     Value = new LayerMeshData()
                 };
 
-                InitializeLayerMeshData(renderer.Value, chunks.Length);
+                InitializeLayerMeshData(renderer.Value, chunks.Length, assetsReference.LayerAsset.name);
 
                 EntityManager.AddSharedComponentData(layerEntity, geometryLayerGPUBuffer);
                 EntityManager.AddSharedComponentData(layerEntity, renderer);
             }
+            
+            EntityQueryDesc ChunksWithoutComponentADesc
+                = new EntityQueryDesc()
+                {
+                    None = new []{ComponentType.ChunkComponent<CGeometryLayerReference>() },
+                    All = new ComponentType[]{ComponentType.ReadOnly<GeometryLayerAssetsReference>(), }
+                };
+            EntityQuery ChunksWithoutChunkComponentA
+                = GetEntityQuery(ChunksWithoutComponentADesc);
+
+            EntityManager.AddChunkComponentData<CGeometryLayerReference>(
+                ChunksWithoutChunkComponentA,
+                new CGeometryLayerReference() {LayerEntity = layerEntity});
 
             chunks.Dispose();
         }
 
-        private void InitializeLayerMeshData(LayerMeshData meshBuilder, int chunkCount)
+        private void InitializeLayerMeshData(LayerMeshData meshBuilder, int chunkCount, string layerDebugName)
         {
             meshBuilder.ArgsBuffer = new ComputeBuffer(4, 4);
             meshBuilder.ArgsBuffer.SetData(new[] {3, 0, 0, 0});
@@ -167,8 +180,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
             meshBuilder.PropertyBlock = new MaterialPropertyBlock();
 
             // meshBuilder._triangulationIndices = new ComputeBuffer(triangleCapacity, 4, ComputeBufferType.Structured);
-            meshBuilder.TriangleBuffer = new ComputeBuffer(triangleCapacity, 4);
-            meshBuilder.TrianglesToRenderBuffer = new ComputeBuffer(triangleCapacity, 4);
+            meshBuilder.TriangleBuffer = new ComputeBuffer(triangleCapacity, 4)
+                {name = layerDebugName + "TriangleBuffer"};
+            meshBuilder.TrianglesToRenderBuffer = new ComputeBuffer(triangleCapacity, 4)
+                {name = layerDebugName + "TrianglesToRenderBuffer"};
             //
             // meshBuilder._clusterCounts = geometryFieldData.ClusterCounts;
             // meshBuilder._chunkCounts = geometryFieldData.ClusterCounts * Constants.chunkLengthPerCluster;
@@ -216,20 +231,6 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var query = GetEntityQuery(componentTypes);
             NativeArray<ArchetypeChunk> chunks = query.CreateArchetypeChunkArray(Allocator.Temp);
 
-            for (int i = 0; i < chunks.Length; i++)
-            {
-                EntityManager.SetChunkComponentData(chunks[i],
-                    new CGeometryLayerReference() {LayerEntity = layerEntity});
-            }
-
-            //
-            // var componentTypes = _entityClusterArchetype.GetComponentTypes(Allocator.Temp);
-            // var query = GetEntityQuery(componentTypes);
-            // query.AddSharedComponentFilter(geometryLayerReference);
-            //
-            // EntityManager.AddChunkComponentData<CGeometryLayerReference>(query,
-            //     new CGeometryLayerReference() {LayerEntity = layerEntity});
-            // componentTypes.Dispose();
             chunks.Dispose();
                 
             return clusterEntities;
