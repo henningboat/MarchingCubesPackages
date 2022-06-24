@@ -2,8 +2,6 @@
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.Systems
@@ -24,7 +22,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
             var instructionsFromEntity = GetBufferFromEntity<GeometryInstruction>(true);
 
-            var job = new JUpdateDistanceFieldInCluster
+            var job = new JUpdateDistanceField
             {
                 GetInstructionsFromEntity = instructionsFromEntity,
                 GeometryChunkTypeHandle = EntityManager.GetComponentTypeHandle<CGeometryChunk>(true),

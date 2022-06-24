@@ -4,7 +4,6 @@ using henningboat.CubeMarching.Runtime.BinaryAssets;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Shapes;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GenerationGraphSystem;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryFieldSetup;
-using henningboat.CubeMarching.Runtime.NewDistanceFieldResolverPrototype;
 using henningboat.CubeMarching.Runtime.Output.GeometryFieldMeshRendererSystem;
 using Unity.Jobs;
 using Unity.Mathematics;

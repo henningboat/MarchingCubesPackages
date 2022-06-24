@@ -61,7 +61,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         /// <returns></returns>
         public void UpdateHash()
         {
-            Hash128 hash = default;
+            GeometryInstructionHash hash = default;
             hash.Append(ref GeometryInstructionType);
             hash.Append(ref GeometryInstructionSubType);
             hash.Append(ref CombinerBlendOperation);
@@ -81,7 +81,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 hash.Append(ref ResolvedPropertyValues);
             }
 
-            GeometryInstructionHash = new GeometryInstructionHash(hash);
+            GeometryInstructionHash = hash;
         }
 
         #region Public Fields

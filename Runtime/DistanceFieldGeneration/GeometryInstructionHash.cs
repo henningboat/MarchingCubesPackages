@@ -7,20 +7,20 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
     /// Just a container for a hash. Right now I use "proper" 128bit hashes, but
     /// it's probably fine to switch that to 64bit or maybe even 32bit
     /// </summary>
-    public readonly struct GeometryInstructionHash
+    public struct GeometryInstructionHash
     {
-        public readonly Hash128 Hash;
+        private Hash128 _hash;
 
         private sealed class HashEqualityComparer : IEqualityComparer<GeometryInstructionHash>
         {
             public bool Equals(GeometryInstructionHash x, GeometryInstructionHash y)
             {
-                return x.Hash.Equals(y.Hash);
+                return x._hash.Equals(y._hash);
             }
 
             public int GetHashCode(GeometryInstructionHash obj)
             {
-                return obj.Hash.GetHashCode();
+                return obj._hash.GetHashCode();
             }
         }
 
@@ -29,7 +29,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public bool Equals(GeometryInstructionHash other)
         {
-            return Hash.Equals(other.Hash);
+            return _hash.Equals(other._hash);
         }
 
         public override bool Equals(object obj)
@@ -39,12 +39,15 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public override int GetHashCode()
         {
-            return Hash.GetHashCode();
+            return _hash.GetHashCode();
         }
-
-        public GeometryInstructionHash(Hash128 hash)
+        public void Append<T>(ref T data) where T : unmanaged
         {
-            Hash = hash;
+            _hash.Append(ref data);
+        }
+        public void Append(int data)
+        {
+            _hash.Append(ref data);
         }
     }
 }
