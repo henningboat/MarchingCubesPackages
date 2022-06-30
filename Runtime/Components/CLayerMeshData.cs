@@ -9,8 +9,6 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public LayerMeshData Value;
 
-        public int testCounter;
-
         public bool Equals(CLayerMeshData other)
         {
             return Equals(Value, other.Value);

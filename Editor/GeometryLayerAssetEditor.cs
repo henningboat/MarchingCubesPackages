@@ -9,14 +9,12 @@ namespace Editor
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Button("yo");
             EditorGUI.BeginChangeCheck();
             DrawDefaultInspector();
 
             if (EditorGUI.EndChangeCheck())
             {
                 AssetDatabase.SaveAssets();
-                Debug.Log("changed");
             }
         }
     }

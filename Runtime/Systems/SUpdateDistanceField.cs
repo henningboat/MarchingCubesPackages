@@ -27,7 +27,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 GetInstructionsFromEntity = instructionsFromEntity,
                 GeometryChunkTypeHandle = EntityManager.GetComponentTypeHandle<CGeometryChunk>(true),
                 CGeometryLayerReferenceHandle = EntityManager.GetComponentTypeHandle<CGeometryLayerReference>(true),
-                PackedDistanceFieldDataHandle = EntityManager.GetBufferTypeHandle<PackedDistanceFieldData>(false)
+                PackedDistanceFieldDataHandle = EntityManager.GetBufferTypeHandle<PackedDistanceFieldData>(false),
+                EntityTypeHandle = EntityManager.GetEntityTypeHandle(),
+                GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>(false)
             };
             Dependency = job.ScheduleParallel(_clusterQuery, Dependency);
         }

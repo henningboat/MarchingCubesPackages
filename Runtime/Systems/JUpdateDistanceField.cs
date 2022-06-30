@@ -5,6 +5,7 @@ using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 
 namespace henningboat.CubeMarching.Runtime.Systems
@@ -18,6 +19,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
         [ReadOnly] public ComponentTypeHandle<CGeometryChunk> GeometryChunkTypeHandle;
         [ReadOnly] public ComponentTypeHandle<CGeometryLayerReference> CGeometryLayerReferenceHandle;
         public BufferTypeHandle<PackedDistanceFieldData> PackedDistanceFieldDataHandle;
+        [ReadOnly] public EntityTypeHandle EntityTypeHandle;
+        [NativeDisableParallelForRestriction,NativeDisableContainerSafetyRestriction]public BufferFromEntity<PackedDistanceFieldData> GetPackedDistanceFieldBufferFromEntity;
 
         public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
         {
@@ -29,17 +32,18 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var distanceFieldAccessor = batchInChunk.GetBufferAccessor(PackedDistanceFieldDataHandle);
 
             var chunkParameters = batchInChunk.GetNativeArray(GeometryChunkTypeHandle);
+            var entities=batchInChunk.GetNativeArray(EntityTypeHandle);
 
             for (var i = 0; i < batchInChunk.Count; i++)
             {
                 var distanceFieldData = distanceFieldAccessor[i];
                 UpdateForEntity(chunkParameters[i], instructions,
-                    distanceFieldData);
+                    distanceFieldData, entities[i]);
             }
         }
 
         private void UpdateForEntity(CGeometryChunk chunkParameters, DynamicBuffer<GeometryInstruction> instructions,
-            DynamicBuffer<PackedDistanceFieldData> distanceFieldData)
+            DynamicBuffer<PackedDistanceFieldData> distanceFieldData, Entity entity)
         {
             
             var newPositions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
@@ -63,7 +67,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 results.ResizeUninitialized(positions.Length);
 
                 distanceFieldResolver = new GeometryInstructionIterator(previousPositions, instructions, layer,
-                    chunkParameters.PositionWS);
+                    chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity);
                 distanceFieldResolver.CalculateAllTerrainData();
 
 
@@ -108,7 +112,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             results.ResizeUninitialized(previousPositions.Length * 2);
 
             distanceFieldResolver =
-                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS);
+                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity);
             distanceFieldResolver.CalculateAllTerrainData();
 
 

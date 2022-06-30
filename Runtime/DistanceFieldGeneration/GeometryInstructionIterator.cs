@@ -32,6 +32,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public int StackBaseOffset;
         private MortonCellLayer _mortonCellLayer;
+        private NativeArray<MortonCoordinate> _mortonCoordinates;
+        private BufferFromEntity<PackedDistanceFieldData> _packedDistanceFieldDataHandle;
+        private readonly Entity _selfEntityPlaceholder;
 
         #endregion
 
@@ -39,8 +42,12 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         public GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
             DynamicBuffer<GeometryInstruction> combinerInstructions,
-            MortonCellLayer mortonCellLayer, PackedFloat3 chunkBasePosition)
+            MortonCellLayer mortonCellLayer, PackedFloat3 chunkBasePosition,
+            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder)
         {
+            _packedDistanceFieldDataHandle = packedDistanceFieldDataHandle;
+            _selfEntityPlaceholder = selfEntityPlaceholder;
+            _mortonCoordinates = mortonCoordinates;
             _mortonCellLayer = mortonCellLayer;
 
             _combinerInstructions = combinerInstructions;
@@ -156,39 +163,33 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-                        throw new NotImplementedException();
 
-                    //
-                    //     for (var i = 0; i < _postionsWS.Length; i++)
-                    // {
-                    //     PackedFloat readbackSurfaceDistance = default;
-                    //     PackedTerrainMaterial readbackPackedMaterialData = default;
-                    //
-                    //     for (var j = 0; j < 4; j++)
-                    //     {
-                    //         var indexInCluster = _inicesInCluster[i * 4 + j] +
-                    //                              Constants.clusterVolume * _clusterIndex;
-                    //         var readback =
-                    //             _readbackLayers[geometryInstruction.GeometryInstructionSubType]
-                    //                 .GeometryBuffer[indexInCluster / 4];
-                    //
-                    //         readbackSurfaceDistance.PackedValues[j] =
-                    //             readback.SurfaceDistance.PackedValues[indexInCluster % 4];
-                    //         readbackPackedMaterialData[j] = readback.TerrainMaterial[indexInCluster % 4];
-                    //     }
-                    //
-                    //     distanceFieldData =
-                    //         new PackedDistanceFieldData(readbackSurfaceDistance, readbackPackedMaterialData);
-                    //
-                    //
-                    //     var existingData = _terrainDataBuffer[StackBaseOffset + i];
-                    //     var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
-                    //         geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
-                    //         distanceFieldData, existingData);
-                    //     _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
-                    // }
-                    //
-                    //     break;
+                        var readbackBuffer = _packedDistanceFieldDataHandle[_selfEntityPlaceholder];
+                        if (_mortonCellLayer.CellLength == 2)
+                        {
+                            var targetSlice = _terrainDataBuffer.Slice(0, readbackBuffer.Length);
+                            targetSlice.CopyFrom(readbackBuffer.AsNativeArray());
+                        }
+                        if (_mortonCellLayer.CellLength == 2)
+                        {
+                            for (var i = 0; i < _mortonCoordinates.Length; i++)
+                            {
+                                for (int j = 0; j < 2; j++)
+                                {
+                                    distanceFieldData = readbackBuffer[(int)_mortonCoordinates[i].MortonNumber / 4 + j];
+                        
+                        
+                                    var existingData = _terrainDataBuffer[StackBaseOffset + i];
+                                    var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
+                                        geometryInstruction.CombinerBlendOperation,
+                                        geometryInstruction.CombinerBlendFactor,
+                                        existingData, distanceFieldData);
+                                    _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
+                                }
+                            }
+                        }
+
+                        break;
                     case GeometryInstructionType.Shape:
                         var shape = geometryInstruction.GetShapeInstruction();
                         shape.WriteShape(this, default, geometryInstruction);

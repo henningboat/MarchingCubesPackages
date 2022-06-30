@@ -1,5 +1,6 @@
 ﻿using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Collections;
 using Unity.Entities;
@@ -67,15 +68,27 @@ namespace henningboat.CubeMarching.Runtime.Systems
             
             var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>();
 
+            bool shouldDoReadback = Application.isPlaying && UnityEngine.Time.frameCount > 0;
+            
             Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayerTag _) =>
                 {
                     instructions.Clear();
+                    
+                    if(shouldDoReadback)
+                    //todo placeholder
+                    {
+                        instructions.Add(new GeometryInstruction()
+                        {
+                            CombinerDepth = 0, CombinerBlendOperation = CombinerOperation.Min,
+                            GeometryInstructionType = GeometryInstructionType.CopyLayer
+                        });
+                    }
                 })
                 .ScheduleParallel(Dependency);
 
             foreach (var layerReference in _setupSystem.ExistingGeometryLayers)
             {
-                var layerEntity = _setupSystem.GetGeometryLayerSingleton(layerReference);
+                var layerEntity = _setupSystem.GetGeometryLayerSingleton<CGeometryLayerTag>(layerReference);
                
                 Dependency = Entities.WithSharedComponentFilter(layerReference)
                     .WithAll<GeometryInstruction, CGeometryInstructionSourceTag>().ForEach(
