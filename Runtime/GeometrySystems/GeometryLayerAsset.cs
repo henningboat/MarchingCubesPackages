@@ -7,6 +7,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
     [CreateAssetMenu]
     public class GeometryLayerAsset : ScriptableObject
     {
+        [SerializeField] private int _order;
+        
         [SerializeField] private bool _storeResults;
 
         [FormerlySerializedAs("m_GeometryLayerID")] [SerializeField]
@@ -25,6 +27,10 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
         public Material material => _material;
 
         public bool render => _render;
+
+        public SerializableGUID geometryLayerID => _geometryLayerID;
+
+        public int order => _order;
 
         private void Awake()
         {

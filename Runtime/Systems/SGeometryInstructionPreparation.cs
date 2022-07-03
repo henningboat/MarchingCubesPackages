@@ -2,7 +2,6 @@
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -86,23 +85,53 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 })
                 .ScheduleParallel(Dependency);
 
+            Dependency.Complete();
+            
+            var layerList = _setupSystem.GeometryLayerList;
+
             foreach (var layerReference in _setupSystem.ExistingGeometryLayers)
             {
                 var layerEntity = _setupSystem.GetGeometryLayerSingleton<CGeometryLayerTag>(layerReference);
-               
                 Dependency = Entities.WithSharedComponentFilter(layerReference)
                     .WithAll<GeometryInstruction, CGeometryInstructionSourceTag>().ForEach(
                         (Entity entity) =>
                         {
-                            var newElems = getGeometryInstructionBuffer[entity];
-            
-                            for (int i = 0; i < newElems.Length; i++)
-                            {
-                                getGeometryInstructionBuffer[layerEntity].Add(newElems[i]);
-                            }
-            
+                            CopyInstructionsFromEntity(entity, layerEntity, getGeometryInstructionBuffer, layerList,0);
                         })
                     .Schedule(Dependency);
+            }
+ 
+          
+        }
+
+        private static void CopyInstructionsFromEntity(Entity source, Entity target,
+            BufferFromEntity<GeometryInstruction> geometryInstructionBuffer,
+            DynamicBuffer<CGeometryLayerListElement> layerList, int stackOffset)
+        {
+            var newElems = geometryInstructionBuffer[source];
+ 
+            for (var i = 0; i < newElems.Length; i++) 
+            {
+                var instruction = newElems[i];
+                
+                if (instruction.GeometryInstructionType == GeometryInstructionType.CopyLayer)
+                {
+                    CGeometryLayerListElement correctLayer = default;
+                    for (var j = 0; j < layerList.Length; j++)
+                        if (layerList[j].LayerID == instruction.ReferenceGUID)
+                        {
+                            correctLayer = layerList[j];
+                            break;
+                        }
+
+                    CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target, geometryInstructionBuffer,
+                        layerList, stackOffset+1);
+                }
+                else
+                {
+                    instruction.CombinerDepth += stackOffset;
+                    geometryInstructionBuffer[target].Add(instruction);
+                }
             }
         }
     }

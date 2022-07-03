@@ -16,18 +16,24 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [ExecuteAlways]
     [AlwaysUpdateSystem]
     [UpdateAfter(typeof(SGeometryInstructionPreparation))]
-    public partial class SSetupGeometryLayers : SystemBase
+    public partial class SSetupGeometryLayers : SystemBase 
     {
         private EntityArchetype _entityClusterArchetype;
 
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(4, 4, 4)};
+            {ClusterCounts = new int3(6, 6, 6)};
 
-        private readonly List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
+        private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
         private EntityArchetype _geometryLayerArchetype;
 
         private List<GeometryLayerAssetsReference> _existingGeometryLayers = new List<GeometryLayerAssetsReference>();
         private SGeometrySystem[] _supportSystems;
+
+        private NativeList<CGeometryLayerListElement> _geometryLayerList;
+        private Entity _layerListEntity;
+
+        public DynamicBuffer<CGeometryLayerListElement> GeometryLayerList =>
+            EntityManager.GetBuffer<CGeometryLayerListElement>(_layerListEntity, true);
 
         public IReadOnlyList<GeometryLayerAssetsReference> ExistingGeometryLayers => _existingGeometryLayers;
 
@@ -40,6 +46,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 EntityManager.CreateArchetype(typeof(GeometryInstruction), typeof(CGeometryLayerTag),
                     typeof(CGeometryLayerChild), typeof(GeometryLayerAssetsReference));
 
+            _geometryLayerList = new NativeList<CGeometryLayerListElement>(Allocator.Persistent);
+            
             List<ComponentType> typesOfEntityClusterArchetype = new List<ComponentType>()
             {
                 typeof(CGeometryChunk), 
@@ -54,6 +62,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             _entityClusterArchetype =
                 EntityManager.CreateArchetype(typesOfEntityClusterArchetype.ToArray());
+
+            _layerListEntity = EntityManager.CreateEntity(typeof(CGeometryLayerListElement));
         }
 
         public bool TryGetGeometryLayerSingleton<T>(GeometryLayerAssetsReference geometryLayerAssetsReference, out Entity entity) where T : struct
@@ -76,6 +86,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             _geometryLayerReferencesList.Clear();
             _existingGeometryLayers.Clear();
             EntityManager.GetAllUniqueSharedComponentData(_geometryLayerReferencesList);
+            _geometryLayerReferencesList= _geometryLayerReferencesList.OrderBy(reference => reference.LayerAsset != null ? reference.LayerAsset.order : int.MinValue).ToList();
 
             for (var i = 0; i < _geometryLayerReferencesList.Count; i++)
             {
@@ -156,6 +167,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                  new CGeometryLayerReference() {LayerEntity = layerEntity});
 
             chunks.Dispose();
+
+            EntityManager.GetBuffer<CGeometryLayerListElement>(_layerListEntity, false).Add(
+                new CGeometryLayerListElement()
+                    {InstructionListHandler = layerEntity, LayerID = assetsReference.LayerAsset.geometryLayerID});
         }
 
   
@@ -203,7 +218,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 
             return clusterEntities;
         }
-
+ 
         public Entity GetGeometryLayerSingleton<T>(GeometryLayerAssetsReference layerAssetsReference) where T : struct
         {
             if (TryGetGeometryLayerSingleton<T>(layerAssetsReference, out Entity entity))
