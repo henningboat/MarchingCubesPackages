@@ -125,7 +125,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         }
 
                     CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target, geometryInstructionBuffer,
-                        layerList, stackOffset+1);
+                        layerList, instruction.CombinerDepth);
                 }
                 else
                 {
@@ -134,5 +134,5 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 }
             }
         }
-    }
-}
+    } 
+}  
