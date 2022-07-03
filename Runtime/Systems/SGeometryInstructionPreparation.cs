@@ -121,11 +121,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         if (layerList[j].LayerID == instruction.ReferenceGUID)
                         {
                             correctLayer = layerList[j];
+                            CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target, geometryInstructionBuffer,
+                                layerList, instruction.CombinerDepth);
                             break;
                         }
-
-                    CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target, geometryInstructionBuffer,
-                        layerList, instruction.CombinerDepth);
                 }
                 else
                 {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
@@ -9,8 +8,6 @@ using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.Systems
 {
-    //todo rename
-
     [ExecuteAlways]
     [AlwaysUpdateSystem]
     [UpdateAfter(typeof(SUpdateDistanceField))]
@@ -32,6 +29,20 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
             _setupLayer = World.GetOrCreateSystem<SSetupGeometryLayers>();
             base.OnCreate();
+        }
+
+        public override void InitializeChunkData(NativeArray<Entity> chunks)
+        {
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                EntityManager.SetComponentData(chunks[i],
+                    new CGeometryChunkGPUIndices() {DistanceFieldBufferOffset = i});
+            }
+        }
+
+        public override void OnLayerDestroyed(GeometryLayerAssetsReference geometryLayerAssetsReference)
+        {
+            _setupLayer.GetGeometryLayerSingletonData<CGeometryLayerGPUBuffer>(geometryLayerAssetsReference).Value.Dispose();
         }
 
         public override List<ComponentType> RequiredComponentsPerChunk => new() {typeof(CGeometryChunkGPUIndices)};

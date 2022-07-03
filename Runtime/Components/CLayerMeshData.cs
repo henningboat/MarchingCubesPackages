@@ -56,6 +56,7 @@ namespace henningboat.CubeMarching.Runtime.Components
             if (ChunksWithTriangles != null) ChunksWithTriangles.Dispose();
             if (TrianglesToRenderBuffer != null) TrianglesToRenderBuffer.Dispose();
             if (ChunkBasePositionIndex != null) ChunkBasePositionIndex.Dispose();
+            if (TrianglePositionCountBuffer != null) TrianglePositionCountBuffer.Dispose();
         }
     }
 } 

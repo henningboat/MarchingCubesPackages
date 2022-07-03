@@ -74,6 +74,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
             EntityManager.SetSharedComponentData(entity, new CLayerMeshData {Value = meshBuilder});
         }
 
+        public override void OnLayerDestroyed(GeometryLayerAssetsReference geometryLayerAssetsReference)
+        {
+            _setupLayer.GetGeometryLayerSingletonData<CLayerMeshData>(geometryLayerAssetsReference).Value.Dispose();
+        }
+
         public override void UpdateInternal(GeometryLayerAssetsReference layerReference)
         {
             var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(layerReference).Value;

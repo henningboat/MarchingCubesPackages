@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace henningboat.CubeMarching.Runtime.Systems
@@ -56,5 +55,13 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         protected abstract void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
             CGeometryFieldSettings settings);
+
+        public virtual void InitializeChunkData(NativeArray<Entity> chunks)
+        {
+        }
+
+        public virtual void OnLayerDestroyed(GeometryLayerAssetsReference geometryLayerAssetsReference)
+        {
+        }
     }
 }
