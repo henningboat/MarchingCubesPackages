@@ -8,7 +8,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 {
     [ExecuteAlways]
     [AlwaysUpdateSystem]
-    [UpdateAfter(typeof(SSetupGeometryLayers))]
+    [UpdateAfter(typeof(SChunkPrepass))]
     public partial class SUpdateDistanceField : SystemBase
     {
         private EntityQuery _clusterQuery;

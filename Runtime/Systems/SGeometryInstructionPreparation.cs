@@ -63,7 +63,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     geometryInstructions[instructionIndex] = instruction;
                 }
             }).WithBurst().ScheduleParallel(Dependency);
-            
+
+
+            Dependency = Entities.WithNone<CGeometryLayerTag>().ForEach(
+                (ref DynamicBuffer<GeometryInstruction> geometryInstructions) =>
+                {
+                    for (var i = 0; i < geometryInstructions.Length; i++)
+                    {
+                        var instruction = geometryInstructions[i];
+                        instruction.UpdateHash();
+                        geometryInstructions[i] = instruction;
+                    }
+                }).WithBurst().ScheduleParallel(Dependency);
+
             
             var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>();
 
@@ -72,16 +84,16 @@ namespace henningboat.CubeMarching.Runtime.Systems
             Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayerTag _) =>
                 {
                     instructions.Clear();
-                    
-                    if(shouldDoReadback)
-                    //todo placeholder
-                    {
-                        instructions.Add(new GeometryInstruction()
-                        {
-                            CombinerDepth = 0, CombinerBlendOperation = CombinerOperation.Min,
-                            GeometryInstructionType = GeometryInstructionType.CopyLayer
-                        });
-                    }
+
+                    // if(shouldDoReadback)
+                    // //todo placeholder
+                    // {
+                    //     instructions.Add(new GeometryInstruction()
+                    //     {
+                    //         CombinerDepth = 0, CombinerBlendOperation = CombinerOperation.Min,
+                    //         GeometryInstructionType = GeometryInstructionType.CopyLayer
+                    //     });
+                    // }
                 })
                 .ScheduleParallel(Dependency);
 

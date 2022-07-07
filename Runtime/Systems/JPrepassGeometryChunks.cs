@@ -158,3 +158,79 @@
 //         }
 //     }
 // }
+
+using henningboat.CubeMarching.Runtime.Components;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems;
+using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
+using SIMDMath;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Mathematics;
+using UnityEngine;
+
+
+namespace henningboat.CubeMarching.Runtime.Systems
+{
+    [ExecuteAlways]
+    [AlwaysUpdateSystem]
+    [UpdateAfter(typeof(SSetupGeometryLayers))]
+    public partial class SChunkPrepass:SGeometrySystem{
+        public struct CPrepassPackedWorldPosition : IBufferElementData
+        {
+            public PackedFloat3 Value;
+        }
+
+        public struct CGeometryGraphChunkPrepassTag:IComponentData
+        {
+        }
+
+        protected override EntityArchetype GetArchetype()
+        {
+            return EntityManager.CreateArchetype(typeof(CGeometryGraphChunkPrepassTag),typeof(PackedDistanceFieldData),typeof(CPrepassPackedWorldPosition));
+        }
+
+        protected override bool RunSystemForLayer(GeometryLayerAsset layer)
+        {
+            return true;
+        }
+
+        public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
+        {
+        }
+
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, CGeometryFieldSettings settings)
+        {
+            int chunkCount = settings.ClusterCounts.Volume();
+            var distanceFieldBuffer = EntityManager.GetBuffer<PackedDistanceFieldData>(entity);
+            var positionBuffer = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(entity);
+            //we want 8 values per chunk
+            distanceFieldBuffer.ResizeUninitialized(chunkCount * 2);
+            positionBuffer.ResizeUninitialized(chunkCount * 2);
+
+            var query = GetEntityQuery(typeof(CGeometryChunk),typeof(GeometryLayerAssetsReference));
+            query.AddSharedComponentFilter(new GeometryLayerAssetsReference(layer));
+            var chunksOfLayer = query.ToComponentDataArray<CGeometryChunk>(Allocator.Temp);
+
+            PackedFloat3 offsetsA = new PackedFloat3(
+                new float3(0.25f, 0.25f, 0.25f), 
+                new float3(0.75f, 0.25f, 0.25f),
+                new float3(0.25f, 0.75f, 0.25f), 
+                new float3(0.75f, 0.75f, 0.25f)) * Constants.chunkLength;
+
+            PackedFloat3 offsetsB = new PackedFloat3(
+                new float3(0.25f, 0.25f, 0.75f), 
+                new float3(0.75f, 0.25f, 0.75f),
+                new float3(0.25f, 0.75f, 0.75f), 
+                new float3(0.75f, 0.75f, 0.75f)) * Constants.chunkLength; 
+
+            for (int chunkIndex = 0; chunkIndex < chunksOfLayer.Length; chunkIndex++)
+            {
+                var chunk = chunksOfLayer[chunkIndex];
+
+                positionBuffer[chunkIndex * 2 + 0] = new CPrepassPackedWorldPosition() {Value = chunk.PositionWS + offsetsA};
+                positionBuffer[chunkIndex * 2 + 1] = new CPrepassPackedWorldPosition() {Value = chunk.PositionWS + offsetsB};
+            }
+        }
+    }
+}

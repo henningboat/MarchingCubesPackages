@@ -21,7 +21,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private EntityArchetype _entityClusterArchetype;
 
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(6, 6, 6)};
+            {ClusterCounts = new int3(2, 2, 2)};
 
         private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
         private EntityArchetype _geometryLayerArchetype;
