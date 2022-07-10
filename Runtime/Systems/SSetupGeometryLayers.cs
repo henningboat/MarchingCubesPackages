@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.Systems
 {
-    [ExecuteAlways]
+    [ExecuteAlways] 
     [AlwaysUpdateSystem]
     [UpdateAfter(typeof(SGeometryInstructionPreparation))]
     public partial class SSetupGeometryLayers : SystemBase 
@@ -21,7 +21,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private EntityArchetype _entityClusterArchetype;
 
         private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(2, 2, 2)};
+            {ClusterCounts = new int3(8, 8, 8)};
 
         private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
         private EntityArchetype _geometryLayerArchetype;

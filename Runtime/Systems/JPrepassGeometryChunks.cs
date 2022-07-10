@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.Runtime.Components;
+﻿using System.Collections.Generic;
+using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
@@ -17,6 +18,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [UpdateAfter(typeof(SSetupGeometryLayers))]
     public partial class SChunkPrepass : SGeometrySystem
     {
+        private Dictionary<GeometryLayerAssetsReference, NativeList<Entity>> _dirtyChunksPerLayer;
+
         protected override EntityArchetype GetArchetype()
         {
             return EntityManager.CreateArchetype(typeof(CGeometryGraphChunkPrepassTag), typeof(PackedDistanceFieldData),
@@ -26,6 +29,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override bool RunSystemForLayer(GeometryLayerAsset layer)
         {
             return true;
+        }
+
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            _dirtyChunksPerLayer = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
+        }
+
+        protected override void OnStopRunning()
+        {
+            foreach (var nativeList in _dirtyChunksPerLayer.Values) nativeList.Dispose();
+
+            _dirtyChunksPerLayer = null;
         }
 
         public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
@@ -48,22 +64,35 @@ namespace henningboat.CubeMarching.Runtime.Systems
             };
             Dependency = job.Schedule(Dependency);
 
+            var dirtyList = _dirtyChunksPerLayer[geometryLayerReference];
+            dirtyList.Clear();
+            var dirtyListWriter = dirtyList.AsParallelWriter();
 
-            Dependency = Entities.ForEach((ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
-                {
-                    var index = chunk.IndexInIndexMap;
-                    var a = prepassDistanceField[index * 2].SurfaceDistance;
-                    var b = prepassDistanceField[index * 2 + 1].SurfaceDistance;
-            
-                    const float maxDistance = Constants.chunkLength;
-            
-                    var aInside = math.abs(a.PackedValues) < maxDistance;
-                    var bInside = math.abs(b.PackedValues) < maxDistance;
-            
-                    var hasContent = math.any(aInside | bInside);
-                    chunkState.HasContent = hasContent;
-                })
+
+            Dependency = Entities.ForEach(
+                    (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
+                    {
+                        var index = chunk.IndexInIndexMap;
+                        var a = prepassDistanceField[index * 2].SurfaceDistance;
+                        var b = prepassDistanceField[index * 2 + 1].SurfaceDistance;
+
+                        const float maxDistance = Constants.chunkLength;
+
+                        var aInside = math.abs(a.PackedValues) < maxDistance;
+                        var bInside = math.abs(b.PackedValues) < maxDistance;
+
+                        var hasContent = math.any(aInside | bInside);
+                        
+                        if (hasContent || chunkState.HasContent)
+                            if (hasContent)
+                                dirtyListWriter.AddNoResize(entity);
+                        
+                        chunkState.HasContent = hasContent;
+                    })
                 .WithReadOnly(prepassDistanceField).WithBurst().ScheduleParallel(Dependency);
+            
+            Dependency.Complete();
+            Debug.Log(dirtyList.Length);
         }
 
         protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
@@ -72,17 +101,20 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var chunkCount = settings.ClusterCounts.Volume();
             var distanceFieldBuffer = EntityManager.GetBuffer<PackedDistanceFieldData>(entity);
             var positionBuffer = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(entity);
+
             //we want 8 values per chunk
             distanceFieldBuffer.ResizeUninitialized(chunkCount * 2);
             distanceFieldBuffer.Length = chunkCount * 2;
             positionBuffer.ResizeUninitialized(chunkCount * 2);
             positionBuffer.Length = chunkCount * 2;
 
+            var geometryLayerAssetsReference = new GeometryLayerAssetsReference(layer);
+
             var query = GetEntityQuery(typeof(CGeometryChunk), typeof(GeometryLayerAssetsReference));
-            query.AddSharedComponentFilter(new GeometryLayerAssetsReference(layer));
+            query.AddSharedComponentFilter(geometryLayerAssetsReference);
             var chunksOfLayer = query.ToComponentDataArray<CGeometryChunk>(Allocator.Temp);
 
-            var offsetsA = new PackedFloat3( 
+            var offsetsA = new PackedFloat3(
                 new float3(0.25f, 0.25f, 0.25f),
                 new float3(0.75f, 0.25f, 0.25f),
                 new float3(0.25f, 0.75f, 0.25f),
@@ -103,6 +135,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 positionBuffer[chunkIndex * 2 + 1] = new CPrepassPackedWorldPosition
                     {Value = chunk.PositionWS + offsetsB};
             }
+
+            var nativeList = new NativeList<Entity>(Allocator.Persistent);
+            nativeList.Length = settings.ClusterCounts.Volume();
+            ;
+            _dirtyChunksPerLayer[geometryLayerAssetsReference] = nativeList;
         }
 
         public struct CPrepassPackedWorldPosition : IBufferElementData
