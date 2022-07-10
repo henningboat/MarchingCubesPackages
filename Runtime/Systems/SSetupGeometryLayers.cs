@@ -52,7 +52,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 typeof(CGeometryChunk), 
                 typeof(PackedDistanceFieldData),
-                typeof(GeometryLayerAssetsReference)
+                typeof(GeometryLayerAssetsReference),
+                typeof(CGeometryChunkState)
             };
             
             foreach (SGeometrySystem supportSystem in _supportSystems)

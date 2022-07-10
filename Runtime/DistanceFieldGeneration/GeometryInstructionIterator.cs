@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
             DynamicBuffer<GeometryInstruction> combinerInstructions,
             MortonCellLayer mortonCellLayer, PackedFloat3 chunkBasePosition,
-            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder)
+            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder, NativeArray<PackedFloat3> positionWS)
         {
             _packedDistanceFieldDataHandle = packedDistanceFieldDataHandle;
             _selfEntityPlaceholder = selfEntityPlaceholder;
@@ -59,15 +59,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             //todo workaround. Remove this and see the exceptions
             _combinerStackSize++;
 
-            _postionsWS = new NativeArray<PackedFloat3>(mortonCoordinates.Length * 2, Allocator.Temp);
-            for (var i = 0; i < mortonCoordinates.Length; i++)
-            {
-                var mortonCoordinate = mortonCoordinates[i];
-                _postionsWS[i * 2 + 0] = mortonCellLayer.GetMortonCellChildPositions(mortonCoordinate, false) +
-                                         chunkBasePosition;
-                _postionsWS[i * 2 + 1] = mortonCellLayer.GetMortonCellChildPositions(mortonCoordinate, true) +
-                                         chunkBasePosition;
-            }
+            _postionsWS = positionWS;
 
             _terrainDataBuffer = new NativeArray<PackedDistanceFieldData>(_combinerStackSize * _postionsWS.Length, Allocator.Temp);
             _postionStack = new NativeArray<PackedFloat3>(_postionsWS.Length * _combinerStackSize, Allocator.Temp);

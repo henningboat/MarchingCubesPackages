@@ -56,6 +56,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             
             previousPositions.Add(new MortonCoordinate(0));
+            NativeArray<PackedFloat3> postionsWs;
 
             var layer = new MortonCellLayer(CellLength);
 
@@ -66,8 +67,24 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 results.ResizeUninitialized(positions.Length);
 
+                //todo refactor and make this nice
+                var mortonCoordinates = previousPositions;
+                postionsWs = new NativeArray<PackedFloat3>(mortonCoordinates.Length * 2, Allocator.Temp);
+                for (var i = 0; i < mortonCoordinates.Length; i++)
+                {
+                    var mortonCoordinate = mortonCoordinates[i];
+                    postionsWs[i * 2 + 0] = layer.GetMortonCellChildPositions(mortonCoordinate, false) +
+                                             chunkParameters.PositionWS;
+                    postionsWs[i * 2 + 1] = layer.GetMortonCellChildPositions(mortonCoordinate, true) +
+                                             chunkParameters.PositionWS;
+                }
+
+                
                 distanceFieldResolver = new GeometryInstructionIterator(previousPositions, instructions, layer,
-                    chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity);
+                    chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity, postionsWs);
+
+                postionsWs.Dispose();
+                
                 distanceFieldResolver.CalculateAllTerrainData();
 
 
@@ -110,9 +127,20 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
 
             results.ResizeUninitialized(previousPositions.Length * 2);
+            
+            postionsWs = new NativeArray<PackedFloat3>(previousPositions.Length * 2, Allocator.Temp);
+            for (var i = 0; i < previousPositions.Length; i++)
+            {
+                var mortonCoordinate = previousPositions[i];
+                postionsWs[i * 2 + 0] = layer.GetMortonCellChildPositions(mortonCoordinate, false) +
+                                        chunkParameters.PositionWS;
+                postionsWs[i * 2 + 1] = layer.GetMortonCellChildPositions(mortonCoordinate, true) +
+                                        chunkParameters.PositionWS;
+            }
 
+            
             distanceFieldResolver =
-                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity);
+                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity, postionsWs);
             distanceFieldResolver.CalculateAllTerrainData();
 
 

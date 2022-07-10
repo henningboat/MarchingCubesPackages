@@ -11,6 +11,11 @@ namespace henningboat.CubeMarching.Runtime.Components
         public GeometryInstructionHash ContentHash;
     }
 
+    public struct CGeometryChunkState : IComponentData
+    {
+        public bool HasContent;
+    }
+
     public struct CGeometryLayerReference : IComponentData
     {
         public Entity LayerEntity;

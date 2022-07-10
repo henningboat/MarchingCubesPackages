@@ -1,0 +1,24 @@
+{
+    "name": "GeometryTests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:94540e1242084540ab8614de238a2218",
+        "GUID:851d32e6fff5780458aed7419e2f1a7e",
+        "GUID:8e2f79f713f5a47dcb69903037d4bc0e",
+        "GUID:734d92eba21c94caba915361bd5ac177"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

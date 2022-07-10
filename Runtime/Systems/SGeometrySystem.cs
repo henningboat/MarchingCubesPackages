@@ -11,7 +11,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         public virtual List<ComponentType> RequiredComponentsPerChunk => new(); 
         private EntityArchetype _archetype;
         private string _systemName;
-        private SSetupGeometryLayers _setupLayer;
+        protected SSetupGeometryLayers _setupLayer;
         protected abstract EntityArchetype GetArchetype();
         protected abstract bool RunSystemForLayer(GeometryLayerAsset layer);
 
