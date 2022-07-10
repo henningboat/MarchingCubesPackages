@@ -1,7 +1,9 @@
 ﻿using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using Unity.Entities;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace henningboat.CubeMarching.Runtime.Systems
@@ -9,29 +11,51 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [ExecuteAlways]
     [AlwaysUpdateSystem]
     [UpdateAfter(typeof(SChunkPrepass))]
-    public partial class SUpdateDistanceField : SystemBase
+    public partial class SUpdateDistanceField : SGeometrySystem
     {
         private EntityQuery _clusterQuery;
+        private SChunkPrepass _prepassSystem;
+
+        protected override EntityArchetype GetArchetype()
+        {
+            return EntityManager.CreateArchetype();
+        }
+
+        protected override bool RunSystemForLayer(GeometryLayerAsset layer)
+        {
+            return true;
+        }
 
         protected override void OnCreate()
         {
+            base.OnCreate();
             _clusterQuery = GetEntityQuery(typeof(CGeometryChunk), typeof(PackedDistanceFieldData));
         }
 
-        protected override void OnUpdate()
+        protected override void OnStartRunning()
         {
-            var instructionsFromEntity = GetBufferFromEntity<GeometryInstruction>(true);
+            base.OnStartRunning();
+            _prepassSystem = World.GetOrCreateSystem<SChunkPrepass>();
+        }
 
+        public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
+        {
+            var instructionsHolderEntity =
+                _setupLayer.GetGeometryLayerSingleton<CGeometryLayerTag>(geometryLayerReference);
+            var dirtyEntities = _prepassSystem.GetDirtyChunks(geometryLayerReference);
             var job = new JUpdateDistanceField
             {
-                GetInstructionsFromEntity = instructionsFromEntity,
-                GeometryChunkTypeHandle = EntityManager.GetComponentTypeHandle<CGeometryChunk>(true),
-                CGeometryLayerReferenceHandle = EntityManager.GetComponentTypeHandle<CGeometryLayerReference>(true),
-                PackedDistanceFieldDataHandle = EntityManager.GetBufferTypeHandle<PackedDistanceFieldData>(false),
-                EntityTypeHandle = EntityManager.GetEntityTypeHandle(),
-                GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>(false)
+                DirtyEntities = dirtyEntities,
+                Instructions = EntityManager.GetBuffer<GeometryInstruction>(instructionsHolderEntity),
+                GetChunkData = GetComponentDataFromEntity<CGeometryChunk>(),
+                GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>()
             };
-            Dependency = job.ScheduleParallel(_clusterQuery, Dependency);
+            Dependency = job.Schedule(_setupLayer.TotalChunkCount, 1, Dependency);
+        }
+
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+            CGeometryFieldSettings settings)
+        {
         }
     }
 }

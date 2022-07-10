@@ -18,15 +18,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [UpdateAfter(typeof(SGeometryInstructionPreparation))]
     public partial class SSetupGeometryLayers : SystemBase 
     {
+        public  int TotalChunkCount { get; private set; }
         private EntityArchetype _entityClusterArchetype;
 
-        private static readonly CGeometryFieldSettings Settings = new CGeometryFieldSettings
-            {ClusterCounts = new int3(8, 8, 8)};
+        private static readonly CGeometryFieldSettings Settings = new() {ClusterCounts = new int3(8, 8, 8)};
 
-        private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new List<GeometryLayerAssetsReference>();
+        private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new();
         private EntityArchetype _geometryLayerArchetype;
 
-        private List<GeometryLayerAssetsReference> _existingGeometryLayers = new List<GeometryLayerAssetsReference>();
+        private List<GeometryLayerAssetsReference> _existingGeometryLayers = new();
         private SGeometrySystem[] _supportSystems;
 
         private NativeList<CGeometryLayerListElement> _geometryLayerList;
@@ -60,6 +60,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 typesOfEntityClusterArchetype.AddRange(supportSystem.RequiredComponentsPerChunk);
             }
+
+            TotalChunkCount = Settings.ClusterCounts.Volume();
 
             _entityClusterArchetype =
                 EntityManager.CreateArchetype(typesOfEntityClusterArchetype.ToArray());

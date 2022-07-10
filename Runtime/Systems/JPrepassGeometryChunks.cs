@@ -4,6 +4,7 @@ using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using SIMDMath;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -63,6 +64,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 ResultBuffer = prepassDistanceField
             };
             Dependency = job.Schedule(Dependency);
+            Dependency.Complete();
 
             var dirtyList = _dirtyChunksPerLayer[geometryLayerReference];
             dirtyList.Clear();
@@ -151,6 +153,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
         }
 
+        [BurstCompile]
         private struct JUpdatePrepassDistanceField : IJob
         {
             [ReadOnly] public BufferFromEntity<GeometryInstruction> GetInstructionsFromEntity;
@@ -180,6 +183,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     .CopyFrom(iterator._terrainDataBuffer.Slice(0, ResultBuffer.Length));
                 iterator.Dispose();
             }
+        }
+
+        public NativeList<Entity> GetDirtyChunks(GeometryLayerAssetsReference geometryLayerReference)
+        {
+            return _dirtyChunksPerLayer[geometryLayerReference];
         }
     }
 }

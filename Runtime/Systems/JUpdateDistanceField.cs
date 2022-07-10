@@ -7,40 +7,21 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
+using Unity.Jobs;
 
 namespace henningboat.CubeMarching.Runtime.Systems
 {
     [BurstCompile]
-    public partial struct JUpdateDistanceField : IJobEntityBatch
+    public partial struct JUpdateDistanceField : IJobParallelFor
     {
         public const int CellLength = Constants.chunkLength;
         private const int PositionListCapacityEstimate = 4096;
-        [ReadOnly] public BufferFromEntity<GeometryInstruction> GetInstructionsFromEntity;
-        [ReadOnly] public ComponentTypeHandle<CGeometryChunk> GeometryChunkTypeHandle;
-        [ReadOnly] public ComponentTypeHandle<CGeometryLayerReference> CGeometryLayerReferenceHandle;
-        public BufferTypeHandle<PackedDistanceFieldData> PackedDistanceFieldDataHandle;
-        [ReadOnly] public EntityTypeHandle EntityTypeHandle;
+        
         [NativeDisableParallelForRestriction,NativeDisableContainerSafetyRestriction]public BufferFromEntity<PackedDistanceFieldData> GetPackedDistanceFieldBufferFromEntity;
 
-        public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
-        {
-            var layerEntity = batchInChunk.GetChunkComponentData<CGeometryLayerReference>(CGeometryLayerReferenceHandle)
-                .LayerEntity;
-
-            var instructions = GetInstructionsFromEntity[layerEntity];
-
-            var distanceFieldAccessor = batchInChunk.GetBufferAccessor(PackedDistanceFieldDataHandle);
-
-            var chunkParameters = batchInChunk.GetNativeArray(GeometryChunkTypeHandle);
-            var entities=batchInChunk.GetNativeArray(EntityTypeHandle);
-
-            for (var i = 0; i < batchInChunk.Count; i++)
-            {
-                var distanceFieldData = distanceFieldAccessor[i];
-                UpdateForEntity(chunkParameters[i], instructions,
-                    distanceFieldData, entities[i]);
-            }
-        }
+        [ReadOnly] public NativeList<Entity> DirtyEntities;
+        [ReadOnly] public DynamicBuffer<GeometryInstruction> Instructions;
+        [ReadOnly] public ComponentDataFromEntity<CGeometryChunk> GetChunkData;
 
         private void UpdateForEntity(CGeometryChunk chunkParameters, DynamicBuffer<GeometryInstruction> instructions,
             DynamicBuffer<PackedDistanceFieldData> distanceFieldData, Entity entity)
@@ -52,9 +33,6 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var positions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
             var results = new NativeList<PackedDistanceFieldData>(PositionListCapacityEstimate, Allocator.Temp);
 
-
-
-            
             previousPositions.Add(new MortonCoordinate(0));
             NativeArray<PackedFloat3> postionsWs;
 
@@ -182,6 +160,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             for (var i = 0; i < layer.CellPackedBufferSize / 8; i++)
                 buffer[(int) (childMortonNumber.MortonNumber / 4 + i)] = distanceFieldData;
+        }
+
+        public void Execute(int index)
+        {
+            if (index >= DirtyEntities.Length)
+            {
+                return;
+            }
+
+            var chunkEntity = DirtyEntities[index];
+            var distanceField = GetPackedDistanceFieldBufferFromEntity[chunkEntity];
+
+            UpdateForEntity(GetChunkData[chunkEntity], Instructions, distanceField, chunkEntity);
         }
     }
 }
