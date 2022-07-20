@@ -69,34 +69,6 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
             TryDisposeGraphBuffers();
         }
 
-        private void UpdateOverwritesInValueBuffer(GeometryFieldManager geometryFieldManager)
-        {
-            foreach (var overwrite in _overwrites)
-            {
-                var variable = GeometryInstructionList.GetIndexOfProperty(overwrite.PropertyGUID);
-
-                if (variable == null)
-                    continue;
-
-                if (variable.IsAsset)
-                {
-                    var index = geometryFieldManager.EnsureAssetIsRegistered(overwrite.ObjectValue);
-                    _instructionListBuffer.ValueBuffer.Write((float) index, variable.Index);
-                }
-                else
-                {
-                    for (var i = 0; i < variable.GetSizeInBuffer(); i++)
-                        _instructionListBuffer.ValueBuffer.Write(overwrite.Value[i], variable.Index + i);
-                }
-            }
-
-            _instructionListBuffer.ValueBuffer.Write(transform.worldToLocalMatrix,
-                GeometryInstructionList.MainTransformation.Index);
-
-            _instructionListBuffer.SetTopLevelBlendOperation(_combinerOperation);
-        }
-
-
         public List<GeometryGraphPropertyOverwrite> GetOverwrites()
         {
             return _overwrites;
@@ -129,31 +101,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
             _overwrites.Add(new GeometryGraphPropertyOverwrite(propertyGuid) {Value = value});
         }
-
-        public bool TryInitializeAndGetBuffer(out GeometryInstructionListBuffers result,
-            GeometryFieldManager geometryFieldManager)
-        {
-            if (GeometryInstructionList == null)
-            {
-                TryDisposeGraphBuffers();
-                result = default;
-                return false;
-            }
-
-            if (_instructionListBuffer.ContentHash != GeometryInstructionList.ContentHash ||
-                _instructionListBuffer.TargetLayer != TargetLayer)
-            {
-                TryDisposeGraphBuffers();
-                _instructionListBuffer = new GeometryInstructionListBuffers(GeometryInstructionList, TargetLayer);
-            }
-
-            result = _instructionListBuffer;
-
-            UpdateOverwritesInValueBuffer(geometryFieldManager);
-
-            return true;
-        }
-
+        
         private void TryDisposeGraphBuffers()
         {
             if (_instructionListBuffer.IsValid)
