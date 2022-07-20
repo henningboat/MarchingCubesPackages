@@ -32,17 +32,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
             return true;
         }
 
-        protected override void OnStartRunning()
+        protected override void OnCreate()
         {
-            base.OnStartRunning();
             _dirtyChunksPerLayer = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
+            base.OnCreate();
         }
 
-        protected override void OnStopRunning()
+        protected override void OnDestroy()
         {
             foreach (var nativeList in _dirtyChunksPerLayer.Values) nativeList.Dispose();
 
             _dirtyChunksPerLayer = null;
+            
+            base.OnDestroy();
         }
 
         public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
@@ -64,7 +66,6 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 ResultBuffer = prepassDistanceField
             };
             Dependency = job.Schedule(Dependency);
-            Dependency.Complete();
 
             var dirtyList = _dirtyChunksPerLayer[geometryLayerReference];
             dirtyList.Clear();
@@ -84,18 +85,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         var bInside = math.abs(b.PackedValues) < maxDistance;
 
                         var hasContent = math.any(aInside | bInside);
-                        
+
                         if (hasContent || chunkState.HasContent)
-                            if (hasContent)
-                                dirtyListWriter.AddNoResize(entity);
-                        
+                            dirtyListWriter.AddNoResize(entity);
+
                         chunkState.HasContent = hasContent;
                     })
                 .WithReadOnly(prepassDistanceField).WithBurst().ScheduleParallel(Dependency);
-            
-            Dependency.Complete();
-            Debug.Log(dirtyList.Length);
-        }
+        } 
 
         protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
             CGeometryFieldSettings settings)
@@ -141,7 +138,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var nativeList = new NativeList<Entity>(Allocator.Persistent);
             nativeList.Length = settings.ClusterCounts.Volume();
             ;
-            _dirtyChunksPerLayer[geometryLayerAssetsReference] = nativeList;
+            _dirtyChunksPerLayer[geometryLayerAssetsReference] = nativeList; 
         }
 
         public struct CPrepassPackedWorldPosition : IBufferElementData

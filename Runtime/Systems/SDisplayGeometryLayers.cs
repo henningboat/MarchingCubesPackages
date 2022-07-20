@@ -16,6 +16,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private ComputeShaderHandler _computeShaderHandler;
         private static readonly int ClusterPositionWSID = Shader.PropertyToID("_ClusterPositionWS");
         private static readonly int TriangleIndecesID = Shader.PropertyToID("_TriangleIndeces");
+        private SChunkPrepass _prepassSystem;
 
         protected override EntityArchetype GetArchetype()
         {
@@ -30,6 +31,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override void OnCreate() 
         {
             _setupLayer = World.GetOrCreateSystem<SSetupGeometryLayers>();
+            _prepassSystem = World.GetOrCreateSystem<SChunkPrepass>();
             _computeShaderHandler = new(DynamicCubeMarchingSettingsHolder.Instance.Compute);
             base.OnCreate();
         }
@@ -39,11 +41,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(geometryLayerReference).Value;
             var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(geometryLayerReference).Value;
 
-              
-            //todo actually filter which chunks contain data
-            var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerAssetsReference));
-            query.SetSharedComponentFilter(geometryLayerReference);
-            var entitiesToUpdate = query.ToEntityArray(Allocator.Temp);
+            var entitiesToUpdate = _prepassSystem.GetDirtyChunks(geometryLayerReference);
 
             var chunkBasePositions = new NativeList<float4>(Allocator.Temp);
 

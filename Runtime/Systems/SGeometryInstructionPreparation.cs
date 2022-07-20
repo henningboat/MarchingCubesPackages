@@ -79,25 +79,12 @@ namespace henningboat.CubeMarching.Runtime.Systems
             
             var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>();
 
-            bool shouldDoReadback = Application.isPlaying && UnityEngine.Time.frameCount > 0;
-            
             Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayerTag _) =>
                 {
                     instructions.Clear();
-
-                    // if(shouldDoReadback)
-                    // //todo placeholder
-                    // {
-                    //     instructions.Add(new GeometryInstruction()
-                    //     {
-                    //         CombinerDepth = 0, CombinerBlendOperation = CombinerOperation.Min,
-                    //         GeometryInstructionType = GeometryInstructionType.CopyLayer
-                    //     });
-                    // }
-                })
+                }).WithBurst()
                 .ScheduleParallel(Dependency);
 
-            Dependency.Complete();
             
             var layerList = _setupSystem.GeometryLayerList;
 
@@ -108,12 +95,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     .WithAll<GeometryInstruction, CGeometryInstructionSourceTag>().ForEach(
                         (Entity entity) =>
                         {
-                            CopyInstructionsFromEntity(entity, layerEntity, getGeometryInstructionBuffer, layerList,0);
+                            CopyInstructionsFromEntity(entity, layerEntity, getGeometryInstructionBuffer, layerList, 0);
                         })
-                    .Schedule(Dependency);
+                    .WithBurst().Schedule(Dependency);
             }
- 
-          
         }
 
         private static void CopyInstructionsFromEntity(Entity source, Entity target,

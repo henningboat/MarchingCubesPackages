@@ -21,7 +21,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         public  int TotalChunkCount { get; private set; }
         private EntityArchetype _entityClusterArchetype;
 
-        private static readonly CGeometryFieldSettings Settings = new() {ClusterCounts = new int3(8, 8, 8)};
+        private static readonly CGeometryFieldSettings Settings = new() {ClusterCounts = new int3(4, 4, 4)};
 
         private List<GeometryLayerAssetsReference> _geometryLayerReferencesList = new();
         private EntityArchetype _geometryLayerArchetype;

@@ -16,6 +16,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         private SSetupGeometryLayers _setupLayer;
         private ComputeShader _computeShader;
         private ComputeShaderHandler _computeShaderHandler;
+        private SChunkPrepass _prepassSystem;
 
 
         protected override EntityArchetype GetArchetype()
@@ -31,6 +32,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override void OnCreate()
         {
             _setupLayer = World.GetOrCreateSystem<SSetupGeometryLayers>();
+            _prepassSystem = World.GetOrCreateSystem<SChunkPrepass>();
             _computeShaderHandler = new(DynamicCubeMarchingSettingsHolder.Instance.Compute);
             base.OnCreate();
         }
@@ -84,10 +86,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(layerReference).Value;
             var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(layerReference).Value;
 
-            //todo actually filter
-            var query = GetEntityQuery(typeof(CGeometryChunkGPUIndices), typeof(GeometryLayerAssetsReference));
-            query.SetSharedComponentFilter(layerReference);
-            var entitiesToUpdate = query.ToEntityArray(Allocator.Temp);
+            var entitiesToUpdate = _prepassSystem.GetDirtyChunks(layerReference);
 
             var chunksToTriangulate = new NativeList<float4>(Allocator.Temp);
 
@@ -98,10 +97,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
 
             _computeShaderHandler.TriangulizeChunks(chunksToTriangulate, gpuBuffers, gpuRenderer);
-
-
+            
             chunksToTriangulate.Dispose();
-            entitiesToUpdate.Dispose();
         }
     }
 }
