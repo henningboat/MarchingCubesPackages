@@ -147,7 +147,7 @@ namespace SIMDMath
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat clamp(PackedFloat val, float min, float max)
         {
-            return clamp(val, min, max);
+            return clamp(val, (PackedFloat)min, (PackedFloat)max);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

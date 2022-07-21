@@ -25,6 +25,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         public void TriangulizeChunks(NativeList<float4> chunksToTriangulate, GeometryLayerGPUBuffer gpuBuffer ,LayerMeshData layerMeshData)
         {
+            if (chunksToTriangulate.Length == 0)
+            {
+                return;
+            }
             {
                 SetupGeometryLayerProperties(_kernelResetTriangulation, gpuBuffer);
          
@@ -55,6 +59,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
         public void CollectRenderTriangles(NativeList<float4> chunksToRender, GeometryLayerGPUBuffer gpuBuffer,
             LayerMeshData layerMeshData)
         {
+            if (chunksToRender.Length == 0)
+            {
+                return;
+            }
+            
             layerMeshData.ChunkBasePositionIndex.SetData(chunksToRender.AsArray());
 
             SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
@@ -97,4 +106,4 @@ namespace henningboat.CubeMarching.Runtime.Systems
             block.SetBuffer("_IndexMap", gpuBuffer.IndexMapBuffer);
         }
     }
-} 
+}  
