@@ -44,7 +44,7 @@ namespace SIMDMath
         public PackedFloat z;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PackedFloat3(float4 packedX, float4 packedY, float4 packedZ)
+        public PackedFloat3(float8 packedX, float8 packedY, float8 packedZ)
         {
             x = new PackedFloat(packedX);
             y = new PackedFloat(packedY);
@@ -69,11 +69,11 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PackedFloat3(float3 a, float3 b, float3 c, float3 d)
+        public PackedFloat3(float3 a, float3 b, float3 c, float3 d, float3 e, float3 f, float3 g, float3 h)
         {
-            x = new PackedFloat(new float4(a.x, b.x, c.x, d.x));
-            y = new PackedFloat(new float4(a.y, b.y, c.y, d.y));
-            z = new PackedFloat(new float4(a.z, b.z, c.z, d.z));
+            x = new PackedFloat(new float8(a.x, b.x, c.x, d.x, e.x, f.x, g.x, h.x));
+            y = new PackedFloat(new float8(a.y, b.y, c.y, d.y, e.y, f.y, g.y, h.y));
+            z = new PackedFloat(new float8(a.z, b.z, c.z, d.z, e.z, f.z, g.z, h.z));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,13 +125,13 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool4 operator ==(PackedFloat3 a, PackedFloat3 b)
+        public static bool8 operator ==(PackedFloat3 a, PackedFloat3 b)
         {
             return (a.x == b.x) & (a.y == b.y) & (a.z == b.z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool4 operator !=(PackedFloat3 a, PackedFloat3 b)
+        public static bool8 operator !=(PackedFloat3 a, PackedFloat3 b)
         {
             return !(a == b);
         }
@@ -180,7 +180,7 @@ namespace SIMDMath
         public PackedFloat y;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PackedFloat2(float4 packedX, float4 packedY)
+        public PackedFloat2(float8 packedX, float8 packedY)
         {
             x = new PackedFloat(packedX);
             y = new PackedFloat(packedY);
@@ -191,13 +191,6 @@ namespace SIMDMath
         {
             this.x = x;
             this.y = y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PackedFloat2(float2 a, float2 b, float2 c, float2 d)
-        {
-            x = new PackedFloat(new float4(a.x, b.x, c.x, d.x));
-            y = new PackedFloat(new float4(a.y, b.y, c.y, d.y));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -223,18 +216,18 @@ namespace SIMDMath
         {
             return new(a.x - b, a.y - b);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool4 operator ==(PackedFloat2 a, PackedFloat2 b)
-        {
-            return (a.x == b.x) & (a.y == b.y);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool4 operator !=(PackedFloat2 a, PackedFloat2 b)
-        {
-            return !(a == b);
-        }
+        //
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public static bool operator ==(PackedFloat2 a, PackedFloat2 b)
+        // {
+        //     return (a.x == b.x) & (a.y == b.y);
+        // }
+        //
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public static bool8 operator !=(PackedFloat2 a, PackedFloat2 b)
+        // {
+        //     return !(a == b);
+        // }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

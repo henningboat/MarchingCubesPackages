@@ -6,33 +6,34 @@ namespace SIMDMath
     public static class SimdMath
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat abs(PackedFloat a)
+        public static PackedFloat abs(PackedFloat val)
         {
-            return new(math.abs(a.PackedValues));
+            return new(math.abs(val.PackedValues.a), math.abs(val.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat frac(PackedFloat a)
+        public static PackedFloat frac(PackedFloat val)
         {
-            return new(math.frac(a.PackedValues));
+            return new(math.frac(val.PackedValues.a), math.frac(val.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat3 frac(PackedFloat3 a)
+        public static PackedFloat3 frac(PackedFloat3 val)
         {
-            return new(math.frac(a.x.PackedValues), math.frac(a.y.PackedValues), math.frac(a.z.PackedValues));
+            return new(frac(val.x), frac(val.y), frac(val.z));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat3 abs(PackedFloat3 a)
         {
-            return new(math.abs(a.x.PackedValues), math.abs(a.y.PackedValues), math.abs(a.z.PackedValues));
+            return new(abs(a.x), abs(a.y), abs(a.z));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat min(PackedFloat a, PackedFloat b)
+        public static PackedFloat min(PackedFloat lhs, PackedFloat rhs)
         {
-            return new(math.min(a.PackedValues, b.PackedValues));
+            return new(math.min(lhs.PackedValues.a, rhs.PackedValues.a),
+                math.min(lhs.PackedValues.b, rhs.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -42,22 +43,22 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat3 min(PackedFloat3 a, PackedFloat b)
+        public static PackedFloat3 min(PackedFloat3 a, PackedFloat rhs)
         {
-            return new(min(a.x, b), min(a.y, b), min(a.z, b));
+            return new(min(a.x, rhs), min(a.y, rhs), min(a.z, rhs));
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PackedFloat max(PackedFloat lhs, PackedFloat rhs)
+        {
+            return new(math.max(lhs.PackedValues.a, rhs.PackedValues.a),
+                math.max(lhs.PackedValues.b, rhs.PackedValues.b));
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat max(PackedFloat a, PackedFloat b)
+        public static PackedFloat3 max(PackedFloat3 a, PackedFloat rhs)
         {
-            return new(math.max(a.PackedValues, b.PackedValues));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat3 max(PackedFloat3 a, PackedFloat b)
-        {
-            return new(max(a.x, b), max(a.y, b), max(a.z, b));
+            return new(max(a.x, rhs), max(a.y, rhs), max(a.z, rhs));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,18 +68,17 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat floor(PackedFloat a)
+        public static PackedFloat floor(PackedFloat val)
         {
-            return new PackedFloat(math.floor(a.PackedValues));
+            return new PackedFloat(math.floor(val.PackedValues.a), math.floor(val.PackedValues.b));
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat ceil(PackedFloat a)
         {
-            return new PackedFloat(math.ceil(a.PackedValues));
+            return new PackedFloat(math.ceil(a.PackedValues.a), math.ceil(a.PackedValues.b));
         }
-        
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat3 floor(PackedFloat3 a)
         {
@@ -90,12 +90,12 @@ namespace SIMDMath
         {
             return new PackedFloat3(ceil(a.x),ceil(a.y),ceil(a.z));
         }
-        
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat lerp(PackedFloat a, PackedFloat b, PackedFloat t)
+        public static PackedFloat lerp(PackedFloat lhs, PackedFloat rhs, PackedFloat t)
         {
-            return new(math.lerp(a.PackedValues, b.PackedValues, t.PackedValues));
+            return new(math.lerp(lhs.PackedValues.a, rhs.PackedValues.a, t.PackedValues.a),
+                                math.lerp(lhs.PackedValues.b, rhs.PackedValues.b, t.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,10 +118,11 @@ namespace SIMDMath
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat sqrt(PackedFloat a)
+        public static PackedFloat sqrt(PackedFloat val)
         {
-            a.PackedValues = math.sqrt(a.PackedValues);
-            return a;
+            val.PackedValues.a = math.sqrt(val.PackedValues.a);
+            val.PackedValues.b = math.sqrt(val.PackedValues.b);
+            return val;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,15 +138,16 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat clamp(PackedFloat a, PackedFloat min, PackedFloat max)
+        public static PackedFloat clamp(PackedFloat val, PackedFloat min, PackedFloat max)
         {
-            return new(math.clamp(a.PackedValues, min.PackedValues, max.PackedValues));
+            return new(math.clamp(val.PackedValues.a, min.PackedValues.a, max.PackedValues.a),
+                math.clamp(val.PackedValues.b, min.PackedValues.b, max.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat clamp(PackedFloat a, float min, float max)
+        public static PackedFloat clamp(PackedFloat val, float min, float max)
         {
-            return new(math.clamp(a.PackedValues, min, max));
+            return clamp(val, min, max);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -163,16 +165,15 @@ namespace SIMDMath
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat acos(PackedFloat value)
         {
-            return new() {PackedValues = math.acos(value.PackedValues)};
+            return new(math.acos(value.PackedValues.a), math.acos(value.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat sin(PackedFloat value)
+        public static PackedFloat sin(PackedFloat val)
         {
-            return new() {PackedValues = math.sin(value.PackedValues)};
+            return new(math.sin(val.PackedValues.a), math.sin(val.PackedValues.b));
         }
-        
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat3 sin(PackedFloat3 value)
         {
@@ -180,35 +181,39 @@ namespace SIMDMath
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat cos(PackedFloat value)
+        public static PackedFloat cos(PackedFloat val)
         {
-            return new() {PackedValues = math.cos(value.PackedValues)};
+            return new(math.cos(val.PackedValues.a), math.cos(val.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat atan(PackedFloat value)
+        public static PackedFloat atan(PackedFloat val)
         {
-            return new() {PackedValues = math.atan(value.PackedValues)};
+            return new(math.atan(val.PackedValues.a), math.atan(val.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static PackedFloat pow(PackedFloat x, PackedFloat y)
         {
-            return new() {PackedValues = math.pow(x.PackedValues, y.PackedValues)};
+            return new(math.pow(x.PackedValues.a, y.PackedValues.a),math.pow(x.PackedValues.b, y.PackedValues.b));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static PackedFloat log(PackedFloat x)
+        public static PackedFloat log(PackedFloat val)
         {
-            return new() {PackedValues = math.log(x.PackedValues)};
+            return new(math.log(val.PackedValues.a), math.log(val.PackedValues.b));;
         }
 
+        public static PackedFloat mod(PackedFloat val, PackedFloat periode)
+        {
+            return new PackedFloat(
+                math.modf(val.PackedValues.a / periode.PackedValues.a, out float4 _) * periode.PackedValues.a,
+                math.modf(val.PackedValues.b / periode.PackedValues.b, out float4 _) * periode.PackedValues.b);
+        }
+        
         public static PackedFloat3 mod(PackedFloat3 a, PackedFloat3 periode)
         {
-            a.x.PackedValues = math.modf(a.x.PackedValues/periode.x.PackedValues,out float4 _)*periode.x.PackedValues;
-            a.y.PackedValues = math.modf(a.y.PackedValues/periode.y.PackedValues,out float4 _)*periode.y.PackedValues;
-            a.z.PackedValues = math.modf(a.z.PackedValues/periode.z.PackedValues,out float4 _)*periode.z.PackedValues;
-            return a;
+            return new PackedFloat3(mod(a.x, periode.x), mod(a.y, periode.y), mod(a.z, periode.z));
         }
     }
 }
