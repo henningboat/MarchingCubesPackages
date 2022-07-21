@@ -79,15 +79,13 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
                     {
                         var index = chunk.IndexInIndexMap;
-                        var a = prepassDistanceField[index * 2].SurfaceDistance;
-                        var b = prepassDistanceField[index * 2 + 1].SurfaceDistance;
+                        var a = prepassDistanceField[index].SurfaceDistance;
 
                         const float maxDistance = Constants.chunkLength;
 
-                        var aInside = math.abs(a.PackedValues) < maxDistance;
-                        var bInside = math.abs(b.PackedValues) < maxDistance;
+                        var aInside = SimdMath.abs(a) < maxDistance;
 
-                        var hasContent = math.any(aInside | bInside);
+                        var hasContent = SimdMath.any(aInside);
 
                         if (hasContent || chunkState.HasContent)
                             dirtyListWriter.AddNoResize(entity);
@@ -106,10 +104,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var contentHash = EntityManager.GetBuffer<CPrepassContentHash>(entity);
 
             //we want 8 values per chunk
-            distanceFieldBuffer.ResizeUninitialized(chunkCount * 2);
-            distanceFieldBuffer.Length = chunkCount * 2;
-            positionBuffer.ResizeUninitialized(chunkCount * 2);
-            positionBuffer.Length = chunkCount * 2;
+            distanceFieldBuffer.ResizeUninitialized(chunkCount);
+            distanceFieldBuffer.Length = chunkCount;
+            positionBuffer.ResizeUninitialized(chunkCount);
+            positionBuffer.Length = chunkCount;
 
             contentHash.Length = chunkCount;
             
@@ -123,9 +121,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 new float3(0.25f, 0.25f, 0.25f),
                 new float3(0.75f, 0.25f, 0.25f),
                 new float3(0.25f, 0.75f, 0.25f),
-                new float3(0.75f, 0.75f, 0.25f)) * Constants.chunkLength;
-
-            var offsetsB = new PackedFloat3(
+                new float3(0.75f, 0.75f, 0.25f),
                 new float3(0.25f, 0.25f, 0.75f),
                 new float3(0.75f, 0.25f, 0.75f),
                 new float3(0.25f, 0.75f, 0.75f),
@@ -135,10 +131,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 var chunk = chunksOfLayer[chunkIndex];
 
-                positionBuffer[chunkIndex * 2 + 0] = new CPrepassPackedWorldPosition
+                positionBuffer[chunkIndex] = new CPrepassPackedWorldPosition
                     {Value = chunk.PositionWS + offsetsA};
-                positionBuffer[chunkIndex * 2 + 1] = new CPrepassPackedWorldPosition
-                    {Value = chunk.PositionWS + offsetsB};
             }
 
             var nativeList = new NativeList<Entity>(Allocator.Persistent);

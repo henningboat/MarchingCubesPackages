@@ -215,5 +215,16 @@ namespace SIMDMath
         {
             return new PackedFloat3(mod(a.x, periode.x), mod(a.y, periode.y), mod(a.z, periode.z));
         }
+
+        public static bool any(bool8 aInside)
+        {
+            return math.any(aInside.a) | math.any(aInside.b);
+        }
+
+        public static PackedFloat @select(PackedFloat a, PackedFloat b, bool8 s)
+        {
+            return new PackedFloat(math.@select(a.PackedValues.a,b.PackedValues.a,s.a),
+                                        math.@select(a.PackedValues.b,b.PackedValues.b,s.b));
+        }
     }
 }

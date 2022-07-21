@@ -53,25 +53,25 @@ namespace henningboat.CubeMarching.Runtime.TerrainChunkSystem
 
         private static PackedDistanceFieldData ReplaceTerrainColor(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
-            var replaceTerrainMaterial = a.SurfaceDistance.PackedValues > 0;
+            var replaceTerrainMaterial = a.SurfaceDistance > 0;
             return new PackedDistanceFieldData {SurfaceDistance = b.SurfaceDistance, TerrainMaterial = PackedTerrainMaterial.Select(b.TerrainMaterial, a.TerrainMaterial, replaceTerrainMaterial)};
         }
 
         public static PackedDistanceFieldData CombineTerrainMin(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
-            var bIsSmaller = a.SurfaceDistance.PackedValues > b.SurfaceDistance.PackedValues;
-            var surfaceDistance = math.min(a.SurfaceDistance.PackedValues, b.SurfaceDistance.PackedValues);
+            var bIsSmaller = a.SurfaceDistance > b.SurfaceDistance;
+            var surfaceDistance = min(a.SurfaceDistance, b.SurfaceDistance);
             var combinedMaterial = PackedTerrainMaterial.Select(a.TerrainMaterial, b.TerrainMaterial, bIsSmaller);
 
-            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), combinedMaterial);
+            return new PackedDistanceFieldData(surfaceDistance, combinedMaterial);
         }
 
         public static PackedDistanceFieldData CombineTerrainMax(PackedDistanceFieldData a, PackedDistanceFieldData b)
         {
-            var bIsBigger = a.SurfaceDistance.PackedValues < b.SurfaceDistance.PackedValues;
-            var surfaceDistance = math.select(a.SurfaceDistance.PackedValues, b.SurfaceDistance.PackedValues, bIsBigger);
+            var bIsBigger = a.SurfaceDistance < b.SurfaceDistance;
+            var surfaceDistance = select(a.SurfaceDistance, b.SurfaceDistance, bIsBigger);
             
-            return new PackedDistanceFieldData(new PackedFloat(surfaceDistance), a.TerrainMaterial);
+            return new PackedDistanceFieldData(surfaceDistance, a.TerrainMaterial);
         }
 
         public static PackedDistanceFieldData CombineTerrainAdd(PackedDistanceFieldData a, PackedDistanceFieldData b)

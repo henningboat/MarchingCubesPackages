@@ -125,8 +125,8 @@ float4 interpolateColors(float4 v1, float4 v2, float t)
 float4 GetPointPosition(uint3 position)
 {
     uint index = DistanceFieldIndexFromPositionWS(position);
-    
-    float surfaceDistance = _DistanceField[index / 4].surfaceDistance[index % 4];
+
+    float surfaceDistance = _DistanceField[index];
     
     if(any(position<1||position> GetChunkCounts()*k_ChunkLength-1))
     {
@@ -318,7 +318,7 @@ void GetVertexDataFromPackedVertex(PackedTriangle clusterTriangle, int vertexInd
 
     vertexPosition = interpolateVerts(cubeCorners[a0], cubeCorners[b0], tA);
     normal = interpolateNormals(cubeNormals[a0], cubeNormals[b0], tA);
-
+    
     color =0;//= interpolateMaterial(cubeVertexColors[a0], cubeVertexColors[b0], tA);
     occlusion = 0;//lerp(aoCube[a0].x, aoCube[b0].x, tA);
 }

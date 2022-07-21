@@ -46,18 +46,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 results.ResizeUninitialized(positions.Length);
 
                 //todo refactor and make this nice
-                var mortonCoordinates = previousPositions;
-                postionsWs = new NativeArray<PackedFloat3>(mortonCoordinates.Length * 2, Allocator.Temp);
+                NativeList<MortonCoordinate> mortonCoordinates = previousPositions;
+                postionsWs = new NativeArray<PackedFloat3>(mortonCoordinates.Length, Allocator.Temp);
                 for (var i = 0; i < mortonCoordinates.Length; i++)
                 {
                     var mortonCoordinate = mortonCoordinates[i];
-                    postionsWs[i * 2 + 0] = layer.GetMortonCellChildPositions(mortonCoordinate, false) +
-                                             chunkParameters.PositionWS;
-                    postionsWs[i * 2 + 1] = layer.GetMortonCellChildPositions(mortonCoordinate, true) +
-                                             chunkParameters.PositionWS;
+                    postionsWs[i] = layer.GetMortonCellChildPositions(mortonCoordinate) +
+                                    chunkParameters.PositionWS;
                 }
 
-                
                 distanceFieldResolver = new GeometryInstructionIterator(previousPositions, instructions, layer,
                     chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity, postionsWs, false);
 
@@ -70,19 +67,19 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 {
                     var parentPosition = previousPositions[parentCellIndex];
 
-                    ResolveChildCells(false, distanceFieldData);
-                    ResolveChildCells(true, distanceFieldData);
+                    ResolveChildCells(distanceFieldData);
 
-                    void ResolveChildCells(bool secondRow,
-                        DynamicBuffer<PackedDistanceFieldData> buffer)
+                    void ResolveChildCells(DynamicBuffer<PackedDistanceFieldData> buffer)
                     {
                         var distance = distanceFieldResolver
-                            ._terrainDataBuffer[parentCellIndex * 2 + (secondRow ? 1 : 0)].SurfaceDistance;
-                        var distanceInRange = SimdMath.abs(distance).PackedValues < layer.CellLength * 1.25F;
+                            ._terrainDataBuffer[parentCellIndex].SurfaceDistance;
+                        var distanceInRange = SimdMath.abs(distance) < layer.CellLength * 1.25F;
 
-                        for (uint i = 0; i < 4; i++)
+                        distanceInRange = new bool8(true,true);
+                        
+                        for (uint i = 0; i < 8; i++)
                         {
-                            var childMortonNumber = layer.GetChildCell(parentPosition, secondRow ? i + 4 : i);
+                            var childMortonNumber = layer.GetChildCell(parentPosition, i);
                             if (distanceInRange[(int) i])
                                 newPositions.Add(childMortonNumber);
                             else
@@ -104,19 +101,17 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
 
 
-            results.ResizeUninitialized(previousPositions.Length * 2);
+            results.ResizeUninitialized(previousPositions.Length);
             
-            postionsWs = new NativeArray<PackedFloat3>(previousPositions.Length * 2, Allocator.Temp);
+            postionsWs = new NativeArray<PackedFloat3>(previousPositions.Length, Allocator.Temp);
             for (var i = 0; i < previousPositions.Length; i++)
             {
                 var mortonCoordinate = previousPositions[i];
-                postionsWs[i * 2 + 0] = layer.GetMortonCellChildPositions(mortonCoordinate, false) +
-                                        chunkParameters.PositionWS;
-                postionsWs[i * 2 + 1] = layer.GetMortonCellChildPositions(mortonCoordinate, true) +
-                                        chunkParameters.PositionWS;
+                postionsWs[i] = layer.GetMortonCellChildPositions(mortonCoordinate) +
+                                chunkParameters.PositionWS;
             }
 
-            
+
             distanceFieldResolver =
                 new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity, postionsWs, false);
             distanceFieldResolver.ProcessAllInstructions();
@@ -126,11 +121,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 var parentPosition = previousPositions[parentCellIndex];
 
-                var index = parentPosition.MortonNumber / 4;
-                distanceFieldData[(int) index + 0] =
-                    distanceFieldResolver._terrainDataBuffer[parentCellIndex * 2 + 0];
-                distanceFieldData[(int) index + 1] =
-                    distanceFieldResolver._terrainDataBuffer[parentCellIndex * 2 + 1];
+                var index = parentPosition.MortonNumber / 8;
+                distanceFieldData[(int) index] =
+                    distanceFieldResolver._terrainDataBuffer[parentCellIndex];
             }
 
 

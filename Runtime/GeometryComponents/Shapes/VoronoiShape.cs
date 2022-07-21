@@ -56,16 +56,15 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
             for (var j = -1; j <= 1; j++)
             for (var i = -1; i <= 1; i++)
             {
-                var b = new PackedFloat3(new PackedFloat(i), new PackedFloat(j), new PackedFloat(k));
+                var b = new PackedFloat3(new PackedFloat((float) i), new PackedFloat((float)j), new PackedFloat((float)k));
                 var r = b - f + Hash(p + b);
                 //var d = dot(r, r);
                 var d = length(r);
 
-                var newDistanceIsSmallest = d.PackedValues < res.PackedValues;
+                var newDistanceIsSmallest = d < res;
 
-                res.PackedValues = math.select(res.PackedValues, d.PackedValues, newDistanceIsSmallest);
-                res2.PackedValues = math.select(min(res2, d).PackedValues, res2.PackedValues,
-                    newDistanceIsSmallest);
+                res = select(res, d, newDistanceIsSmallest);
+                res2 = select(min(res2, d), res2, newDistanceIsSmallest);
             }
 
             return -(res2 - res);

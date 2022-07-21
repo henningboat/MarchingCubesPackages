@@ -267,7 +267,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             var positionWSValue = _postionStack[_postionsWS.Length * geometryInstruction.CombinerDepth + i];
 
             //todo add SIMD version
-            for (var j = 0; j < 4; j++)
+            for (var j = 0; j < 8; j++)
             {
                 var positionWSSlice = new float4(positionWSValue.x.PackedValues[j], positionWSValue.y.PackedValues[j],
                     positionWSValue.z.PackedValues[j], 1);

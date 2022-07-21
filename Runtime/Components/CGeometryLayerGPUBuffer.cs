@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.Components
 
         public GeometryLayerGPUBuffer(int3 clusterCounts)
         {
-            DistanceFieldBuffer = new ComputeBuffer(clusterCounts.Volume() * Constants.chunkVolume / 4, 4 * 4 * 2,
+            DistanceFieldBuffer = new ComputeBuffer(clusterCounts.Volume() * Constants.chunkVolume, 4,
                 ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
             IndexMapBuffer = new ComputeBuffer(clusterCounts.Volume(), 4, ComputeBufferType.Structured,
                 ComputeBufferMode.SubUpdates); 

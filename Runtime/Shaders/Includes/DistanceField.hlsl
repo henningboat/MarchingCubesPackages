@@ -9,8 +9,10 @@ struct MaterialData4{
 };
 
 struct PackedDistanceFieldData4{
-    float4 surfaceDistance;
-    MaterialData4 terrainMaterial;
+    float4 surfaceDistanceA;
+    float4 surfaceDistanceB;
+    MaterialData4 terrainMaterialA;
+    MaterialData4 terrainMaterialB;
 };
 
 int indexFromCoordAndGridSize(int3 position, int3 gridSize)
@@ -28,7 +30,7 @@ uint3 GetChunkCounts()
 }
 
 StructuredBuffer<int> _IndexMap;
-StructuredBuffer<PackedDistanceFieldData4> _DistanceField;
+StructuredBuffer<float> _DistanceField;
 StructuredBuffer<float4> _ChunkPositions;
 
 uint GetChunkIndexFromPosition(float3 position)

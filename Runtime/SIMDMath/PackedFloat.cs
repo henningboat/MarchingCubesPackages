@@ -51,6 +51,18 @@ namespace SIMDMath
             return new PackedFloat(a.PackedValues / b.PackedValues);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool8 operator >(PackedFloat a, PackedFloat b)
+        {
+            return new bool8(a.PackedValues.a > b.PackedValues.a,a.PackedValues.b > b.PackedValues.b);
+        }    
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool8 operator <(PackedFloat a, PackedFloat b)
+        {
+            return new bool8(a.PackedValues.a < b.PackedValues.a,a.PackedValues.b < b.PackedValues.b);
+        }
+
         public bool Equals(PackedFloat other)
         {
             return PackedValues.Equals(other.PackedValues);
@@ -105,6 +117,12 @@ namespace SIMDMath
         public static implicit operator PackedFloat(float a)
         {
             return new PackedFloat(a);
+        }
+
+        public override string ToString()
+        {
+            return
+                $"{PackedValues.a.x} | {PackedValues.a.y} | {PackedValues.a.z} | {PackedValues.a.w} | {PackedValues.b.x} | {PackedValues.b.y} | {PackedValues.b.z} | {PackedValues.b.w}";
         }
     }
 }

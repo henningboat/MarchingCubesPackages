@@ -12,13 +12,11 @@ namespace henningboat.CubeMarching.Runtime.Utils
         private readonly uint _childCellSize;
         private readonly uint _cellLength;
 
-        private static readonly PackedFloat3 childOffsetsXY = new PackedFloat3(
+        private static readonly PackedFloat3 childOffsets = new(
             new float3(0.0f, 0.0f, 0),
             new float3(0.5f, 0.0f, 0),
             new float3(0.0f, 0.5f, 0),
-            new float3(0.5f, 0.5f, 0));
-        
-        private static readonly PackedFloat3 childOffsetsXYZ = new PackedFloat3(
+            new float3(0.5f, 0.5f, 0),
             new float3(0.0f, 0.0f, 0.5f),
             new float3(0.5f, 0.0f, 0.5f),
             new float3(0.0f, 0.5f, 0.5f),
@@ -34,8 +32,8 @@ namespace henningboat.CubeMarching.Runtime.Utils
 
             CellLength = cellLength;
 
-            CellPackedBufferSize = CellLength * CellLength * CellLength / 4;
-            _childCellSize = CellPackedBufferSize / 2;
+            CellPackedBufferSize = CellLength * CellLength * CellLength / 8;
+            _childCellSize = CellPackedBufferSize;
         }
 
         public uint CellLength { get; set; }
@@ -46,19 +44,10 @@ namespace henningboat.CubeMarching.Runtime.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PackedFloat3 GetMortonCellChildPositions(MortonCoordinate mortonCoordinate, bool secondRow)
+        public PackedFloat3 GetMortonCellChildPositions(MortonCoordinate mortonCoordinate)
         {
             PackedFloat3 childPositions = mortonCoordinate.GetPositionFloat3();
-
-            if (secondRow)
-            {
-                childPositions += childOffsetsXYZ * _cellLength;
-            }
-            else
-            {
-                childPositions += childOffsetsXY * _cellLength;
-            }
-
+            childPositions += childOffsets * _cellLength;
             return childPositions;
         }
 

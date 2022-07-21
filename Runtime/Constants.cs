@@ -12,7 +12,7 @@
         public const int clusterLength = chunkLength * 8;
         public const int clusterVolume = clusterLength * clusterLength * clusterLength;
         public const int chunkLengthPerCluster = 8;
-        public const int PackedCapacity = 4;
+        public const int PackedCapacity = 8;
         public const int maxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
         public const int maxTrianglesPerChunk = chunkVolume * 5;
         public const int DistanceFieldDataInBytes = 2*4; 

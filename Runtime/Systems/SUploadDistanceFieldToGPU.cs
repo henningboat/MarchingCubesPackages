@@ -2,6 +2,7 @@
 using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.GeometrySystems;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
+using SIMDMath;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -65,7 +66,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var writableIndexMap = gpuBuffers.IndexMapBuffer.BeginWrite<int>(0, gpuBuffers.IndexMapBuffer.count);
             
             var writableBuffer =
-                gpuBuffers.DistanceFieldBuffer.BeginWrite<PackedDistanceFieldData>(0,
+                gpuBuffers.DistanceFieldBuffer.BeginWrite<float>(0,
                     gpuBuffers.DistanceFieldBuffer.count);
             
             var jobHandle = Entities.WithSharedComponentFilter(geometryLayerReference).ForEach(
@@ -75,15 +76,17 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         writableIndexMap[chunk.IndexInIndexMap] = chunkGPUIndices.DistanceFieldBufferOffset;
             
                         var packedChunkLength = Constants.chunkVolume / Constants.PackedCapacity;
-                        writableBuffer.Slice(chunkGPUIndices.DistanceFieldBufferOffset * packedChunkLength,
-                                packedChunkLength)
-                            .CopyFrom(distanceFieldBuffer.AsNativeArray());
+                        var baseOffset = Constants.chunkVolume * chunkGPUIndices.DistanceFieldBufferOffset;
+                        for (int i = 0; i < Constants.chunkVolume; i++)
+                        {
+                            writableBuffer[i + baseOffset] = distanceFieldBuffer[i / 8].SurfaceDistance.PackedValues[i % 8];
+                        }
                     }).WithBurst().WithNativeDisableParallelForRestriction(writableBuffer)
                 .WithNativeDisableParallelForRestriction(writableIndexMap)
                 .ScheduleParallel(Dependency);
             jobHandle.Complete();
             
-            gpuBuffers.DistanceFieldBuffer.EndWrite<PackedDistanceFieldData>(gpuBuffers.DistanceFieldBuffer.count);
+            gpuBuffers.DistanceFieldBuffer.EndWrite<float>(gpuBuffers.DistanceFieldBuffer.count);
             gpuBuffers.IndexMapBuffer.EndWrite<int>(gpuBuffers.IndexMapBuffer.count);
         }
     }
