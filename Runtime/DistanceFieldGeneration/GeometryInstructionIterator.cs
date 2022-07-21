@@ -3,9 +3,11 @@ using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.TerrainChunkSystem;
 using henningboat.CubeMarching.Runtime.Utils;
 using SIMDMath;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 using static Unity.Mathematics.math;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
@@ -36,6 +38,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         private BufferFromEntity<PackedDistanceFieldData> _packedDistanceFieldDataHandle;
         private readonly Entity _selfEntityPlaceholder;
 
+        private bool _recordContentHash;
+        private NativeArray<GeometryInstructionHash> _contentHashBuffer;
+
         #endregion
 
         #region Constructors
@@ -43,8 +48,19 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         public GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
             DynamicBuffer<GeometryInstruction> combinerInstructions,
             MortonCellLayer mortonCellLayer, PackedFloat3 chunkBasePosition,
-            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder, NativeArray<PackedFloat3> positionWS)
+            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder, NativeArray<PackedFloat3> positionWS, bool recordContentHash)
         {
+            _recordContentHash = recordContentHash;
+
+            if (recordContentHash)
+            {
+                _contentHashBuffer = new NativeArray<GeometryInstructionHash>(positionWS.Length / 2, Allocator.Temp);
+            }
+            else
+            {
+                _contentHashBuffer = default;
+            }
+            
             _packedDistanceFieldDataHandle = packedDistanceFieldDataHandle;
             _selfEntityPlaceholder = selfEntityPlaceholder;
             _mortonCoordinates = mortonCoordinates;
@@ -76,9 +92,9 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         #region Public methods
 
-        public void CalculateAllTerrainData()
+        public void ProcessAllInstructions()
         {
-            for (var i = 0; i < _combinerInstructions.Length; i++) ProcessTerrainData(i);
+            for (var i = 0; i < _combinerInstructions.Length; i++) ProcessInstruction(i);
 
             //In case we did not write any data to the terrain, we fill it with a dummy value
             if (_hasWrittenToCurrentCombiner[0] == false)
@@ -99,7 +115,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         #region Private methods
 
-        public void ProcessTerrainData(int instructionIndex)
+        public void ProcessInstruction(int instructionIndex)
         {
             var geometryInstruction = _combinerInstructions[instructionIndex];
 

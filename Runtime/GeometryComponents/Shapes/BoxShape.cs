@@ -16,7 +16,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
         public void WriteShape(GeometryInstructionIterator iterator, in BinaryDataStorage assetData,
             in GeometryInstruction instruction)
         {
-            
             for (int i = 0; i < iterator.BufferLength; i++)
             {
                 var positionOS = iterator.CalculatePositionWSFromInstruction(instruction, i);
@@ -27,8 +26,6 @@ namespace henningboat.CubeMarching.Runtime.GeometryComponents.Shapes
                 
                 iterator.WriteDistanceField(i, surfaceDistance, instruction);
             }
-            
-            
         }
 
         public ShapeType Type => ShapeType.Box;

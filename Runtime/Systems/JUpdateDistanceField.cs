@@ -59,11 +59,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 
                 distanceFieldResolver = new GeometryInstructionIterator(previousPositions, instructions, layer,
-                    chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity, postionsWs);
+                    chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity, entity, postionsWs, false);
 
                 postionsWs.Dispose();
                 
-                distanceFieldResolver.CalculateAllTerrainData();
+                distanceFieldResolver.ProcessAllInstructions();
 
 
                 for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)
@@ -118,8 +118,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             
             distanceFieldResolver =
-                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity, postionsWs);
-            distanceFieldResolver.CalculateAllTerrainData();
+                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity, postionsWs, false);
+            distanceFieldResolver.ProcessAllInstructions();
 
 
             for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)

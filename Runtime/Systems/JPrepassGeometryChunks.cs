@@ -24,7 +24,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override EntityArchetype GetArchetype()
         {
             return EntityManager.CreateArchetype(typeof(CGeometryGraphChunkPrepassTag), typeof(PackedDistanceFieldData),
-                typeof(CPrepassPackedWorldPosition));
+                typeof(CPrepassPackedWorldPosition), typeof(CPrepassContentHash));
         }
 
         protected override bool RunSystemForLayer(GeometryLayerAsset layer)
@@ -55,6 +55,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var instructionsFromEntity = GetBufferFromEntity<GeometryInstruction>(true);
             var prepassDistanceField =
                 EntityManager.GetBuffer<PackedDistanceFieldData>(singleton, true).AsNativeArray();
+            var prepassHashData =
+                EntityManager.GetBuffer<CPrepassContentHash>(singleton, true).AsNativeArray();
 
             var job = new JUpdatePrepassDistanceField
             {
@@ -63,7 +65,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 MainEntity = singleton,
                 GeometryLayerReference = EntityManager.GetChunkComponentData<CGeometryLayerReference>(singleton),
                 PositionWS = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(singleton),
-                ResultBuffer = prepassDistanceField
+                ResultBuffer = prepassDistanceField,
+                ContentHashPerChunk = prepassHashData,
             };
             Dependency = job.Schedule(Dependency);
 
@@ -100,6 +103,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var chunkCount = settings.ClusterCounts.Volume();
             var distanceFieldBuffer = EntityManager.GetBuffer<PackedDistanceFieldData>(entity);
             var positionBuffer = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(entity);
+            var contentHash = EntityManager.GetBuffer<CPrepassContentHash>(entity);
 
             //we want 8 values per chunk
             distanceFieldBuffer.ResizeUninitialized(chunkCount * 2);
@@ -107,6 +111,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             positionBuffer.ResizeUninitialized(chunkCount * 2);
             positionBuffer.Length = chunkCount * 2;
 
+            contentHash.Length = chunkCount;
+            
             var geometryLayerAssetsReference = new GeometryLayerAssetsReference(layer);
 
             var query = GetEntityQuery(typeof(CGeometryChunk), typeof(GeometryLayerAssetsReference));
@@ -146,6 +152,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
             public PackedFloat3 Value;
         }
 
+        public struct CPrepassContentHash : IBufferElementData
+        {
+            public GeometryInstructionHash Value;
+        }
+
         public struct CGeometryGraphChunkPrepassTag : IComponentData
         {
         }
@@ -163,6 +174,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             public Entity MainEntity;
             public CGeometryLayerReference GeometryLayerReference;
             public NativeArray<PackedDistanceFieldData> ResultBuffer;
+            public NativeArray<CPrepassContentHash> ContentHashPerChunk;
 
             public void Execute()
             {
@@ -172,9 +184,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 var iterator = new GeometryInstructionIterator(default, instructions, default, default,
                     GetPackedDistanceFieldBufferFromEntity, default,
-                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray());
+                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true);
 
-                iterator.CalculateAllTerrainData();
+                iterator.ProcessAllInstructions();
 
                 ResultBuffer.Slice(0, ResultBuffer.Length)
                     .CopyFrom(iterator._terrainDataBuffer.Slice(0, ResultBuffer.Length));
