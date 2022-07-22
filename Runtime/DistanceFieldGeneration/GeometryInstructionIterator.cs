@@ -39,7 +39,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         private readonly Entity _selfEntityPlaceholder;
 
         private bool _recordContentHash;
-        private NativeArray<GeometryInstructionHash> _contentHashBuffer;
+        public NativeArray<GeometryInstructionHash> _contentHashBuffer;
 
         #endregion
 
@@ -54,7 +54,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             if (recordContentHash)
             {
-                _contentHashBuffer = new NativeArray<GeometryInstructionHash>(positionWS.Length / 2, Allocator.Temp);
+                _contentHashBuffer = new NativeArray<GeometryInstructionHash>(positionWS.Length, Allocator.Temp);
             }
             else
             {
@@ -109,6 +109,11 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             _postionStack.Dispose();
             _hasWrittenToCurrentCombiner.Dispose();
             _postionsWS.Dispose();
+
+            if (_recordContentHash)
+            {
+                _contentHashBuffer.Dispose();
+            }
         }
 
         #endregion
@@ -255,6 +260,13 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 geometryInstruction.CombinerBlendOperation, geometryInstruction.CombinerBlendFactor,
                 distanceFieldData, existingData);
             _terrainDataBuffer[indexInGeometryField] = combinedResult;
+
+            if (_recordContentHash)
+            {
+                var geometryInstructionHash = _contentHashBuffer[i];
+                geometryInstructionHash.Append(ref geometryInstruction.GeometryInstructionHash);
+                _contentHashBuffer[i] = geometryInstructionHash;
+            }
         }
 
         public PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i)

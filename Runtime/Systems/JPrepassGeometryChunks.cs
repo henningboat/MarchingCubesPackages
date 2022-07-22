@@ -20,6 +20,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
     public partial class SChunkPrepass : SGeometrySystem
     {
         private Dictionary<GeometryLayerAssetsReference, NativeList<Entity>> _dirtyChunksPerLayer;
+        private Dictionary<GeometryLayerAssetsReference, NativeList<Entity>> _chunksWithContent;
 
         protected override EntityArchetype GetArchetype()
         {
@@ -35,14 +36,17 @@ namespace henningboat.CubeMarching.Runtime.Systems
         protected override void OnCreate()
         {
             _dirtyChunksPerLayer = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
+            _chunksWithContent = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
             base.OnCreate();
         }
 
         protected override void OnDestroy()
         {
             foreach (var nativeList in _dirtyChunksPerLayer.Values) nativeList.Dispose();
+            foreach (var nativeList in _chunksWithContent.Values) nativeList.Dispose();
 
             _dirtyChunksPerLayer = null;
+            _chunksWithContent = null;
             
             base.OnDestroy();
         }
@@ -66,7 +70,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 GeometryLayerReference = EntityManager.GetChunkComponentData<CGeometryLayerReference>(singleton),
                 PositionWS = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(singleton),
                 ResultBuffer = prepassDistanceField,
-                ContentHashPerChunk = prepassHashData,
+                ContentHashPerChunk = prepassHashData.Reinterpret<GeometryInstructionHash>(),
             };
             Dependency = job.Schedule(Dependency);
 
@@ -74,6 +78,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
             dirtyList.Clear();
             var dirtyListWriter = dirtyList.AsParallelWriter();
 
+            var contentList = _chunksWithContent[geometryLayerReference];
+            contentList.Clear();
+            var contentListWriter = contentList.AsParallelWriter();
 
             Dependency = Entities.ForEach(
                     (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
@@ -88,11 +95,21 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         var hasContent = SimdMath.any(aInside);
 
                         if (hasContent || chunkState.HasContent)
-                            dirtyListWriter.AddNoResize(entity);
+                        {
+                           contentListWriter.AddNoResize(entity);
+                        }
 
                         chunkState.HasContent = hasContent;
+                        var newContentHash = prepassHashData[index].Value;
+                        chunkState.IsDirty = !newContentHash.Equals(chunkState.ContentHash);
+                        chunkState.ContentHash = newContentHash;
+
+                        if (chunkState.IsDirty)
+                        {
+                            dirtyListWriter.AddNoResize(entity);
+                        }
                     })
-                .WithReadOnly(prepassDistanceField).WithBurst().ScheduleParallel(Dependency);
+                .WithReadOnly(prepassDistanceField).WithReadOnly(prepassHashData).WithBurst().ScheduleParallel(Dependency);
         } 
 
         protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
@@ -135,10 +152,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
                     {Value = chunk.PositionWS + offsetsA};
             }
 
-            var nativeList = new NativeList<Entity>(Allocator.Persistent);
-            nativeList.Length = settings.ClusterCounts.Volume();
-            ;
-            _dirtyChunksPerLayer[geometryLayerAssetsReference] = nativeList; 
+            var dirtyChunks = new NativeList<Entity>(Allocator.Persistent);
+            dirtyChunks.Length = settings.ClusterCounts.Volume();
+            _dirtyChunksPerLayer[geometryLayerAssetsReference] = dirtyChunks; 
+            
+            var contentChunks = new NativeList<Entity>(Allocator.Persistent);
+            contentChunks.Length = settings.ClusterCounts.Volume();
+            _chunksWithContent[geometryLayerAssetsReference] = contentChunks; 
+
         }
 
         public struct CPrepassPackedWorldPosition : IBufferElementData
@@ -168,7 +189,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             public Entity MainEntity;
             public CGeometryLayerReference GeometryLayerReference;
             public NativeArray<PackedDistanceFieldData> ResultBuffer;
-            public NativeArray<CPrepassContentHash> ContentHashPerChunk;
+            public NativeArray<GeometryInstructionHash> ContentHashPerChunk;
 
             public void Execute()
             {
@@ -184,6 +205,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 ResultBuffer.Slice(0, ResultBuffer.Length)
                     .CopyFrom(iterator._terrainDataBuffer.Slice(0, ResultBuffer.Length));
+                ContentHashPerChunk.Slice(0, ContentHashPerChunk.Length)
+                    .CopyFrom(iterator._contentHashBuffer.Slice(0, ContentHashPerChunk.Length));
+                
                 iterator.Dispose();
             }
         }
@@ -191,6 +215,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
         public NativeList<Entity> GetDirtyChunks(GeometryLayerAssetsReference geometryLayerReference)
         {
             return _dirtyChunksPerLayer[geometryLayerReference];
+        }
+        
+        public NativeList<Entity> GetChunksToDraw(GeometryLayerAssetsReference geometryLayerReference)
+        {
+            return _chunksWithContent[geometryLayerReference];
         }
     }
 }

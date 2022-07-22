@@ -37,18 +37,23 @@ namespace henningboat.CubeMarching.Runtime.Systems
         }
         
         public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
-        { 
+        {
+            var entitiesToDraw = _prepassSystem.GetChunksToDraw(geometryLayerReference);
+            if (entitiesToDraw.Length == 0)
+            {
+                return;
+            }
+            
             var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(geometryLayerReference).Value;
             var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(geometryLayerReference).Value;
 
-            var entitiesToUpdate = _prepassSystem.GetDirtyChunks(geometryLayerReference);
 
             var chunkBasePositions = new NativeList<float4>(Allocator.Temp);
 
-            for (var i = 0; i < entitiesToUpdate.Length; i++)
+            for (var i = 0; i < entitiesToDraw.Length; i++)
             {
                 chunkBasePositions.Add(
-                    EntityManager.GetComponentData<CGeometryChunk>(entitiesToUpdate[i]).PositionWS.xyzz);
+                    EntityManager.GetComponentData<CGeometryChunk>(entitiesToDraw[i]).PositionWS.xyzz);
             }
                 
             var propertyBlock = gpuRenderer.PropertyBlock;
