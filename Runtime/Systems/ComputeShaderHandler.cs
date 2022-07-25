@@ -65,6 +65,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
             
             layerMeshData.ChunkBasePositionIndex.SetData(chunksToRender.AsArray());
+            layerMeshData.ChunksToTriangulate.SetData(chunksToRender.AsArray());
 
             SetupGeometryLayerProperties(_indexBufferKernel, gpuBuffer);
 

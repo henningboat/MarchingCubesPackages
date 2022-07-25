@@ -158,7 +158,14 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 }
 
                 _lastCombinerDepth = geometryInstruction.CombinerDepth;
-
+                
+                if (_recordContentHash)
+                {
+                    for (var i = 0; i < _postionsWS.Length; i++)
+                    {
+                        WriteGeometryInstructionHash(i, geometryInstruction);
+                    }
+                }
                 return;
             }
 
@@ -221,7 +228,14 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                                 distanceFieldData, existingData);
                             _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
                         }
-
+                        
+                        if (_recordContentHash)
+                        {
+                            for (var i = 0; i < _postionsWS.Length; i++)
+                            {
+                                WriteGeometryInstructionHash(i, geometryInstruction);
+                            }
+                        }
                         break;
                     case GeometryInstructionType.PositionModification:
 
@@ -233,6 +247,14 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                                     .GetTerrainTransformation().TransformPosition(positionOS);
                         }
 
+
+                        if (_recordContentHash)
+                        {
+                            for (var i = 0; i < _postionsWS.Length; i++)
+                            {
+                                WriteGeometryInstructionHash(i, geometryInstruction);
+                            }
+                        }
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -263,10 +285,18 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
             if (_recordContentHash)
             {
-                var geometryInstructionHash = _contentHashBuffer[i];
-                geometryInstructionHash.Append(ref geometryInstruction.GeometryInstructionHash);
-                _contentHashBuffer[i] = geometryInstructionHash;
+                if (SimdMath.any(SimdMath.abs(surfaceDistance) < 10))
+                {
+                    WriteGeometryInstructionHash(i, geometryInstruction);
+                }
             }
+        }
+
+        private void WriteGeometryInstructionHash(int i, GeometryInstruction geometryInstruction)
+        {
+            var geometryInstructionHash = _contentHashBuffer[i];
+            geometryInstructionHash.Append(ref geometryInstruction.GeometryInstructionHash);
+            _contentHashBuffer[i] = geometryInstructionHash;
         }
 
         public PackedFloat3 CalculatePositionWSFromInstruction(GeometryInstruction geometryInstruction, int i)

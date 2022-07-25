@@ -30,7 +30,6 @@ namespace Editor.UI
             _root.Add(_mainToggle);
             _controls = new GroupBox();
 
-            var showEnabledChunksToggle = new Toggle("Show chunks with content");
             _mainToggle.RegisterValueChangedCallback<bool>((value) =>
             {
                 if (value.newValue)
@@ -45,8 +44,12 @@ namespace Editor.UI
 
 
             var view = base.containerWindow as SceneView;
+            
+            var showEnabledChunksToggle = new Toggle("Show chunks with content");
+            var showDirtyChunks = new Toggle("Show chunks with content");
 
             _controls.Add(showEnabledChunksToggle);
+            _controls.Add(showDirtyChunks);
 
             return _root;
         }
@@ -57,7 +60,7 @@ namespace Editor.UI
     [UpdateAfter(typeof(SDisplayGeometryLayers))]
     public partial class SShowDebugVisualizations:SystemBase
     {
-        private NativeList<float3> _activeChunks;
+        private NativeList<(float3,bool)> _activeChunks;
         
         protected override void OnStopRunning()
         {
@@ -73,7 +76,9 @@ namespace Editor.UI
             {
                 foreach (var activeChunk in _activeChunks)
                 {
-                    Gizmos.DrawWireCube((Vector3) activeChunk + (Constants.chunkLength / 2.0f * Vector3.one),
+                    Gizmos.color = activeChunk.Item2 ? Color.blue : Color.white;
+                    
+                    Gizmos.DrawWireCube((Vector3) activeChunk.Item1 + (Constants.chunkLength / 2.0f * Vector3.one),
                         Vector3.one * Constants.chunkLength);
                 }
             }
@@ -85,13 +90,13 @@ namespace Editor.UI
             {
                 _activeChunks.Dispose();
             }
-            _activeChunks = new NativeList<float3>(10000, Allocator.TempJob);
+            _activeChunks = new NativeList<(float3,bool)>(10000, Allocator.TempJob);
             var parallelWriter = _activeChunks.AsParallelWriter();
             Dependency = Entities.ForEach((in CGeometryChunk chunk, in CGeometryChunkState state) =>
             {
                 if (state.HasContent)
                 {
-                    parallelWriter.AddNoResize(chunk.PositionWS);
+                    parallelWriter.AddNoResize((chunk.PositionWS, state.IsDirty));
                 }
             }).WithBurst().ScheduleParallel(Dependency);
             

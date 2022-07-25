@@ -88,7 +88,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         var index = chunk.IndexInIndexMap;
                         var a = prepassDistanceField[index].SurfaceDistance;
 
-                        const float maxDistance = Constants.chunkLength;
+                        const float maxDistance = Constants.chunkLength / 2.0f;
 
                         var aInside = SimdMath.abs(a) < maxDistance;
 
