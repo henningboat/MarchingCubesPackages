@@ -82,7 +82,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             contentList.Clear();
             var contentListWriter = contentList.AsParallelWriter();
 
-            Dependency = Entities.ForEach(
+            Dependency = Entities.WithSharedComponentFilter(geometryLayerReference).ForEach(
                     (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
                     {
                         var index = chunk.IndexInIndexMap;
@@ -131,7 +131,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var geometryLayerAssetsReference = new GeometryLayerAssetsReference(layer);
 
             var query = GetEntityQuery(typeof(CGeometryChunk), typeof(GeometryLayerAssetsReference));
-            query.AddSharedComponentFilter(geometryLayerAssetsReference);
+            query.SetSharedComponentFilter(geometryLayerAssetsReference);
             var chunksOfLayer = query.ToComponentDataArray<CGeometryChunk>(Allocator.Temp);
 
             var offsetsA = new PackedFloat3(
