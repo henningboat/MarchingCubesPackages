@@ -46,7 +46,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 {
                     break; 
                 }
-
+ 
+                //todo placeholder 
+                Dependency.Complete();
+                
                 UpdateInternal(geometryLayerReference);
             }
         }
