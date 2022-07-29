@@ -48,8 +48,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 DirtyEntities = dirtyEntities,
                 Instructions = EntityManager.GetBuffer<GeometryInstruction>(instructionsHolderEntity),
                 GetChunkData = GetComponentDataFromEntity<CGeometryChunk>(),
-                GetLayerChild = GetBufferFromEntity<CGeometryLayerChild>(),
-                GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>()
+                ReadbackHandler = new ReadbackHandler(this),
             };
             Dependency = job.Schedule(_setupLayer.TotalChunkCount, 1, Dependency);
         }

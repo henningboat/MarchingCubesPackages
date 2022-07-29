@@ -32,28 +32,21 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         private int _lastCombinerDepth;
 
         public int StackBaseOffset;
-        private MortonCellLayer _mortonCellLayer;
-        private NativeArray<MortonCoordinate> _mortonCoordinates;
-        private BufferFromEntity<PackedDistanceFieldData> _packedDistanceFieldDataHandle;
-        private readonly Entity _selfEntityPlaceholder;
-
+        
         private bool _isPrepass;
-        private readonly BufferFromEntity<CGeometryLayerChild> _getGeometryLayerChild;
-        private readonly int _entityIndexInBuffer;
+        private ReadbackHandler _readbackHandler;
         public NativeArray<GeometryInstructionHash> _contentHashBuffer;
 
         #endregion
 
         #region Constructors
 
-        public GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
+        internal GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
             DynamicBuffer<GeometryInstruction> combinerInstructions,
-            MortonCellLayer mortonCellLayer, PackedFloat3 chunkBasePosition,
-            BufferFromEntity<PackedDistanceFieldData> packedDistanceFieldDataHandle, Entity selfEntityPlaceholder, NativeArray<PackedFloat3> positionWS, bool isPrepass, BufferFromEntity<CGeometryLayerChild> getGeometryLayerChild, int entityIndexInBuffer)
+            MortonCellLayer mortonCellLayer, NativeArray<PackedFloat3> positionWS, bool isPrepass, ReadbackHandler readbackHandler)
         {
             _isPrepass = isPrepass;
-            _getGeometryLayerChild = getGeometryLayerChild;
-            _entityIndexInBuffer = entityIndexInBuffer;
+            _readbackHandler = readbackHandler;
 
             if (isPrepass)
             {
@@ -63,11 +56,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             {
                 _contentHashBuffer = default;
             }
-            
-            _packedDistanceFieldDataHandle = packedDistanceFieldDataHandle;
-            _selfEntityPlaceholder = selfEntityPlaceholder;
-            _mortonCoordinates = mortonCoordinates;
-            _mortonCellLayer = mortonCellLayer;
 
             _combinerInstructions = combinerInstructions;
             //todo cache this between pre-pass and actual pass
@@ -75,7 +63,6 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             for (var i = 0; i < combinerInstructions.Length; i++)
                 _combinerStackSize = max(_combinerInstructions[i].CombinerDepth, _combinerStackSize);
 
-            //todo workaround. Remove this and see the exceptions
             _combinerStackSize++;
 
             _postionsWS = positionWS;
@@ -182,48 +169,12 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
 
             {
-                PackedDistanceFieldData distanceFieldData = default;
+                PackedDistanceFieldData distanceFieldData;
                 switch (geometryInstruction.GeometryInstructionType)
                 {
                     case GeometryInstructionType.CopyLayer:
-
-                        var layerEntity = geometryInstruction.ReferenceEntity;
                         var targetSlice = _terrainDataBuffer.Slice(StackBaseOffset, _postionsWS.Length);
-                        //if (_mortonCellLayer.CellLength == 2)
-                        //{
-                        if (_isPrepass)
-                        {
-                            //todo add this
-                            for (int i = 0; i < targetSlice.Length; i++)
-                            {
-                                targetSlice[i] = new PackedDistanceFieldData(0, default);
-                            }
-                        }
-                        else
-                        {
-                            var chunkEntityInOtherLayer = _getGeometryLayerChild[layerEntity][_entityIndexInBuffer].ClusterEntity;
-                            var readbackBuffer = _packedDistanceFieldDataHandle[chunkEntityInOtherLayer];
-                            targetSlice.CopyFrom(readbackBuffer.AsNativeArray());   
-                        }
-                        //}
-                        // if (_mortonCellLayer.CellLength == 2)
-                        // {
-                        //     for (var i = 0; i < _mortonCoordinates.Length; i++)
-                        //     {
-                        //         for (int j = 0; j < 2; j++)
-                        //         {
-                        //             distanceFieldData = readbackBuffer[(int)_mortonCoordinates[i].MortonNumber / 4 + j];
-                        //
-                        //
-                        //             var existingData = _terrainDataBuffer[StackBaseOffset + i];
-                        //             var combinedResult = TerrainChunkOperations.CombinePackedTerrainData(
-                        //                 geometryInstruction.CombinerBlendOperation,
-                        //                 geometryInstruction.CombinerBlendFactor,
-                        //                 existingData, distanceFieldData);
-                        //             _terrainDataBuffer[StackBaseOffset + i] = combinedResult;
-                        //         }
-                        //     }
-                        // }
+                        _readbackHandler.DoReadback(targetSlice, geometryInstruction);
                         break;
                     case GeometryInstructionType.Shape:
                         var shape = geometryInstruction.GetShapeInstruction();

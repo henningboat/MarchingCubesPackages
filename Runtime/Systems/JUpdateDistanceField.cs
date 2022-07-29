@@ -16,14 +16,13 @@ namespace henningboat.CubeMarching.Runtime.Systems
     {
         public const int CellLength = Constants.chunkLength;
         private const int PositionListCapacityEstimate = 4096;
-        
-        [NativeDisableParallelForRestriction,NativeDisableContainerSafetyRestriction]public BufferFromEntity<PackedDistanceFieldData> GetPackedDistanceFieldBufferFromEntity;
 
         [ReadOnly] public NativeList<Entity> DirtyEntities;
         [ReadOnly] public DynamicBuffer<GeometryInstruction> Instructions;
         [ReadOnly] public ComponentDataFromEntity<CGeometryChunk> GetChunkData;
-        [ReadOnly] public BufferFromEntity<CGeometryLayerChild> GetLayerChild;
 
+         public ReadbackHandler ReadbackHandler;
+        
         private void UpdateForEntity(CGeometryChunk chunkParameters, DynamicBuffer<GeometryInstruction> instructions,
             DynamicBuffer<PackedDistanceFieldData> distanceFieldData, Entity entity)
         {
@@ -122,9 +121,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 postionsWs[i] = layer.GetMortonCellChildPositions(new MortonCoordinate((uint)i))+chunkParameters.PositionWS;;
             }
 
+            ReadbackHandler.SetEntityIndex(chunkParameters.IndexInIndexMap);
+
             distanceFieldResolver =
-                new GeometryInstructionIterator(default, instructions, default, chunkParameters.PositionWS,
-                    GetPackedDistanceFieldBufferFromEntity, entity, postionsWs, false, GetLayerChild,chunkParameters.IndexInIndexMap);
+                new GeometryInstructionIterator(default, instructions, default, postionsWs, false, ReadbackHandler);
             distanceFieldResolver.ProcessAllInstructions();
 
             distanceFieldData.AsNativeArray().Slice(0,distanceFieldData.Length)
@@ -181,7 +181,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
 
             var chunkEntity = DirtyEntities[index];
-            var distanceField = GetPackedDistanceFieldBufferFromEntity[chunkEntity];
+            var distanceField = ReadbackHandler.GetPackDistanceFieldData[chunkEntity];
 
             UpdateForEntity(GetChunkData[chunkEntity], Instructions, distanceField, chunkEntity);
         }

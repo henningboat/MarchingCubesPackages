@@ -57,23 +57,25 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 _setupLayer.GetGeometryLayerSingleton<CGeometryGraphChunkPrepassTag>(geometryLayerReference);
 
             var instructionsFromEntity = GetBufferFromEntity<GeometryInstruction>(true);
-            var prepassDistanceField =
-                EntityManager.GetBuffer<PackedDistanceFieldData>(singleton, true).AsNativeArray();
             var prepassHashData =
                 EntityManager.GetBuffer<CPrepassContentHash>(singleton, true).AsNativeArray();
 
             var job = new JUpdatePrepassDistanceField
             {
                 GetInstructionsFromEntity = instructionsFromEntity,
-                GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>(),
                 MainEntity = singleton,
                 GeometryLayerReference = EntityManager.GetChunkComponentData<CGeometryLayerReference>(singleton),
                 PositionWS = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(singleton),
-                ResultBuffer = prepassDistanceField,
                 ContentHashPerChunk = prepassHashData.Reinterpret<GeometryInstructionHash>(),
+                ReadbackHandler = new ReadbackHandler(this)
             };
             Dependency = job.Schedule(Dependency);
+            //todo placeholder
+            Dependency.Complete();
 
+            var prepassDistanceField =
+                EntityManager.GetBuffer<PackedDistanceFieldData>(singleton, true).AsNativeArray();
+            
             var dirtyList = _dirtyChunksPerLayer[geometryLayerReference];
             dirtyList.Clear();
             var dirtyListWriter = dirtyList.AsParallelWriter();
@@ -187,12 +189,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             public DynamicBuffer<CPrepassPackedWorldPosition> PositionWS;
 
-            [NativeDisableParallelForRestriction] [NativeDisableContainerSafetyRestriction]
-            public BufferFromEntity<PackedDistanceFieldData> GetPackedDistanceFieldBufferFromEntity;
+             public ReadbackHandler ReadbackHandler;
 
             public Entity MainEntity;
             public CGeometryLayerReference GeometryLayerReference;
-            public NativeArray<PackedDistanceFieldData> ResultBuffer;
             public NativeArray<GeometryInstructionHash> ContentHashPerChunk;
 
             public void Execute()
@@ -201,14 +201,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
                 var instructions = GetInstructionsFromEntity[layerEntity];
 
-                var iterator = new GeometryInstructionIterator(default, instructions, default, default,
-                    GetPackedDistanceFieldBufferFromEntity, MainEntity,
-                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true, default,1);
+                var iterator = new GeometryInstructionIterator(default, instructions, default,
+                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true,ReadbackHandler);
 
                 iterator.ProcessAllInstructions();
 
-                ResultBuffer.Slice(0, ResultBuffer.Length)
-                    .CopyFrom(iterator._terrainDataBuffer.Slice(0, ResultBuffer.Length));
+                var resultBuffer = ReadbackHandler.GetPackDistanceFieldData[MainEntity].AsNativeArray();
+                
+                resultBuffer.Slice(0, resultBuffer.Length)
+                    .CopyFrom(iterator._terrainDataBuffer.Slice(0, resultBuffer.Length));
                 ContentHashPerChunk.Slice(0, ContentHashPerChunk.Length)
                     .CopyFrom(iterator._contentHashBuffer.Slice(0, ContentHashPerChunk.Length));
                 
