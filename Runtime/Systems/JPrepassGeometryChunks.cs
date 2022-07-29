@@ -104,6 +104,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         chunkState.IsDirty = !newContentHash.Equals(chunkState.ContentHash);
                         chunkState.ContentHash = newContentHash;
 
+                        //todo placeholder 
+                        chunkState.HasContent = true;
+                        chunkState.IsDirty = true;
+                        
                         if (chunkState.IsDirty)
                         {
                             dirtyListWriter.AddNoResize(entity);
@@ -198,8 +202,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 var instructions = GetInstructionsFromEntity[layerEntity];
 
                 var iterator = new GeometryInstructionIterator(default, instructions, default, default,
-                    GetPackedDistanceFieldBufferFromEntity, default,
-                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true);
+                    GetPackedDistanceFieldBufferFromEntity, MainEntity,
+                    PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true, default,1);
 
                 iterator.ProcessAllInstructions();
 

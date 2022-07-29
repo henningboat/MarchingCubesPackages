@@ -7,5 +7,6 @@ namespace henningboat.CubeMarching.Runtime.Components
     {
         public SerializableGUID LayerID;
         public Entity InstructionListHandler;
+        public bool StoreResult;
     }
 }

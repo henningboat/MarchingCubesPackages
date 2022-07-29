@@ -1,6 +1,5 @@
 ﻿using henningboat.CubeMarching.Runtime.Components;
 using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
-using henningboat.CubeMarching.Runtime.GeometryComponents.Combiners;
 using henningboat.CubeMarching.Runtime.GeometrySystems.GeometryGraphPreparation;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -65,7 +64,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }).WithBurst().ScheduleParallel(Dependency);
 
 
-            Dependency = Entities.WithNone<CGeometryLayerTag>().ForEach(
+            Dependency = Entities.WithNone<CGeometryLayerInstance>().ForEach(
                 (ref DynamicBuffer<GeometryInstruction> geometryInstructions) =>
                 {
                     for (var i = 0; i < geometryInstructions.Length; i++)
@@ -79,9 +78,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
             
             var getGeometryInstructionBuffer = GetBufferFromEntity<GeometryInstruction>();
 
-            Dependency = Entities.ForEach((DynamicBuffer<GeometryInstruction> instructions, in CGeometryLayerTag _) =>
+            Dependency = Entities.ForEach((Entity entity,DynamicBuffer<GeometryInstruction> instructions, ref CGeometryLayerInstance geometryLayer) =>
                 {
                     instructions.Clear();
+                    if (geometryLayer.ClearEveryFrame == false && geometryLayer.Iteration > 0)
+                    {
+                        instructions.Add(GeometryInstruction.CopyLayerInstruction(entity));
+                    }
+
+                    geometryLayer.Iteration++;
                 }).WithBurst()
                 .ScheduleParallel(Dependency);
 
@@ -90,7 +95,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             foreach (var layerReference in _setupSystem.ExistingGeometryLayers)
             {
-                var layerEntity = _setupSystem.GetGeometryLayerSingleton<CGeometryLayerTag>(layerReference);
+                var layerEntity = _setupSystem.GetGeometryLayerSingleton<CGeometryLayerInstance>(layerReference);
                 Dependency = Entities.WithSharedComponentFilter(layerReference)
                     .WithAll<GeometryInstruction, CGeometryInstructionSourceTag>().ForEach(
                         (Entity entity) =>
@@ -118,9 +123,20 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         if (layerList[j].LayerID == instruction.ReferenceGUID)
                         {
                             correctLayer = layerList[j];
-                            CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target, geometryInstructionBuffer,
-                                layerList, instruction.CombinerDepth);
-                            break;
+                            
+                            if (correctLayer.StoreResult)
+                            {
+                                instruction.CombinerDepth += stackOffset;
+                                instruction.ReferenceEntity = correctLayer.InstructionListHandler;
+                                geometryInstructionBuffer[target].Add(instruction);
+                            }
+                            else
+                            {
+                                CopyInstructionsFromEntity(correctLayer.InstructionListHandler, target,
+                                    geometryInstructionBuffer,
+                                    layerList, instruction.CombinerDepth);
+                                break;
+                            }
                         }
                 }
                 else

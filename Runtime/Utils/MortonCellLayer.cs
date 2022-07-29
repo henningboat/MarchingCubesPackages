@@ -47,7 +47,8 @@ namespace henningboat.CubeMarching.Runtime.Utils
         public PackedFloat3 GetMortonCellChildPositions(MortonCoordinate mortonCoordinate)
         {
             PackedFloat3 childPositions = mortonCoordinate.GetPositionFloat3();
-            childPositions += childOffsets * _cellLength;
+            childPositions += childOffsets;
+            childPositions *= _cellLength;
             return childPositions;
         }
 

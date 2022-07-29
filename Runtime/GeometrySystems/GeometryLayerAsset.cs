@@ -32,6 +32,8 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public int order => _order;
 
+        public bool clearOnUpdate => _clearOnUpdate;
+
         private void Awake()
         {
             if (!_geometryLayerID.Valid) _geometryLayerID = SerializableGUID.Generate();

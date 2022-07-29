@@ -10,7 +10,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine.GraphToolsFoundation.Overdrive;
 using UnityEngine.Serialization;
-using Hash128 = UnityEngine.Hash128;
 
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
@@ -84,6 +83,12 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             GeometryInstructionHash = hash;
         }
 
+        public static GeometryInstruction CopyLayerInstruction(Entity layerEntity)
+        {
+            return new GeometryInstruction
+                {GeometryInstructionType = GeometryInstructionType.CopyLayer, ReferenceEntity = layerEntity};
+        }
+
         #region Public Fields
 
         public int CombinerDepth;
@@ -104,6 +109,8 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         [FormerlySerializedAs("SourceLayerID")] [FormerlySerializedAs("SourceLayer")]
         public SerializableGUID ReferenceGUID;
+        
+        public Entity ReferenceEntity;
 
         #endregion
     }

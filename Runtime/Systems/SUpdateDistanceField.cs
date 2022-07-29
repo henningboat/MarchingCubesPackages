@@ -41,13 +41,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
         public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
         {
             var instructionsHolderEntity =
-                _setupLayer.GetGeometryLayerSingleton<CGeometryLayerTag>(geometryLayerReference);
+                _setupLayer.GetGeometryLayerSingleton<CGeometryLayerInstance>(geometryLayerReference);
             var dirtyEntities = _prepassSystem.GetDirtyChunks(geometryLayerReference);
             var job = new JUpdateDistanceField
             {
                 DirtyEntities = dirtyEntities,
                 Instructions = EntityManager.GetBuffer<GeometryInstruction>(instructionsHolderEntity),
                 GetChunkData = GetComponentDataFromEntity<CGeometryChunk>(),
+                GetLayerChild = GetBufferFromEntity<CGeometryLayerChild>(),
                 GetPackedDistanceFieldBufferFromEntity = GetBufferFromEntity<PackedDistanceFieldData>()
             };
             Dependency = job.Schedule(_setupLayer.TotalChunkCount, 1, Dependency);

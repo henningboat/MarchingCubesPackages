@@ -22,11 +22,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
         [ReadOnly] public NativeList<Entity> DirtyEntities;
         [ReadOnly] public DynamicBuffer<GeometryInstruction> Instructions;
         [ReadOnly] public ComponentDataFromEntity<CGeometryChunk> GetChunkData;
+        [ReadOnly] public BufferFromEntity<CGeometryLayerChild> GetLayerChild;
 
         private void UpdateForEntity(CGeometryChunk chunkParameters, DynamicBuffer<GeometryInstruction> instructions,
             DynamicBuffer<PackedDistanceFieldData> distanceFieldData, Entity entity)
         {
-            
+            NativeArray<PackedFloat3> postionsWs;
+            GeometryInstructionIterator distanceFieldResolver;
+#if !SKIP_PREPASS
+
             var newPositions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
             var previousPositions = new NativeList<MortonCoordinate>(PositionListCapacityEstimate, Allocator.Temp);
 
@@ -34,11 +38,9 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var results = new NativeList<PackedDistanceFieldData>(PositionListCapacityEstimate, Allocator.Temp);
 
             previousPositions.Add(new MortonCoordinate(0));
-            NativeArray<PackedFloat3> postionsWs;
 
             var layer = new MortonCellLayer(CellLength);
 
-            GeometryInstructionIterator distanceFieldResolver;
             while (layer.CellLength > 2)
             {
                 newPositions.Clear();
@@ -103,6 +105,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
             results.ResizeUninitialized(previousPositions.Length);
             
+          
             postionsWs = new NativeArray<PackedFloat3>(previousPositions.Length, Allocator.Temp);
             for (var i = 0; i < previousPositions.Length; i++)
             {
@@ -110,13 +113,24 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 postionsWs[i] = layer.GetMortonCellChildPositions(mortonCoordinate) +
                                 chunkParameters.PositionWS;
             }
+            #else
+            postionsWs = new NativeArray<PackedFloat3>(Constants.chunkVolume/Constants.PackedCapacity, Allocator.Temp);
 
+            var layer = new MortonCellLayer(2);
+            for (int i = 0; i < 64; i++)
+            {
+                postionsWs[i] = layer.GetMortonCellChildPositions(new MortonCoordinate((uint)i))+chunkParameters.PositionWS;;
+            }
 
             distanceFieldResolver =
-                new GeometryInstructionIterator(previousPositions, instructions, layer, chunkParameters.PositionWS,GetPackedDistanceFieldBufferFromEntity,entity, postionsWs, false);
+                new GeometryInstructionIterator(default, instructions, default, chunkParameters.PositionWS,
+                    GetPackedDistanceFieldBufferFromEntity, entity, postionsWs, false, GetLayerChild,chunkParameters.IndexInIndexMap);
             distanceFieldResolver.ProcessAllInstructions();
 
-
+            distanceFieldData.AsNativeArray().Slice(0,distanceFieldData.Length)
+                .CopyFrom(distanceFieldResolver._terrainDataBuffer.Slice(0,distanceFieldData.Length));
+#endif
+#if !SKIP_PREPASS
             for (var parentCellIndex = 0; parentCellIndex < previousPositions.Length; parentCellIndex++)
             {
                 var parentPosition = previousPositions[parentCellIndex];
@@ -133,6 +147,10 @@ namespace henningboat.CubeMarching.Runtime.Systems
             results.Dispose();
             
             distanceFieldResolver.Dispose();
+#else
+            postionsWs.Dispose();
+            distanceFieldResolver.Dispose();
+#endif
         }
 
         // private void FillPositionsIntoPositionBuffer(NativeList<MortonCoordinate> previousPositions,

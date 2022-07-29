@@ -26,7 +26,7 @@ namespace henningboat.CubeMarching.Runtime.Components
             Entities.ForEach((GeometryLayerAsset asset) =>
             {
                 var layerEntityTest = GetPrimaryEntity(asset);
-                DstEntityManager.AddComponent<CGeometryLayerTag>(layerEntityTest);
+                DstEntityManager.AddComponent<CGeometryLayerInstance>(layerEntityTest);
                 DstEntityManager.AddComponent<Translation>(layerEntityTest);
             });
         }
