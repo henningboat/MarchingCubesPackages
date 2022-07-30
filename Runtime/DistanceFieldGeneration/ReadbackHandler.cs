@@ -6,11 +6,11 @@ using Unity.Entities;
 namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 {
     public struct ReadbackHandler
-    { 
+    {
         private int _index;
-        [ReadOnly]private  BufferFromEntity<CGeometryLayerChild> _getGeometryLayerChild;
-        [NativeDisableParallelForRestriction]public  BufferFromEntity<PackedDistanceFieldData> GetPackDistanceFieldData;
-        [ReadOnly]private  ComponentDataFromEntity<CGeometryChunkState> _getChunkState; 
+        [ReadOnly] private BufferFromEntity<CGeometryLayerChild> _getGeometryLayerChild;
+        [NativeDisableParallelForRestriction] public BufferFromEntity<PackedDistanceFieldData> GetPackDistanceFieldData;
+        [ReadOnly] private ComponentDataFromEntity<CGeometryChunkState> _getChunkState;
         private bool _isPrepass;
 
         public ReadbackHandler(SystemBase system)
@@ -41,8 +41,22 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
             {
                 var chunkEntityInOtherLayer =
                     _getGeometryLayerChild[geometryInstruction.ReferenceEntity][_index].ClusterEntity;
-                var readbackBuffer = GetPackDistanceFieldData[chunkEntityInOtherLayer];
-                targetSlice.CopyFrom(readbackBuffer.AsNativeArray());
+                var stateOfOtherChunk = _getChunkState[chunkEntityInOtherLayer];
+                if (stateOfOtherChunk.HasContent)
+                {
+                    var readbackBuffer = GetPackDistanceFieldData[chunkEntityInOtherLayer];
+                    targetSlice.CopyFrom(readbackBuffer.AsNativeArray());
+                }
+                else
+                {
+                    PackedDistanceFieldData targetValue;
+                    if (stateOfOtherChunk.IsFullyInsideGeometry)
+                        targetValue = new PackedDistanceFieldData(-Constants.DefaultDOutsideDistance);
+                    else
+                        targetValue = new PackedDistanceFieldData(Constants.DefaultDOutsideDistance);
+
+                    for (var i = 0; i < targetSlice.Length; i++) targetSlice[i] = targetValue;
+                }
             }
         }
     }

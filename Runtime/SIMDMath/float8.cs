@@ -97,6 +97,18 @@ namespace SIMDMath
             return new float8(v);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool8 operator <(float8 lhs, float8 rhs)
+        {
+            return new bool8(lhs.a < rhs.a, lhs.b < rhs.b);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool8 operator >(float8 lhs, float8 rhs)
+        {
+            return new bool8(lhs.a > rhs.a, lhs.b < rhs.b);
+        }
+
         /// <summary>Returns the float element at a specified index.</summary>
         unsafe public float this[int index]
         {

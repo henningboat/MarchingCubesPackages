@@ -16,7 +16,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         [SerializeField] private bool _clearOnUpdate = true;
 
-        [SerializeField] private Material _material;
+        [SerializeField] private Material[] _materials;
 
         [SerializeField] private bool _render;
         
@@ -24,7 +24,7 @@ namespace henningboat.CubeMarching.Runtime.GeometrySystems
 
         public GeometryLayer GeometryLayer => new(name, _geometryLayerID, StoreResults, _clearOnUpdate);
 
-        public Material material => _material;
+        public Material[] materials => _materials;
 
         public bool render => _render;
 

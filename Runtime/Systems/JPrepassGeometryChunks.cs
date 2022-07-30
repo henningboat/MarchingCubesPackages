@@ -109,6 +109,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
                         //todo placeholder 
                         chunkState.HasContent = true;
                         chunkState.IsDirty = true;
+
+                        chunkState.IsFullyInsideGeometry = SimdMath.any(a.PackedValues < new float8(0f));
                         
                         if (chunkState.IsDirty)
                         {

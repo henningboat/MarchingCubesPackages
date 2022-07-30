@@ -35,7 +35,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             _computeShaderHandler = new(DynamicCubeMarchingSettingsHolder.Instance.Compute);
             base.OnCreate();
         }
-        
+
         public override void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference)
         {
             var entitiesToDraw = _prepassSystem.GetChunksToDraw(geometryLayerReference);
@@ -43,7 +43,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             {
                 return;
             }
-            
+
             var gpuBuffers = _setupLayer.GetLayer<CGeometryLayerGPUBuffer>(geometryLayerReference).Value;
             var gpuRenderer = _setupLayer.GetLayer<CLayerMeshData>(geometryLayerReference).Value;
 
@@ -55,20 +55,23 @@ namespace henningboat.CubeMarching.Runtime.Systems
                 chunkBasePositions.Add(
                     EntityManager.GetComponentData<CGeometryChunk>(entitiesToDraw[i]).PositionWS.xyzz);
             }
-                
+
             var propertyBlock = gpuRenderer.PropertyBlock;
 
             _computeShaderHandler.CollectRenderTriangles(chunkBasePositions, gpuBuffers, gpuRenderer);
             _computeShaderHandler.SetupGeometryLayerMaterialData(propertyBlock, gpuBuffers);
-                
+
             propertyBlock.SetVector(ClusterPositionWSID, (Vector3) (float3) 0);
             propertyBlock.SetBuffer("_ChunkPositions", gpuRenderer.ChunksToTriangulate);
             propertyBlock.SetBuffer(TriangleIndecesID, gpuRenderer.TrianglesToRenderBuffer);
-                
-            Graphics.DrawProceduralIndirect(geometryLayerReference.LayerAsset.material,
-                new Bounds(Vector3.zero, Vector3.one * 10000),
-                MeshTopology.Triangles, gpuRenderer.IndexBufferCounter, 0, null, propertyBlock);
 
+            foreach (var material in geometryLayerReference.LayerAsset.materials)
+            {
+                if (material != null)
+                    Graphics.DrawProceduralIndirect(material,
+                        new Bounds(Vector3.zero, Vector3.one * 10000),
+                        MeshTopology.Triangles, gpuRenderer.IndexBufferCounter, 0, null, propertyBlock);
+            }
         }
 
         protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, CGeometryFieldSettings settings)

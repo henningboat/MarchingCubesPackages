@@ -1,4 +1,6 @@
-﻿namespace henningboat.CubeMarching.Runtime
+﻿using SIMDMath;
+
+namespace henningboat.CubeMarching.Runtime
 {
     public static class Constants
     {
@@ -15,6 +17,7 @@
         public const int PackedCapacity = 8;
         public const int maxVertsPerCluster = 4 * 4 * 4 * 5 * 3;
         public const int maxTrianglesPerChunk = chunkVolume * 5;
-        public const int DistanceFieldDataInBytes = 2*4; 
+        public const int DistanceFieldDataInBytes = 2*4;
+        public const float DefaultDOutsideDistance = chunkLength;
     }
 }
