@@ -124,7 +124,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             ReadbackHandler.SetEntityIndex(chunkParameters.IndexInIndexMap);
 
             distanceFieldResolver =
-                new GeometryInstructionIterator(default, instructions, default, postionsWs, false, ReadbackHandler);
+                new GeometryInstructionIterator(default, instructions.AsNativeArray(), default, postionsWs, false, ReadbackHandler);
             distanceFieldResolver.ProcessAllInstructions();
 
             distanceFieldData.AsNativeArray().Slice(0,distanceFieldData.Length)

@@ -94,7 +94,7 @@ namespace Editor.UI
             var parallelWriter = _activeChunks.AsParallelWriter();
             Dependency = Entities.ForEach((in CGeometryChunk chunk, in CGeometryChunkState state) =>
             {
-                if (state.HasContent)
+                if (state.IsDirty)
                 {
                     parallelWriter.AddNoResize((chunk.PositionWS, state.IsDirty));
                 }

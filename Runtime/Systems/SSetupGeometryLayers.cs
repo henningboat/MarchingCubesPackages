@@ -18,7 +18,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
     [UpdateAfter(typeof(SGeometryInstructionPreparation))]
     public partial class SSetupGeometryLayers : SystemBase
     {
-        private static readonly CGeometryFieldSettings Settings = new() {ClusterCounts = new int3(4, 4, 4)};
+        private static readonly CGeometryFieldSettings Settings = new() {ClusterCounts = new int3(1, 1, 1)};
         private EntityArchetype _entityClusterArchetype;
 
         private List<GeometryLayerAssetsReference> _existingGeometryLayers = new();
@@ -175,7 +175,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var chunks = SpawnChunks(clusterCount, layerEntity, assetsReference);
 
             foreach (var supportSystem in _supportSystems)
-                supportSystem.OnLayerCreated(assetsReference.LayerAsset, Settings);
+                supportSystem.OnLayerCreated(assetsReference.LayerAsset, layerEntity,Settings);
 
             var ChunksWithoutComponentADesc
                 = new EntityQueryDesc

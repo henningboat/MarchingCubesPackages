@@ -74,7 +74,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
             }
         }
 
-        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, CGeometryFieldSettings settings)
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
+            CGeometryFieldSettings settings)
         {
         }
     }

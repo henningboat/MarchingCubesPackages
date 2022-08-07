@@ -37,7 +37,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             base.OnCreate();
         }
         
-        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
             CGeometryFieldSettings settings)
         {
             var meshBuilder = new LayerMeshData();

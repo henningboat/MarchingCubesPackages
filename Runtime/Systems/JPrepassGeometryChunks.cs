@@ -21,6 +21,15 @@ namespace henningboat.CubeMarching.Runtime.Systems
     {
         private Dictionary<GeometryLayerAssetsReference, NativeList<Entity>> _dirtyChunksPerLayer;
         private Dictionary<GeometryLayerAssetsReference, NativeList<Entity>> _chunksWithContent;
+        /// <summary>
+        /// Maps a layer entity to it's prepass entity, used by ReadbackHandler
+        /// </summary>
+        private NativeParallelHashMap<Entity, Entity> _prepassSystemMap;
+
+        /// <summary>
+        /// Maps a layer entity to it's prepass entity, used by ReadbackHandler
+        /// </summary>
+        public NativeParallelHashMap<Entity, Entity> prepassSystemMap => _prepassSystemMap;
 
         protected override EntityArchetype GetArchetype()
         {
@@ -37,6 +46,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
             _dirtyChunksPerLayer = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
             _chunksWithContent = new Dictionary<GeometryLayerAssetsReference, NativeList<Entity>>();
+            //todo placeholder capacity
+            _prepassSystemMap = new NativeParallelHashMap<Entity, Entity>(10,Allocator.Persistent);
             base.OnCreate();
         }
 
@@ -44,6 +55,8 @@ namespace henningboat.CubeMarching.Runtime.Systems
         {
             foreach (var nativeList in _dirtyChunksPerLayer.Values) nativeList.Dispose();
             foreach (var nativeList in _chunksWithContent.Values) nativeList.Dispose();
+        
+            _prepassSystemMap.Dispose();
 
             _dirtyChunksPerLayer = null;
             _chunksWithContent = null;
@@ -56,71 +69,70 @@ namespace henningboat.CubeMarching.Runtime.Systems
             var singleton =
                 _setupLayer.GetGeometryLayerSingleton<CGeometryGraphChunkPrepassTag>(geometryLayerReference);
 
-            var instructionsFromEntity = GetBufferFromEntity<GeometryInstruction>(true);
-            var prepassHashData =
-                EntityManager.GetBuffer<CPrepassContentHash>(singleton, true).AsNativeArray();
+            var mainEntity = EntityManager.GetChunkComponentData<CGeometryLayerReference>(singleton);
+            var buffer = GetBuffer<GeometryInstruction>(mainEntity.LayerEntity,true).AsNativeArray();
 
             var job = new JUpdatePrepassDistanceField
             {
-                GetInstructionsFromEntity = instructionsFromEntity,
-                MainEntity = singleton,
-                GeometryLayerReference = EntityManager.GetChunkComponentData<CGeometryLayerReference>(singleton),
+                Instructions = buffer,
                 PositionWS = EntityManager.GetBuffer<CPrepassPackedWorldPosition>(singleton),
-                ContentHashPerChunk = prepassHashData.Reinterpret<GeometryInstructionHash>(),
-                ReadbackHandler = new ReadbackHandler(this)
+                ReadbackHandler = new ReadbackHandler(this),
+                MainEntity = singleton,
             };
-            Dependency = job.Schedule(Dependency);
-            //todo placeholder
-            Dependency.Complete();
+            Dependency=job.Schedule(Dependency);
+            // //todo placeholder
+             Dependency.Complete();
 
-            var prepassDistanceField =
-                EntityManager.GetBuffer<PackedDistanceFieldData>(singleton, true).AsNativeArray();
-            
             var dirtyList = _dirtyChunksPerLayer[geometryLayerReference];
             dirtyList.Clear();
             var dirtyListWriter = dirtyList.AsParallelWriter();
 
             var contentList = _chunksWithContent[geometryLayerReference];
             contentList.Clear();
-            var contentListWriter = contentList.AsParallelWriter();
+             var contentListWriter = contentList.AsParallelWriter();
+            
+             var prepassDistanceField =
+                 EntityManager.GetBuffer<PackedDistanceFieldData>(singleton, true).AsNativeArray();
 
-            Dependency = Entities.WithSharedComponentFilter(geometryLayerReference).ForEach(
-                    (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
-                    {
-                        var index = chunk.IndexInIndexMap;
-                        var a = prepassDistanceField[index].SurfaceDistance;
-
-                        const float maxDistance = Constants.chunkLength / 2.0f;
-
-                        var aInside = SimdMath.abs(a) < maxDistance;
-
-                        var hasContent = SimdMath.any(aInside);
-
-                        if (hasContent || chunkState.HasContent)
-                        {
-                           contentListWriter.AddNoResize(entity);
-                        }
-
-                        chunkState.HasContent = hasContent;
-                        var newContentHash = prepassHashData[index].Value;
-                        chunkState.IsDirty = !newContentHash.Equals(chunkState.ContentHash);
-                        chunkState.ContentHash = newContentHash;
-
-                        //todo placeholder 
-                        chunkState.HasContent = true;
-                        chunkState.IsDirty = true;
-
-                        chunkState.IsFullyInsideGeometry = SimdMath.any(a.PackedValues < new float8(0f));
-                        
-                        if (chunkState.IsDirty)
-                        {
-                            dirtyListWriter.AddNoResize(entity);
-                        }
-                    })
-                .WithReadOnly(prepassDistanceField).WithReadOnly(prepassHashData).WithBurst().ScheduleParallel(Dependency);
+             var prepassHashData =
+                 EntityManager.GetBuffer<CPrepassContentHash>(singleton, true).AsNativeArray();
+             
+             Dependency = Entities.WithSharedComponentFilter(geometryLayerReference).ForEach(
+                     (Entity entity, ref CGeometryChunkState chunkState, in CGeometryChunk chunk) =>
+                     {
+                         var index = chunk.IndexInIndexMap;
+                         var a = prepassDistanceField[index].SurfaceDistance;
+            
+                         const float maxDistance = Constants.chunkLength / 2.0f;
+            
+                         var aInside = SimdMath.abs(a) < maxDistance;
+            
+                         var hasContent = SimdMath.any(aInside);
+            
+                         if (hasContent || chunkState.HasContent)
+                         {
+                            contentListWriter.AddNoResize(entity);
+                         }
+            
+                         chunkState.HasContent = hasContent;
+                         var newContentHash = prepassHashData[index].Value;
+                         chunkState.IsDirty = !newContentHash.Equals(chunkState.ContentHash);
+                         chunkState.ContentHash = newContentHash;
+            
+                         chunkState.IsFullyInsideGeometry = SimdMath.any(a.PackedValues < new float8(0f));
+                         
+                         if (chunkState.IsDirty)
+                         {
+                             dirtyListWriter.AddNoResize(entity);
+                         }
+                     })
+                 .WithReadOnly(prepassDistanceField).WithReadOnly(prepassHashData).WithBurst().Schedule(Dependency);
+            
+            
+            Dependency.Complete();
         } 
 
-        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
             CGeometryFieldSettings settings)
         {
             var chunkCount = settings.ClusterCounts.Volume();
@@ -166,10 +178,11 @@ namespace henningboat.CubeMarching.Runtime.Systems
             
             var contentChunks = new NativeList<Entity>(Allocator.Persistent);
             contentChunks.Length = settings.ClusterCounts.Volume();
-            _chunksWithContent[geometryLayerAssetsReference] = contentChunks; 
+            _chunksWithContent[geometryLayerAssetsReference] = contentChunks;
 
+            _prepassSystemMap.Add(layerEntity, entity);
         }
-
+ 
         public struct CPrepassPackedWorldPosition : IBufferElementData
         {
             public PackedFloat3 Value;
@@ -187,33 +200,28 @@ namespace henningboat.CubeMarching.Runtime.Systems
         [BurstCompile]
         private struct JUpdatePrepassDistanceField : IJob
         {
-            [ReadOnly] public BufferFromEntity<GeometryInstruction> GetInstructionsFromEntity;
+            [ReadOnly]public NativeArray<GeometryInstruction> Instructions;
 
             public DynamicBuffer<CPrepassPackedWorldPosition> PositionWS;
 
              public ReadbackHandler ReadbackHandler;
 
             public Entity MainEntity;
-            public CGeometryLayerReference GeometryLayerReference;
-            public NativeArray<GeometryInstructionHash> ContentHashPerChunk;
 
             public void Execute()
             {
-                var layerEntity = GeometryLayerReference.LayerEntity;
-
-                var instructions = GetInstructionsFromEntity[layerEntity];
-
-                var iterator = new GeometryInstructionIterator(default, instructions, default,
+                var iterator = new GeometryInstructionIterator(default, Instructions, default,
                     PositionWS.Reinterpret<PackedFloat3>().AsNativeArray(), true,ReadbackHandler);
 
                 iterator.ProcessAllInstructions();
 
                 var resultBuffer = ReadbackHandler.GetPackDistanceFieldData[MainEntity].AsNativeArray();
+                var resultHashes = ReadbackHandler.GetPrepassHashBuffer[MainEntity].AsNativeArray();
                 
                 resultBuffer.Slice(0, resultBuffer.Length)
                     .CopyFrom(iterator._terrainDataBuffer.Slice(0, resultBuffer.Length));
-                ContentHashPerChunk.Slice(0, ContentHashPerChunk.Length)
-                    .CopyFrom(iterator._contentHashBuffer.Slice(0, ContentHashPerChunk.Length));
+                resultHashes.Reinterpret<GeometryInstructionHash>().Slice(0, iterator._contentHashBuffer.Length)
+                    .CopyFrom(iterator._contentHashBuffer.Slice(0, iterator._contentHashBuffer.Length));
                 
                 iterator.Dispose();
             }

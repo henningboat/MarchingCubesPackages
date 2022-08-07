@@ -53,7 +53,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
             Dependency = job.Schedule(_setupLayer.TotalChunkCount, 1, Dependency);
         }
 
-        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
             CGeometryFieldSettings settings)
         {
         }

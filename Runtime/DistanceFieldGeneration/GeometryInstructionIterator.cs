@@ -24,7 +24,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
 
         #region Private Fields
 
-        private readonly DynamicBuffer<GeometryInstruction> _combinerInstructions;
+        private readonly NativeArray<GeometryInstruction> _combinerInstructions;
         private NativeArray<PackedFloat3> _postionsWS;
         private readonly int _combinerStackSize;
         private NativeArray<PackedFloat3> _postionStack;
@@ -42,7 +42,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
         #region Constructors
 
         internal GeometryInstructionIterator(NativeArray<MortonCoordinate> mortonCoordinates,
-            DynamicBuffer<GeometryInstruction> combinerInstructions,
+            NativeArray<GeometryInstruction> combinerInstructions,
             MortonCellLayer mortonCellLayer, NativeArray<PackedFloat3> positionWS, bool isPrepass, ReadbackHandler readbackHandler)
         {
             _isPrepass = isPrepass;
@@ -174,7 +174,7 @@ namespace henningboat.CubeMarching.Runtime.DistanceFieldGeneration
                 {
                     case GeometryInstructionType.CopyLayer:
                         var targetSlice = _terrainDataBuffer.Slice(StackBaseOffset, _postionsWS.Length);
-                        _readbackHandler.DoReadback(targetSlice, geometryInstruction);
+                        _readbackHandler.DoReadback(targetSlice, geometryInstruction, _contentHashBuffer);
                         break;
                     case GeometryInstructionType.Shape:
                         var shape = geometryInstruction.GetShapeInstruction();

@@ -27,14 +27,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
             _setupLayer = World.GetOrCreateSystem<SSetupGeometryLayers>();
         }
 
-        public void OnLayerCreated(GeometryLayerAsset layer, CGeometryFieldSettings settings)
+        public void OnLayerCreated(GeometryLayerAsset layer, Entity layerEntity, CGeometryFieldSettings settings)
         {
             if (RunSystemForLayer(layer))
             {
                 var entity = EntityManager.CreateEntity(_archetype);
                 EntityManager.SetName(entity, $"{layer.name}_{_systemName}");
                 EntityManager.AddSharedComponentData(entity, new GeometryLayerAssetsReference(layer));
-                InitializeLayerHandlerEntity(layer, entity, settings);
+                InitializeLayerHandlerEntity(layer, entity, layerEntity,settings);
             }
         }
 
@@ -56,7 +56,7 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         public abstract void UpdateInternal(GeometryLayerAssetsReference geometryLayerReference);
 
-        protected abstract void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+        protected abstract void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
             CGeometryFieldSettings settings);
 
         public virtual void InitializeChunkData(NativeArray<Entity> chunks)

@@ -1,4 +1,5 @@
-﻿using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
+﻿using System;
+using henningboat.CubeMarching.Runtime.DistanceFieldGeneration;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -22,8 +23,23 @@ namespace henningboat.CubeMarching.Runtime.Components
         public bool IsDirty;
     }
 
-    public struct CGeometryLayerReference : IComponentData
+    public struct CGeometryLayerReference : IComponentData, IEquatable<CGeometryLayerReference>
     {
         public Entity LayerEntity;
+
+        public bool Equals(CGeometryLayerReference other)
+        {
+            return LayerEntity.Equals(other.LayerEntity);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CGeometryLayerReference other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return LayerEntity.GetHashCode();
+        }
     }
 }

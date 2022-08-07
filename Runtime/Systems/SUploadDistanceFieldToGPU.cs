@@ -48,14 +48,14 @@ namespace henningboat.CubeMarching.Runtime.Systems
 
         public override List<ComponentType> RequiredComponentsPerChunk => new() {typeof(CGeometryChunkGPUIndices)};
 
-        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity,
+        protected override void InitializeLayerHandlerEntity(GeometryLayerAsset layer, Entity entity, Entity layerEntity,
             CGeometryFieldSettings settings)
         {
             CGeometryLayerGPUBuffer geometryLayerGPUBuffer = new CGeometryLayerGPUBuffer()
             {
                 Value = new GeometryLayerGPUBuffer(settings.ClusterCounts)
             };
-
+ 
             EntityManager.SetSharedComponentData(entity, geometryLayerGPUBuffer);
         }
 
